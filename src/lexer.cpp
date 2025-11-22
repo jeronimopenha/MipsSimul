@@ -2,7 +2,7 @@
 
 using namespace std;
 
-Lexer::Lexer(const std::string &s) : src(s) {
+Lexer::Lexer(const string &s) : src(s) {
 }
 
 bool Lexer::eof() const {
@@ -10,14 +10,17 @@ bool Lexer::eof() const {
 }
 
 char Lexer::peek() const {
-    if (eof()) return '\0';
+    if (eof())
+        return '\0';
     return src[pos];
 }
 
 char Lexer::get() {
-    if (eof()) return '\0';
-    char c = src[pos++];
-    if (c == '\n') line++;
+    if (eof())
+        return '\0';
+    const char c = src[pos++];
+    if (c == '\n')
+        line++;
     return c;
 }
 
@@ -30,14 +33,14 @@ bool Lexer::isIdentChar(char c) {
 }
 
 Token Lexer::next() {
-    // pular espaços e tabs
+    // ignire spaces and tabs
     while (!eof()) {
-        char c = peek();
+        const char c = peek();
         if (c == ' ' || c == '\t' || c == '\r') {
             get();
             continue;
         }
-        // comentário: # até fim da linha
+        // If comment (#) goes until the end of the line
         if (c == '#') {
             while (!eof() && get() != '\n') {
             }
@@ -67,7 +70,7 @@ Token Lexer::next() {
     if (c == ')')
         return Token{TokenKind::RParen, ")", line};
 
-    // registrador: começa com $
+    // register: starts with $
     if (c == '$') {
         string lex = "$";
         while (!eof() && isIdentChar(peek())) {
@@ -76,7 +79,7 @@ Token Lexer::next() {
         return Token{TokenKind::Register, lex, line};
     }
 
-    // identificador: opcode, label, etc.
+    // identifier: opcode, label, etc.
     if (isIdentStart(c)) {
         string lex(1, c);
         while (!eof() && isIdentChar(peek())) {

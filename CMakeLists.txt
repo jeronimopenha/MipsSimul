@@ -18,7 +18,9 @@ include_directories(include)
 
 # Parser Executável
 file(GLOB_RECURSE PARSER_SRCS src/*.cpp)
-add_executable(ParserMain parserMain.cpp  ${PARSER_SRCS}) #${COMMON_SRCS} ${FPGA_SRCS})
+add_executable(ParserTestMain parserTestMain.cpp ${PARSER_SRCS}) #${COMMON_SRCS} ${FPGA_SRCS})
+add_executable(LexerTestMain lexerTestMain.cpp ${PARSER_SRCS}) #${COMMON_SRCS} ${FPGA_SRCS})
+add_executable(AssemblerTestMain assemblerTestMain.cpp ${PARSER_SRCS}) #${COMMON_SRCS} ${FPGA_SRCS})
 
 
 # Ferramentas / Outros

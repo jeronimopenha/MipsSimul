@@ -5,6 +5,8 @@
 
 #include <bits/stdc++.h>
 
+//#define DEBUG
+
 #define PROJECT_ROOT_OFFSET 1
 
 inline constexpr auto benchPath =  "benchmarks/";
