@@ -9,7 +9,9 @@
 
 #define PROJECT_ROOT_OFFSET 1
 
-inline constexpr auto benchPath =  "benchmarks/";
-inline constexpr auto benchExt = ".asm";
+inline constexpr auto benchPath = "benchmarks/";
+inline constexpr auto benchAsmExt = ".asm";
+inline constexpr auto benchDisasmExt = ".hex";
+
 
 #endif //DEFINITIONS_H

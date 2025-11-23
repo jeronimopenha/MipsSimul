@@ -3,35 +3,18 @@
 
 #include <definitions.h>
 #include <lexer.h>
+#include <ast.h>
 
 
-struct Operand {
-    enum class Kind { Reg, Imm, Mem, LabelRef } kind;
+class Parser {
+public:
+    explicit Parser(const std::vector<Token> &tokens);
 
-    int reg = 0; // if register
-    int imm = 0; // if immediate or offset
-    int baseReg = 0; // if Mem (imm(baseReg))
-    std::string label; // if LabelRef
-};
+    std::vector<Line> parseProgram();
 
-struct Instruction {
-    std::string op; // "addi", "lw", "j", ...
-    std::vector<Operand> args;
-    int line = 0;
-};
-
-struct Line {
-    std::string label; // "" if empty
-    bool hasInstr = false;
-    Instruction instr;
-};
-
-struct Parser {
+private:
     std::vector<Token> tokens;
     size_t pos = 0;
-
-    // funções parseX virão aqui
-    explicit Parser(const std::vector<Token> &tokens);
 
     const Token &peek();
 
@@ -40,8 +23,6 @@ struct Parser {
     bool match(TokenKind k);
 
     const Token &expect(TokenKind k, const std::string &msg);
-
-    std::vector<Line> parseProgram();
 
     Line parseLine();
 

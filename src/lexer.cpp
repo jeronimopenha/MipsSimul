@@ -2,7 +2,7 @@
 
 using namespace std;
 
-Lexer::Lexer(const string &s) : src(s) {
+Lexer::Lexer(string s) : src(std::move(s)) {
 }
 
 bool Lexer::eof() const {
@@ -25,15 +25,15 @@ char Lexer::get() {
 }
 
 bool Lexer::isIdentStart(char c) {
-    return isalpha((unsigned char) c) || c == '_' || c == '.';
+    return isalpha(static_cast<unsigned char>(c)) || c == '_' || c == '.';
 }
 
 bool Lexer::isIdentChar(char c) {
-    return isalnum((unsigned char) c) || c == '_' || c == '.';
+    return isalnum(static_cast<unsigned char>(c)) || c == '_' || c == '.';
 }
 
 Token Lexer::next() {
-    // ignire spaces and tabs
+    // ignore spaces and tabs
     while (!eof()) {
         const char c = peek();
         if (c == ' ' || c == '\t' || c == '\r') {
@@ -53,7 +53,7 @@ Token Lexer::next() {
         return Token{TokenKind::Eof, "", line};
     }
 
-    char c = get();
+    const char c = get();
 
     // quebra de linha
     if (c == '\n') {

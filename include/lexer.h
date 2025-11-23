@@ -2,31 +2,18 @@
 #define MIPSSIMUL_LEXER_H
 
 #include <definitions.h>
+#include <tokens.h>
 
-enum class TokenKind {
-    Identifier, // opcodes, labels, regs without $
-    Register, // tokens with initial $
-    Number, // imediates (decimal or hexa)
-    Comma, // ,
-    Colon, // :
-    LParen, // (
-    RParen, // )
-    Newline, // end of line
-    Eof // End of file
-};
+class Lexer {
+public:
+    explicit Lexer(std::string s);
 
-struct Token {
-    TokenKind kind;
-    std::string lexeme; // original text
-    int line; // line of the file to detect error
-};
+    Token next();
 
-struct Lexer {
+private:
     std::string src;
     size_t pos = 0;
     int line = 1;
-
-    Lexer(const std::string &s);
 
     [[nodiscard]] bool eof() const;
 
@@ -37,8 +24,6 @@ struct Lexer {
     static bool isIdentStart(char c);
 
     static bool isIdentChar(char c);
-
-    Token next();
 };
 
 #endif //MIPSSIMUL_LEXER_H

@@ -1,5 +1,5 @@
 #include <parser.h>
-#include <util.h>
+#include <common.h>
 
 using namespace std;
 
@@ -16,7 +16,7 @@ int main(int argc, char **argv) {
 
     cout << rootPath << endl;
 
-    auto files = getFilesListByExtension(rootPath + benchPath, benchExt);
+    auto files = getFilesListByExtension(rootPath + benchPath, benchAsmExt);
 
     for (const auto &[fst, snd]: files) {
         cout << fst << endl;
