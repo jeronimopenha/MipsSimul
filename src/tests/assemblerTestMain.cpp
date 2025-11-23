@@ -21,16 +21,16 @@ int main(int argc, char **argv) {
     for (const auto &[fst, snd]: files) {
         cout << fst << endl;
 
-        std::ifstream in(fst);
+        ifstream in(fst);
         if (!in) {
-            std::cerr << "Error while opening file " << argv[1] << "\n";
+            cerr << "Error while opening file " << argv[1] << "\n";
             return 1;
         }
-        std::string src((std::istreambuf_iterator<char>(in)),
-                        std::istreambuf_iterator<char>());
+        string src((istreambuf_iterator<char>(in)),
+                        istreambuf_iterator<char>());
 
         Lexer lex(src);
-        std::vector<Token> tokens;
+        vector<Token> tokens;
         while (true) {
             Token t = lex.next();
             tokens.push_back(t);
@@ -46,9 +46,9 @@ int main(int argc, char **argv) {
         auto sym = buildSymbolTable(prog);
         auto code = generateCode(prog, sym);
 
-        std::cout << std::uppercase << std::hex;
+        cout << uppercase << hex;
         for (auto w: code) {
-            std::cout << "0x" << std::setw(8) << std::setfill('0') << w << "\n";
+            cout << "0x" << setw(8) << setfill('0') << w << "\n";
         }
     }
 

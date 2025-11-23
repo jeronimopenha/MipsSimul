@@ -21,4 +21,6 @@ struct Token {
     int line; // line of the file to detect error
 };
 
+std::string tokenKindToString(const TokenKind k);
+
 #endif //MIPSSIMUL_TOKENS_H
