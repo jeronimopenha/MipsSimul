@@ -6,8 +6,6 @@
 #include <registers.h>
 #include <isa.h>
 
-inline uint32_t base_pc = 0x00400000;
-
 struct InstrInfo {
     uint8_t opcode;
     uint8_t funct; // only R-type

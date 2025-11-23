@@ -35,7 +35,9 @@ int main(int argc, char **argv) {
 
         while (true) {
             Token t = lex.next();
-            if (t.kind == TokenKind::Eof) break;
+            if (t.kind == TokenKind::Eof) {
+                break;
+            }
 
             cout << t.line << ":\t";
 

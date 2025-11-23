@@ -2,7 +2,7 @@
 
 using namespace std;
 
-const array<std::string, 32> REG_NAME = {
+const array<string, 32> REG_NAME = {
     "$zero",
     "$at",
     "$v0", "$v1",
@@ -18,12 +18,13 @@ const array<std::string, 32> REG_NAME = {
 };
 
 
-int regNumber(const std::string &name) {
+int regNumber(const string &name) {
     for (int i = 0; i < 32; i++) {
-        if (REG_NAME[i] == name)
+        if (REG_NAME[i] == name) {
             return i;
+        }
     }
-    throw std::runtime_error("Unknown register: " + name);
+    throw runtime_error("Unknown register: " + name);
 }
 
 string regNameFromNumber(const int n) {

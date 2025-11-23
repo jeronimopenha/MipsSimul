@@ -34,7 +34,9 @@ int main(int argc, char **argv) {
         while (true) {
             Token t = lex.next();
             tokens.push_back(t);
-            if (t.kind == TokenKind::Eof) break;
+            if (t.kind == TokenKind::Eof) {
+                break;
+            }
         }
 
         Parser p(tokens);
@@ -45,10 +47,9 @@ int main(int argc, char **argv) {
         auto code = generateCode(prog, sym);
 
         std::cout << std::uppercase << std::hex;
-        for (auto w : code) {
+        for (auto w: code) {
             std::cout << "0x" << std::setw(8) << std::setfill('0') << w << "\n";
         }
-
     }
 
     return 0;

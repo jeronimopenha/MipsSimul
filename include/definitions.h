@@ -9,6 +9,7 @@
 
 #define PROJECT_ROOT_OFFSET 1
 
+inline constexpr uint32_t basePc = 0x00400000;
 inline constexpr auto benchPath = "benchmarks/";
 inline constexpr auto benchAsmExt = ".asm";
 inline constexpr auto benchDisasmExt = ".hex";

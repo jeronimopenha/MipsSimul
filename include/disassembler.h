@@ -1,57 +1,29 @@
 #ifndef MIPSSIMUL_DISASSEMBLER_H
 #define MIPSSIMUL_DISASSEMBLER_H
 
-#include <../definitions.h>
+#include <definitions.h>
+#include <registers.h>
+#include <isa.h>
 
-struct RDesc {
-    const std::string name;
-    uint8_t funct;
+// Generate labels L0, L1, ... for all targets of beq/j/jal/bne
+// code  = instruction vector in machine language
+// basePc = initial address (ex: 0x00400000)
+std::map<uint32_t, std::string> makeLabels(const std::vector<uint32_t> &code);
 
-    enum class Form { RdRsRt, RdRtShamt } form;
-};
-
-static const RDesc R_TABLE[] = {
-    {"add", 0x20, RDesc::Form::RdRsRt},
-    {"sub", 0x22, RDesc::Form::RdRsRt},
-    {"and", 0x24, RDesc::Form::RdRsRt},
-    {"or", 0x25, RDesc::Form::RdRsRt},
-    {"slt", 0x2A, RDesc::Form::RdRsRt},
-    {"sll", 0x00, RDesc::Form::RdRtShamt},
-};
-
-struct IDesc {
-    const std::string name;
-    uint8_t opcode;
-
-    enum class Form { RtRsImm, RtMemRsImm, RsRtRel } form;
-
-    // RtMemRsImm = lw/sw ; RsRtRel = beq/bne
-};
-
-static const IDesc I_TABLE[] = {
-    {"addi", 0x08, IDesc::Form::RtRsImm},
-    {"lw", 0x23, IDesc::Form::RtMemRsImm},
-    {"sw", 0x2B, IDesc::Form::RtMemRsImm},
-    {"beq", 0x04, IDesc::Form::RsRtRel},
-    // {"bne", 0x05, IDesc::Form::RsRtRel},
-};
-
-struct JDesc {
-    const std::string name;
-    uint8_t opcode;
-};
-
-static const JDesc J_TABLE[] = {
-    {"j", 0x02},
-    {"jal", 0x03},
-};
-
-const RDesc *findR(uint8_t funct);
-
-const IDesc *findI(uint8_t op);
-
-const JDesc *findJ(uint8_t op);
-
+// disassemble an instruction
+// w      = 32 bits word
+// pc     = actual address of the instruction
+// labels = ptional;
 std::string disassembleWord(uint32_t w, uint32_t pc, const std::map<uint32_t, std::string> *labels = nullptr);
+
+static const std::string r(int n);
+
+static const InstrDesc *findInstrByOpcodeFunct(uint8_t opcode, uint8_t funct);
+
+static const InstrDesc *findInstrByOpcode(uint8_t opcode);
+
+std::map<uint32_t, std::string> makeLabels(const std::vector<uint32_t> &code, uint32_t basePc);
+
+std::string disassembleWord(uint32_t w, uint32_t pc, const std::map<uint32_t, std::string> *labels);
 
 #endif //MIPSSIMUL_DISASSEMBLER_H

@@ -20,8 +20,9 @@ string getProjectRoot() {
  * @return
  */
 string verifyPath(const string &path) {
-    if (!path.empty() && path.back() != '/')
+    if (!path.empty() && path.back() != '/') {
         return path + '/';
+    }
 
     return path;
 }

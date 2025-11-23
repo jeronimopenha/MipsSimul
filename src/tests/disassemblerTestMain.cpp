@@ -1,4 +1,5 @@
-#include <parser.h>
+#include <assembler.h>
+#include <disassembler.h>
 #include <common.h>
 
 using namespace std;
@@ -42,32 +43,27 @@ int main(int argc, char **argv) {
         Parser p(tokens);
         auto prog = p.parseProgram();
 
-        // Só pra testar: imprimir o que o parser entendeu
-        for (auto &line: prog) {
-            if (!line.label.empty()) {
-                std::cout << line.label << ":\n";
+
+        auto sym = buildSymbolTable(prog);
+        auto code = generateCode(prog, sym);
+
+        auto labels = makeLabels(code);
+
+        uint32_t pc = basePc;
+        for (auto w : code) {
+            // print LABEL if it exists
+            auto it = labels.find(pc);
+            if (it != labels.end()) {
+                std::cout << it->second << ":\n";
             }
-            if (line.hasInstr) {
-                std::cout << "  " << line.instr.op;
-                for (auto &a: line.instr.args) {
-                    std::cout << "  [";
-                    switch (a.kind) {
-                        case Operand::Kind::Reg: std::cout << "Reg " << a.label;
-                            break;
-                        case Operand::Kind::Imm: std::cout << "Imm " << a.imm;
-                            break;
-                        case Operand::Kind::Mem: std::cout << "Mem off=" << a.imm << " base=" << a.label;
-                            break;
-                        case Operand::Kind::LabelRef: std::cout << "Label " << a.label;
-                            break;
-                    }
-                    std::cout << "]";
-                }
-                std::cout << "\n";
-            }
+
+            std::cout << std::hex << std::uppercase
+                      << "0x" << std::setw(8) << std::setfill('0') << pc
+                      << ":  " << disassembleWord(w, pc, &labels) << "\n";
+
+            pc += 4;
         }
     }
-
 
     return 0;
 }

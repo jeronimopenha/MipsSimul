@@ -10,17 +10,20 @@ bool Lexer::eof() const {
 }
 
 char Lexer::peek() const {
-    if (eof())
+    if (eof()) {
         return '\0';
+    }
     return src[pos];
 }
 
 char Lexer::get() {
-    if (eof())
+    if (eof()) {
         return '\0';
+    }
     const char c = src[pos++];
-    if (c == '\n')
+    if (c == '\n') {
         line++;
+    }
     return c;
 }
 
@@ -61,14 +64,18 @@ Token Lexer::next() {
     }
 
     // pontuações simples
-    if (c == ',')
+    if (c == ',') {
         return Token{TokenKind::Comma, ",", line};
-    if (c == ':')
+    }
+    if (c == ':') {
         return Token{TokenKind::Colon, ":", line};
-    if (c == '(')
+    }
+    if (c == '(') {
         return Token{TokenKind::LParen, "(", line};
-    if (c == ')')
+    }
+    if (c == ')') {
         return Token{TokenKind::RParen, ")", line};
+    }
 
     // register: starts with $
     if (c == '$') {

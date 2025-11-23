@@ -7,4 +7,6 @@ extern const std::array<std::string, 32> REG_NAME;
 
 int regNumber(const std::string &name);
 
+std::string regNameFromNumber(const int n);
+
 #endif //MIPSSIMUL_REGISTERS_H

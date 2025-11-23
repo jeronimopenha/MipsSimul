@@ -7,15 +7,17 @@ Parser::Parser(const vector<Token> &tokens) : tokens(tokens) {
 
 const Token &Parser::peek() {
     static Token eofToken{TokenKind::Eof, "", -1};
-    if (pos >= tokens.size())
+    if (pos >= tokens.size()) {
         return eofToken;
+    }
     return tokens[pos];
 }
 
 const Token &Parser::get() {
     const Token &t = peek();
-    if (pos < tokens.size())
+    if (pos < tokens.size()) {
         pos++;
+    }
     return t;
 }
 
@@ -40,8 +42,9 @@ const Token &Parser::expect(const TokenKind k, const string &msg) {
 vector<Line> Parser::parseProgram() {
     vector<Line> prog;
     while (true) {
-        if (peek().kind == TokenKind::Eof)
+        if (peek().kind == TokenKind::Eof) {
             break;
+        }
         // multiple Newlines
         if (peek().kind == TokenKind::Newline) {
             get();
