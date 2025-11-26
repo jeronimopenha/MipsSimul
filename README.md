@@ -109,3 +109,22 @@ docs/ISA.md
 
 Projeto para fins acadêmicos, didáticos e de pesquisa.
 
+# Compilação e execução
+
+## Assembler
+Para compilar o assembler, basta seguir os passos abaixo:
+
+1. Clonar o repositório na tag de versão mais nova.
+2.
+  ``` bash
+  cd MipsSimul
+  mkdir build
+  cd build
+  cmake -DCMAKE_BUILD_TYPE=Release ..
+  cmake --build ./ --target assembler -j 4
+  ```
+
+Para executar:
+``` bash
+./assembler -t {lex|parse|asm|disasm} [-i file] [-o file]
+```
