@@ -1,0 +1,457 @@
+
+---
+# MipsSimul
+Mips Simulator
+
+Little MIPS Tools for convert MIPS asm to lexemes, Parse structure, hexadecimal words and hexa disassembly.
+
+To compile: Clone the repository on newer tag and:
+
+``` bash
+cd MipsSimul
+mkdir build
+cd build
+cmake -DCMAKE_BUILD=Release ..
+cmake --build . --target mips_tool
+```
+
+To run:
+``` bash
+./mips_tool -t {lex|parse|asm|disasm} [-i file] [-o file]
+```
+
+The files are .txt format, and you can see on screen the response if you don't use -o.
+
+# Mini-C – Especificação v0.1
+
+Mini-C é uma linguagem C reduzida projetada para:
+
+* compilar para MIPS (simulador e FPGA),
+* não depender de libc (printf, malloc etc.),
+* ser simples de implementar (lexer → parser → AST → MIPS),
+* suportar arrays, ponteiros, recursão e hardware mapeado em memória.
+
+## Arquivos, includes e organização
+
+* Cada compilação considera apenas um arquivo fonte.
+
+* Não existe pré-processador:
+
+    * Qualquer linha começando com # (ex: #include, #define) é erro de compilação.
+
+Todo o código (funções, variáveis globais, etc.) deve estar no mesmo arquivo.
+
+2. Tipos suportados
+
+Tipos base:
+
+int – inteiro com sinal de 32 bits.
+
+void – somente como tipo de retorno de função.
+
+Tipos derivados:
+
+int* – ponteiro para inteiro.
+
+int[] – array de inteiros de tamanho fixo na declaração.
+
+Restrições:
+
+Não existem: float, double, char, long, struct, union, enum, typedef.
+
+Não existem ponteiros para função, nem múltiplos níveis (int**) na v0.1.
+
+3. Variáveis, arrays e ponteiros
+   3.1. Escopos
+
+Globais (fora de qualquer função):
+
+int g;
+int v[16];
+int *pg;
+
+
+Locais (dentro de funções):
+
+int main() {
+int x;
+int a[10];
+int *p;
+}
+
+
+Parâmetros de função:
+
+int soma(int a, int b);
+int sum(int *v, int n);
+int sum2(int v[], int n);  // sintaxe alternativa para ponteiro
+
+
+Em parâmetros, int v[] é tratado como int *v.
+
+3.2. Arrays de tamanho fixo
+
+Declaração:
+
+int v[10];
+int w[4];
+
+
+O tamanho deve ser um literal inteiro positivo (v0.1).
+
+Acesso:
+
+v[0] = 42;
+v[1] = v[0] + 3;
+x = v[i];
+
+
+Arrays globais vão para .data/.bss; arrays locais ficam no frame da função.
+
+Inicialização composta (int v[3] = {1,2,3};) não é suportada na v0.1.
+
+3.3. Ponteiros
+
+Declaração:
+
+int *p;
+int *q, *r;
+
+
+Atribuições válidas:
+
+int x;
+int v[10];
+
+p = &x;
+p = &v[0];
+p = v;          // array decai para ponteiro
+p = 0x80000000; // literal inteiro pode ser atribuído a int* (acesso a hw)
+
+
+Desreferência:
+
+*p = 42;  // escreve na memória apontada
+x = *p;   // lê da memória apontada
+
+
+Indexação em ponteiros (açúcar sintático):
+
+p[i]      // equivalente a *(p + i)
+
+4. Expressões
+   4.1. Literais
+
+Decimais: 0, 123, 42.
+
+Hexadecimais: 0xFF, 0X1A2B.
+
+Binários (opcional, mas o compilador pode aceitar): 0b1010.
+
+4.2. Identificadores
+
+Nomes de variáveis, funções, parâmetros:
+
+começam com letra ou _, seguem com letras, dígitos ou _.
+
+4.3. Operadores unários
+
+Suportados:
+
++expr – unário (sem efeito além de coerção).
+
+-expr – negação aritmética (em int).
+
+!expr – negação lógica (0 → 1, ≠0 → 0).
+
+&expr – endereço:
+
+expr deve ser um lvalue (x, v[i], *p).
+
+*expr – desreferência:
+
+expr deve ter tipo int*, resultado é lvalue int.
+
+4.4. Operadores binários em int
+
+Aritméticos: +, -, *, /, %.
+
+Comparação: ==, !=, <, <=, >, >=.
+
+Lógicos: &&, || (com short-circuit).
+
+Atribuição: =.
+
+4.5. Operadores com ponteiros (int*)
+
+Atribuição:
+
+int *p, *q;
+p = q;
+p = &x;
+p = v;
+p = 0x80000000; // literal inteiro → int*
+
+
+Comparação (v0.1): permitidos == e != entre ponteiros (e ponteiro com 0).
+
+Aritmética:
+
+Permitidos p + inteiro, inteiro + p, p - inteiro.
+
+Não é permitido p - q (ponteiro – ponteiro) na v0.1.
+
+4.6. Indexação ([])
+
+Para arrays e ponteiros:
+
+v[i];   // v é int[] → lvalue int
+p[i];   // p é int*  → lvalue int (p[i] == *(p + i))
+
+4.7. Chamadas de função
+
+Forma:
+
+f();
+x = soma(2, 3);
+x = sum(v, n);
+x = sum(&v[0], n);
+
+
+Argumentos são avaliados como expressões comuns.
+
+5. Comandos (statements)
+   5.1. Declarações locais
+
+Dentro de funções:
+
+int x;
+int x = 10;
+int a[10];
+int *p;
+int *q = &x;
+
+
+(Se quiser simplificar a implementação, pode restringir a inicialização local a literais e endereços simples na primeira versão.)
+
+5.2. Comando de expressão
+x = 1;
+*p = 2;
+p = &a[0];
+sum(a, 10);
+;           // comando vazio é permitido
+
+5.3. Bloco
+{
+int y;
+y = 2;
+}
+
+
+Blocos introduzem um novo escopo para variáveis locais.
+
+5.4. If (sempre com {})
+
+Atenção: Mini-C exige bloco {} em todo if/else.
+
+Formas válidas:
+
+if (cond) {
+/* ... */
+}
+
+if (cond) {
+/* ... */
+} else {
+/* ... */
+}
+
+
+Formas inválidas (rejeitadas):
+
+if (cond)
+x = 1;        // proibido
+
+if (cond)
+x = 1;
+else
+y = 2;        // proibido
+
+5.5. While (sempre com {})
+
+Também exige bloco:
+
+while (cond) {
+/* ... */
+}
+
+
+Exemplo clássico de loop infinito:
+
+while (1) {
+/* ... */
+}
+
+
+Forma inválida:
+
+while (cond)
+x = x + 1;    // proibido
+
+5.6. Outros comandos
+
+return:
+
+return expr;  // em funções com retorno int
+return;       // apenas em funções void
+
+
+Não existem em v0.1:
+
+for, do, switch, break, continue.
+
+6. Funções e recursão
+   6.1. Definição
+
+Forma geral:
+
+int nome_func(int a, int b, int *p) {
+/* corpo */
+}
+
+void foo(int *p, int n) {
+/* corpo */
+}
+
+
+Regras:
+
+Tipo de retorno: int ou void.
+
+Parâmetros: qualquer combinação de int e int* (ou int[] → int*).
+
+Corpo sempre é um bloco { ... }.
+
+6.2. main
+
+Ponto de entrada do programa:
+
+int main() {
+/* ... */
+}
+
+
+ou:
+
+int main(void) {
+/* ... */
+}
+
+6.3. Recursão
+
+Recursão direta e indireta são suportadas:
+
+int fact(int n) {
+if (n <= 1) {
+return 1;
+} else {
+return n * fact(n - 1);
+}
+}
+
+
+O compilador gera frames de pilha por chamada (salvando $ra, variáveis locais, etc.).
+
+7. Comentários e léxico
+
+Espaços em branco (' ', '\t', '\n', etc.) são ignorados, exceto para separar tokens.
+
+Comentários:
+
+Linha: // até o fim da linha
+
+Bloco: /* ... */ (não aninháveis).
+
+Identificadores:
+
+[A-Za-z_][A-Za-z0-9_]*
+
+Literais inteiros:
+
+0, 123, 0xFF, 0b1010 (dependendo do suporte de lexer).
+
+8. Funções builtin e acesso a hardware
+
+Mini-C é pensado para rodar tanto em simulador quanto em FPGA, usando hardware mapeado em memória.
+
+Existem duas formas principais de acessar hardware:
+
+8.1. Funções builtin
+
+O compilador conhece alguns nomes especiais de função e gera código específico (sem chamar uma função normal). Exemplos possíveis:
+
+int read_int();           // lê inteiro (ex: de stdin / UART)
+void print_int(int x);    // imprime inteiro
+void print_char(int c);   // opcional
+void print_newline();     // opcional
+
+void led_write(int value);
+int  led_read();
+
+void uart_write(int value);
+int  uart_read();
+
+
+No código Mini-C:
+
+int main() {
+int x;
+x = led_read();
+led_write(x + 1);
+
+    while (1) {
+        uart_write(42);
+    }
+    return 0;
+}
+
+
+O backend pode mapear, por exemplo:
+
+led_write(x) → sw em um endereço fixo de LEDs.
+
+led_read() → lw do mesmo endereço.
+
+uart_write(x) → escrita em registrador mapeado da UART.
+
+Esses endereços são configuráveis no backend, não no código Mini-C.
+
+8.2. Ponteiros para registradores de hardware
+
+Como existem ponteiros, também é possível programar no estilo “bare-metal”:
+
+int *LED     = 0x80000000;  // endereço mapeado dos LEDs
+int *BUTTONS = 0x80000004;  // endereço mapeado dos botões
+
+int main() {
+int pos;
+pos = 0;
+
+    while (1) {
+        int b;
+        b = *BUTTONS;       // lê botões
+        if (b & 1) {
+            pos = pos + 1;
+        } else if (b & 2) {
+            pos = pos - 1;
+        }
+
+        *LED = pos;         // escreve nos LEDs
+    }
+
+    return 0;
+}
+
+
+O compilador trata a atribuição int *LED = 0x80000000; como conversão literal int → ponteiro; *LED gera lw/sw nesse endereço.
+

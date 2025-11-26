@@ -3,38 +3,43 @@ project(MIPSSimul)
 
 set(CMAKE_CXX_STANDARD 17)
 
-set(CMAKE_CXX_FLAGS_DEBUG "-g -fopenmp -lSDL2")
-set(CMAKE_CXX_FLAGS_RELEASE "-O3 -fopenmp -lSDL2")
+set(CMAKE_CXX_FLAGS_DEBUG "-g -fopenmp")
+set(CMAKE_CXX_FLAGS_RELEASE "-O3 -fopenmp")
 
 if (NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Debug)
 endif ()
 
 
-include_directories(include)
+include_directories(${CMAKE_SOURCE_DIR}/assembler/include ${CMAKE_SOURCE_DIR}/common/include ${CMAKE_SOURCE_DIR}/tools/include)
 
 
-file(GLOB_RECURSE G_SRC src/common.cpp)
+file(GLOB_RECURSE COMMON_SRC common/src/common.cpp)
 
 # Lexer Test
-file(GLOB_RECURSE LEXER_SRC ${G_SRC} src/lexer.cpp src/tokens.cpp)
-add_executable(LexerTestMain src/tests/lexerTestMain.cpp ${LEXER_SRC})
+file(GLOB_RECURSE LEXER_SRC
+        ${COMMON_SRC}
+        assembler/src/asm_lexer.cpp
+        assembler/src/asm_tokens.cpp)
+add_executable(LexerTestMain tools/tests/lexerTestMain.cpp ${LEXER_SRC})
+#target_include_directories(LexerTestMain PRIVATE
+#        ${CMAKE_SOURCE_DIR}/assembler/include
+#        ${CMAKE_SOURCE_DIR}/common/include
+#        ${CMAKE_SOURCE_DIR}/tools/include
+#)
 
 # Parser Test
-file(GLOB_RECURSE PARSER_SRC ${LEXER_SRC} src/parser.cpp)
-add_executable(ParserTestMain src/tests/parserTestMain.cpp ${PARSER_SRC})
+file(GLOB_RECURSE PARSER_SRC ${LEXER_SRC} assembler/src/asm_parser.cpp)
+add_executable(ParserTestMain tools/tests/parserTestMain.cpp ${PARSER_SRC})
 
 # Assembler Test
-file(GLOB_RECURSE ASSEMBLER_SRC ${PARSER_SRC} src/registers.cpp src/isa.cpp src/assembler.cpp)
-add_executable(AssemblerTestMain src/tests/assemblerTestMain.cpp ${ASSEMBLER_SRC}
-        include/tools_cli.h
-        src/tools_cli.cpp
-        src/main/mips_tools.cpp)
+file(GLOB_RECURSE ASSEMBLER_SRC ${PARSER_SRC} assembler/src/asm_registers.cpp assembler/src/asm_isa.cpp assembler/src/asm.cpp)
+add_executable(AssemblerTestMain tools/tests/assemblerTestMain.cpp ${ASSEMBLER_SRC})
 
 # Disassembler Test
-file(GLOB_RECURSE DISASSEMBLER_SRC ${ASSEMBLER_SRC} src/disassembler.cpp)
-add_executable(DisassemblerTestMain src/tests/disassemblerTestMain.cpp ${DISASSEMBLER_SRC})
+file(GLOB_RECURSE DISASSEMBLER_SRC ${ASSEMBLER_SRC} assembler/src/disasm.cpp)
+add_executable(DisassemblerTestMain tools/tests/disassemblerTestMain.cpp ${DISASSEMBLER_SRC})
 
 # mips toos
-file(GLOB_RECURSE MIPS_TOOLS_SRC ${DISASSEMBLER_SRC} src/tools_cli.cpp)
-add_executable(mips_tool src/main/mips_tools.cpp ${MIPS_TOOLS_SRC})
+file(GLOB_RECURSE ASSEMBLER_TOOLS_SRC ${DISASSEMBLER_SRC} tools/src/assembler_cli.cpp)
+add_executable(assembler tools/src/assembler_tools.cpp ${ASSEMBLER_TOOLS_SRC})
