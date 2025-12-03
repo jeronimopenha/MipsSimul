@@ -1,0 +1,72 @@
+#ifndef ASSEMBLER_TOKENS_H
+#define ASSEMBLER_TOKENS_H
+
+#include <definitions.h>
+
+enum class MiniCTokenKind {
+    //keywords
+    TOK_INT, // reserved  - int
+    TOK_FLOAT, // reserved  - float
+    TOK_VOID, // reserved  - void
+    TOK_IF, // reserved  - if
+    TOK_ELSE, // reserved  - else
+    TOK_WHILE, // reserved  - while
+    TOK_RETURN, // reserved  - return
+
+    //identificator
+    TOK_IDENT, // everything that is not a keyword and other tokens
+
+    //literals
+    TOK_INT_LIT, // int literals
+    TOK_FLOAT_LIT, // float literals
+
+    //arithmetic operators
+    TOK_PLUS, // +
+    TOK_MINUS, // -
+    TOK_STAR, //*
+    TOK_SLASH, // /
+    TOK_PERCENT, //%
+
+    // relational operators
+    TOK_EQ, // ==
+    TOK_NEQ, // Not Equal
+    TOK_LE, // Less or equal than
+    TOK_GE, //Greater or equal than
+    TOK_LT, //Less than
+    TOK_GT, //Greater than
+
+    //logical operators
+    TOK_AND_AND, // &&
+    TOK_OR_OR, //||
+    TOK_NOT, //!
+
+    //assign
+    TOK_ASSIGN, // =
+
+    //pointers
+    TOK_AMP, // &
+
+    // Delimitations
+    TOK_SEMI, // ;
+    TOK_COMMA, // ,
+    TOK_LPAREN, // (
+    TOK_RPAREN, // )
+    TOK_LBRACE, // {
+    TOK_RBRACE, // }
+    TOK_LBRACKET, // [
+    TOK_RBRACKET, // ]
+
+    //Specials
+    TOK_EOF, // End of file
+    TOK_INVALID
+};
+
+struct MiniCToken {
+    TokenKind kind;
+    std::string lexeme; // original text
+    int line; // line of the file to detect error
+};
+
+std::string asmTokenKindToString(const TokenKind k);
+
+#endif

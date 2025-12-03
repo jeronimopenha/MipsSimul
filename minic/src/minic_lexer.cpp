@@ -2,21 +2,21 @@
 
 using namespace std;
 
-AsmLexer::AsmLexer(string s) : src(std::move(s)) {
+MiniCLexer::MiniCLexer(string s) : src(std::move(s)) {
 }
 
-bool AsmLexer::eof() const {
+bool MiniCLexer::eof() const {
     return pos >= src.size();
 }
 
-char AsmLexer::peek() const {
+char MiniCLexer::peek() const {
     if (eof()) {
         return '\0';
     }
     return src[pos];
 }
 
-char AsmLexer::get() {
+char MiniCLexer::get() {
     if (eof()) {
         return '\0';
     }
@@ -27,15 +27,15 @@ char AsmLexer::get() {
     return c;
 }
 
-bool AsmLexer::isIdentStart(char c) {
+bool MiniCLexer::isIdentStart(char c) {
     return isalpha(static_cast<unsigned char>(c)) || c == '_' || c == '.';
 }
 
-bool AsmLexer::isIdentChar(char c) {
+bool MiniCLexer::isIdentChar(char c) {
     return isalnum(static_cast<unsigned char>(c)) || c == '_' || c == '.';
 }
 
-AsmToken AsmLexer::next() {
+Token MiniCLexer::next() {
     // ignore spaces and tabs
     while (!eof()) {
         const char c = peek();
@@ -47,34 +47,34 @@ AsmToken AsmLexer::next() {
         if (c == '#') {
             while (!eof() && get() != '\n') {
             }
-            return AsmToken{AsmTokenKind::Newline, "\\n", line};
+            return Token{TokenKind::Newline, "\\n", line};
         }
         break;
     }
 
     if (eof()) {
-        return AsmToken{AsmTokenKind::Eof, "", line};
+        return Token{TokenKind::Eof, "", line};
     }
 
     const char c = get();
 
     // quebra de linha
     if (c == '\n') {
-        return AsmToken{AsmTokenKind::Newline, "\\n", line - 1};
+        return Token{TokenKind::Newline, "\\n", line - 1};
     }
 
     // pontuações simples
     if (c == ',') {
-        return AsmToken{AsmTokenKind::Comma, ",", line};
+        return Token{TokenKind::Comma, ",", line};
     }
     if (c == ':') {
-        return AsmToken{AsmTokenKind::Colon, ":", line};
+        return Token{TokenKind::Colon, ":", line};
     }
     if (c == '(') {
-        return AsmToken{AsmTokenKind::LParen, "(", line};
+        return Token{TokenKind::LParen, "(", line};
     }
     if (c == ')') {
-        return AsmToken{AsmTokenKind::RParen, ")", line};
+        return Token{TokenKind::RParen, ")", line};
     }
 
     // register: starts with $
@@ -83,7 +83,7 @@ AsmToken AsmLexer::next() {
         while (!eof() && isIdentChar(peek())) {
             lex.push_back(get());
         }
-        return AsmToken{AsmTokenKind::Register, lex, line};
+        return Token{TokenKind::Register, lex, line};
     }
 
     // identifier: opcode, label, etc.
@@ -92,7 +92,7 @@ AsmToken AsmLexer::next() {
         while (!eof() && isIdentChar(peek())) {
             lex.push_back(get());
         }
-        return AsmToken{AsmTokenKind::Identifier, lex, line};
+        return Token{TokenKind::Identifier, lex, line};
     }
 
     // número: decimal ou hexa
@@ -110,10 +110,10 @@ AsmToken AsmLexer::next() {
                 lex.push_back(get());
             }
         }
-        return AsmToken{AsmTokenKind::Number, lex, line};
+        return Token{TokenKind::Number, lex, line};
     }
 
     // se cair aqui, é algo que não tratamos ainda
     cerr << "Caractere inesperado '" << c << "' na linha " << line << "\n";
-    return AsmToken{AsmTokenKind::Eof, "", line};
+    return Token{TokenKind::Eof, "", line};
 }

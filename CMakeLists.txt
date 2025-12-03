@@ -11,7 +11,12 @@ if (NOT CMAKE_BUILD_TYPE)
 endif ()
 
 
-include_directories(${CMAKE_SOURCE_DIR}/assembler/include ${CMAKE_SOURCE_DIR}/common/include ${CMAKE_SOURCE_DIR}/tools/include)
+include_directories(
+        ${CMAKE_SOURCE_DIR}/minic/include
+        ${CMAKE_SOURCE_DIR}/assembler/include
+        ${CMAKE_SOURCE_DIR}/common/include
+        ${CMAKE_SOURCE_DIR}/tools/include
+)
 
 
 file(GLOB_RECURSE COMMON_SRC common/src/common.cpp)
@@ -21,25 +26,28 @@ file(GLOB_RECURSE LEXER_SRC
         ${COMMON_SRC}
         assembler/src/asm_lexer.cpp
         assembler/src/asm_tokens.cpp)
-add_executable(LexerTestMain tools/tests/lexerTestMain.cpp ${LEXER_SRC})
+add_executable(LexerTestMain tools/tests/asmLexerTestMain.cpp ${LEXER_SRC})
 #target_include_directories(LexerTestMain PRIVATE
 #        ${CMAKE_SOURCE_DIR}/assembler/include
 #        ${CMAKE_SOURCE_DIR}/common/include
 #        ${CMAKE_SOURCE_DIR}/tools/include
 #)
 
-# Parser Test
+# Asm Lexer Test
 file(GLOB_RECURSE PARSER_SRC ${LEXER_SRC} assembler/src/asm_parser.cpp)
-add_executable(ParserTestMain tools/tests/parserTestMain.cpp ${PARSER_SRC})
+add_executable(ParserTestMain tools/tests/asmParserTestMain.cpp ${PARSER_SRC})
 
-# Assembler Test
+# Asm Test
 file(GLOB_RECURSE ASSEMBLER_SRC ${PARSER_SRC} assembler/src/asm_registers.cpp assembler/src/asm_isa.cpp assembler/src/asm.cpp)
-add_executable(AssemblerTestMain tools/tests/assemblerTestMain.cpp ${ASSEMBLER_SRC})
+add_executable(AssemblerTestMain tools/tests/asmTestMain.cpp ${ASSEMBLER_SRC})
 
-# Disassembler Test
+# Disasm Test
 file(GLOB_RECURSE DISASSEMBLER_SRC ${ASSEMBLER_SRC} assembler/src/disasm.cpp)
-add_executable(DisassemblerTestMain tools/tests/disassemblerTestMain.cpp ${DISASSEMBLER_SRC})
+add_executable(DisassemblerTestMain tools/tests/disasmTestMain.cpp ${DISASSEMBLER_SRC})
 
-# mips toos
+# MiniC Lexer Test
+
+
+# assembler tool
 file(GLOB_RECURSE ASSEMBLER_TOOLS_SRC ${DISASSEMBLER_SRC} tools/src/assembler_cli.cpp)
 add_executable(assembler tools/src/assembler_tools.cpp ${ASSEMBLER_TOOLS_SRC})

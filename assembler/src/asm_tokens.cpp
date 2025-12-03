@@ -2,17 +2,17 @@
 
 using namespace std;
 
-string tokenKindToString(const TokenKind k) {
+string asmTokenKindToString(const AsmTokenKind k) {
     switch (k) {
-        case TokenKind::Identifier: return "IDENT";
-        case TokenKind::Register: return "REG";
-        case TokenKind::Number: return "NUM";
-        case TokenKind::Comma: return "COMMA";
-        case TokenKind::Colon: return "COLON";
-        case TokenKind::LParen: return "LPAR";
-        case TokenKind::RParen: return "RPAR";
-        case TokenKind::Newline: return "NEWLN";
-        case TokenKind::Eof: return "EOF";
+        case AsmTokenKind::Identifier: return "IDENT";
+        case AsmTokenKind::Register: return "REG";
+        case AsmTokenKind::Number: return "NUM";
+        case AsmTokenKind::Comma: return "COMMA";
+        case AsmTokenKind::Colon: return "COLON";
+        case AsmTokenKind::LParen: return "LPAR";
+        case AsmTokenKind::RParen: return "RPAR";
+        case AsmTokenKind::Newline: return "NEWLN";
+        case AsmTokenKind::Eof: return "EOF";
         default: return "UNKNOWN";
     }
 }

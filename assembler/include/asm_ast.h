@@ -2,7 +2,7 @@
 #define ASSEMBLER_AST_H
 #include <definitions.h>
 
-struct Operand {
+struct AsmOperand {
     enum class Kind { Reg, Imm, Mem, LabelRef } kind;
 
     int reg = 0; // if register
@@ -11,16 +11,16 @@ struct Operand {
     std::string label; // if LabelRef
 };
 
-struct Instruction {
+struct AsmInstruction {
     std::string op; // "addi", "lw", "j", ...
-    std::vector<Operand> args;
+    std::vector<AsmOperand> args;
     int line = 0;
 };
 
-struct Line {
+struct AsmLine {
     std::string label; // "" if empty
     bool hasInstr = false;
-    Instruction instr;
+    AsmInstruction instr;
 };
 
 #endif

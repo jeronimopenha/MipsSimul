@@ -1,5 +1,5 @@
-#ifndef ASSEMBLER_LEXER_H
-#define ASSEMBLER_LEXER_H
+#ifndef MINIC_LEXER_H
+#define MINIC_LEXER_H
 
 #include <common.h>
 #include <asm_tokens.h>
@@ -8,7 +8,7 @@ class AsmLexer {
 public:
     explicit AsmLexer(std::string s);
 
-    AsmToken next();
+    MiniCToken next();
 
 private:
     std::string src;

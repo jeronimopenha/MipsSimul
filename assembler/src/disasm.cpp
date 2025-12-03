@@ -6,9 +6,9 @@ static const string r(int n) {
     return regNameFromNumber(n);
 }
 
-static const InstrDesc *findInstrByOpcodeFunct(const uint8_t opcode, const uint8_t funct) {
+static const AsmInstrDesc *findInstrByOpcodeFunct(const uint8_t opcode, const uint8_t funct) {
     for (const auto &d: ISA_TABLE) {
-        if (d.type == InstrType::R) {
+        if (d.type == AsmInstrType::R) {
             if (d.opcode == opcode && d.funct == funct) {
                 return &d;
             }
@@ -21,18 +21,18 @@ static const InstrDesc *findInstrByOpcodeFunct(const uint8_t opcode, const uint8
     return nullptr;
 }
 
-static const InstrDesc *findInstrByOpcode(const uint8_t opcode) {
+static const AsmInstrDesc *findInstrByOpcode(const uint8_t opcode) {
     for (const auto &d: ISA_TABLE)
-        if (d.opcode == opcode && d.type != InstrType::R) {
+        if (d.opcode == opcode && d.type != AsmInstrType::R) {
             return &d;
         }
 
     return nullptr;
 }
 
-std::map<uint32_t, std::string> makeLabels(const std::vector<uint32_t> &code) {
+std::map<uint32_t, std::string> disasmMakeLabels(const std::vector<uint32_t> &code) {
     std::map<uint32_t, std::string> labels;
-    uint32_t pc = basePc;
+    uint32_t pc = baseAsmPc;
     int count = 0;
 
     for (const auto w: code) {
@@ -45,7 +45,7 @@ std::map<uint32_t, std::string> makeLabels(const std::vector<uint32_t> &code) {
         const int16_t imm16 = static_cast<int16_t>(w & 0xFFFF);
         const uint32_t idx = w & 0x03FFFFFF;
 
-        const InstrDesc *d = nullptr;
+        const AsmInstrDesc *d = nullptr;
 
         if (op == 0x00) {
             // R-type (It usually doesn't have a target label, except for jalr/jr, that is not added yet.)
@@ -60,13 +60,13 @@ std::map<uint32_t, std::string> makeLabels(const std::vector<uint32_t> &code) {
             continue;
         }
 
-        if (d->type == InstrType::I && d->form == InstrForm::RsRtRel) {
+        if (d->type == AsmInstrType::I && d->form == AsmInstrForm::RsRtRel) {
             // beq / bne style
             const uint32_t target = pc + 4 + (static_cast<int32_t>(imm16) << 2);
             if (!labels.count(target)) {
                 labels[target] = "L" + std::to_string(count++);
             }
-        } else if (d->type == InstrType::J && d->form == InstrForm::Jump) {
+        } else if (d->type == AsmInstrType::J && d->form == AsmInstrForm::Jump) {
             // j / jal
             const uint32_t target = (pc & 0xF0000000u) | (idx << 2);
             if (!labels.count(target)) {
@@ -92,7 +92,7 @@ std::string disassembleWord(const uint32_t w, const uint32_t pc, const std::map<
 
     std::ostringstream out;
 
-    const InstrDesc *d = nullptr;
+    const AsmInstrDesc *d = nullptr;
 
     if (op == 0x00) {
         d = findInstrByOpcodeFunct(op, funct);
@@ -107,11 +107,11 @@ std::string disassembleWord(const uint32_t w, const uint32_t pc, const std::map<
     }
 
     // ---------------- R-TYPE ----------------
-    if (d->type == InstrType::R) {
-        if (d->form == InstrForm::RdRsRt) {
+    if (d->type == AsmInstrType::R) {
+        if (d->form == AsmInstrForm::RdRsRt) {
             // add/and/or/slt ...
             out << d->name << " " << r(rd) << ", " << r(rs) << ", " << r(rt);
-        } else if (d->form == InstrForm::RdRtShamt) {
+        } else if (d->form == AsmInstrForm::RdRtShamt) {
             // sll rd, rt, shamt (include nop)
             if (rs == 0 && rt == 0 && rd == 0 && shamt == 0) {
                 // nop
@@ -125,14 +125,14 @@ std::string disassembleWord(const uint32_t w, const uint32_t pc, const std::map<
     }
 
     // ---------------- I-TYPE ----------------
-    else if (d->type == InstrType::I) {
-        if (d->form == InstrForm::RtRsImm) {
+    else if (d->type == AsmInstrType::I) {
+        if (d->form == AsmInstrForm::RtRsImm) {
             // addi rt, rs, imm
             out << d->name << " " << r(rt) << ", " << r(rs) << ", " << static_cast<int>(imm16);
-        } else if (d->form == InstrForm::RtMem) {
+        } else if (d->form == AsmInstrForm::RtMem) {
             // lw/sw rt, imm(rs)
             out << d->name << " " << r(rt) << ", " << static_cast<int>(imm16) << "(" << r(rs) << ")";
-        } else if (d->form == InstrForm::RsRtRel) {
+        } else if (d->form == AsmInstrForm::RsRtRel) {
             // beq/bne rs, rt, label/addr
             const uint32_t target = pc + 4 + (static_cast<int32_t>(imm16) << 2);
             out << d->name << " " << r(rs) << ", " << r(rt) << ", ";
@@ -147,8 +147,8 @@ std::string disassembleWord(const uint32_t w, const uint32_t pc, const std::map<
     }
 
     // ---------------- J-TYPE ----------------
-    else if (d->type == InstrType::J) {
-        if (d->form == InstrForm::Jump) {
+    else if (d->type == AsmInstrType::J) {
+        if (d->form == AsmInstrForm::Jump) {
             uint32_t target = (pc & 0xF0000000u) | (idx << 2);
             out << d->name << " ";
             if (labels && labels->count(target)) {

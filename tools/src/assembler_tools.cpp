@@ -12,10 +12,10 @@ int runLexer(const istream &in, ostream &out) {
     buffer << in.rdbuf();
     const string src = buffer.str();
 
-    Lexer lex(src);
+    AsmLexer lex(src);
     while (true) {
-        Token t = lex.next();
-        out << t.line << ":\t" << tokenKindToString(t.kind) << "\t" << t.lexeme << "\n";
+        MiniCToken t = lex.next();
+        out << t.line << ":\t" << asmTokenKindToString(t.kind) << "\t" << t.lexeme << "\n";
         if (t.kind == TokenKind::Eof) break;
     }
     return 0;
@@ -26,10 +26,10 @@ int runParser(const istream &in, ostream &out) {
     buffer << in.rdbuf();
     const string src = buffer.str();
 
-    Lexer lex(src);
-    vector<Token> toks;
+    AsmLexer lex(src);
+    vector<MiniCToken> toks;
     while (true) {
-        Token t = lex.next();
+        MiniCToken t = lex.next();
         toks.push_back(t);
         if (t.kind == TokenKind::Eof) break;
     }
@@ -48,13 +48,13 @@ int runParser(const istream &in, ostream &out) {
             for (const auto &a: inst.args) {
                 out << "  [";
                 switch (a.kind) {
-                    case Operand::Kind::Reg: out << "Reg " << a.label;
+                    case AsmOperand::Kind::Reg: out << "Reg " << a.label;
                         break;
-                    case Operand::Kind::Imm: out << "Imm " << a.imm;
+                    case AsmOperand::Kind::Imm: out << "Imm " << a.imm;
                         break;
-                    case Operand::Kind::Mem: out << "Mem off=" << a.imm << " base=" << a.label;
+                    case AsmOperand::Kind::Mem: out << "Mem off=" << a.imm << " base=" << a.label;
                         break;
-                    case Operand::Kind::LabelRef: out << "Label " << a.label;
+                    case AsmOperand::Kind::LabelRef: out << "Label " << a.label;
                         break;
                 }
                 out << "]";
@@ -71,10 +71,10 @@ int runAssembler(const istream &in, ostream &out) {
     string src = buffer.str();
 
     try {
-        Lexer lex(src);
-        vector<Token> toks;
+        AsmLexer lex(src);
+        vector<MiniCToken> toks;
         while (true) {
-            Token t = lex.next();
+            MiniCToken t = lex.next();
             toks.push_back(t);
             if (t.kind == TokenKind::Eof) break;
         }
@@ -82,8 +82,8 @@ int runAssembler(const istream &in, ostream &out) {
         Parser p(toks);
         auto prog = p.parseProgram();
 
-        auto sym = buildSymbolTable(prog);
-        auto code = generateCode(prog, sym);
+        auto sym = asmBuildSymbolTable(prog);
+        auto code = asmGenerateCode(prog, sym);
 
         out << uppercase << hex;
         for (auto w: code) {
@@ -114,9 +114,9 @@ int runDisassembler(istream &in, ostream &out) {
         code.push_back(w);
     }
 
-    auto labels = makeLabels(code);
+    auto labels = disasmMakeLabels(code);
 
-    uint32_t pc = basePc;
+    uint32_t pc = baseAsmPc;
     for (const auto w: code) {
         auto it = labels.find(pc);
         if (it != labels.end()) {

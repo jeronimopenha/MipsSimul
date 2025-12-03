@@ -10,7 +10,7 @@ int main() {
 
     cout << rootPath << endl;
 
-    auto files = getFilesListByExtension(rootPath + benchPath, benchAsmExt);
+    auto files = getFilesListByExtension(rootPath + BenchAsmPath, benchAsmExt);
 
     for (const auto &[fst, snd]: files) {
         cout << fst << endl;
@@ -23,10 +23,10 @@ int main() {
         string src((istreambuf_iterator<char>(in)),
                    istreambuf_iterator<char>());
 
-        Lexer lex(src);
-        vector<Token> tokens;
+        AsmLexer lex(src);
+        vector<MiniCToken> tokens;
         while (true) {
-            Token t = lex.next();
+            MiniCToken t = lex.next();
             tokens.push_back(t);
             if (t.kind == TokenKind::Eof) {
                 break;
@@ -46,13 +46,13 @@ int main() {
                 for (auto &a: line.instr.args) {
                     cout << "  [";
                     switch (a.kind) {
-                        case Operand::Kind::Reg: cout << "Reg " << a.label;
+                        case AsmOperand::Kind::Reg: cout << "Reg " << a.label;
                             break;
-                        case Operand::Kind::Imm: cout << "Imm " << a.imm;
+                        case AsmOperand::Kind::Imm: cout << "Imm " << a.imm;
                             break;
-                        case Operand::Kind::Mem: cout << "Mem off=" << a.imm << " base=" << a.label;
+                        case AsmOperand::Kind::Mem: cout << "Mem off=" << a.imm << " base=" << a.label;
                             break;
-                        case Operand::Kind::LabelRef: cout << "Label " << a.label;
+                        case AsmOperand::Kind::LabelRef: cout << "Label " << a.label;
                             break;
                     }
                     cout << "]";

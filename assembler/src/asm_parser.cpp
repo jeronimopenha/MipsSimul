@@ -2,19 +2,19 @@
 
 using namespace std;
 
-Parser::Parser(const vector<Token> &tokens) : tokens(tokens) {
+Parser::Parser(const vector<MiniCToken> &tokens) : tokens(tokens) {
 }
 
-const Token &Parser::peek() {
-    static Token eofToken{TokenKind::Eof, "", -1};
+const MiniCToken &Parser::peek() {
+    static MiniCToken eofToken{TokenKind::Eof, "", -1};
     if (pos >= tokens.size()) {
         return eofToken;
     }
     return tokens[pos];
 }
 
-const Token &Parser::get() {
-    const Token &t = peek();
+const MiniCToken &Parser::get() {
+    const MiniCToken &t = peek();
     if (pos < tokens.size()) {
         pos++;
     }
@@ -29,7 +29,7 @@ bool Parser::match(const TokenKind k) {
     return false;
 }
 
-const Token &Parser::expect(const TokenKind k, const string &msg) {
+const MiniCToken &Parser::expect(const TokenKind k, const string &msg) {
     if (peek().kind != k) {
         cerr << "Error on line " << peek().line
                 << ": expected " << msg << "\n";
@@ -39,8 +39,8 @@ const Token &Parser::expect(const TokenKind k, const string &msg) {
 }
 
 //program    ::= { line }
-vector<Line> Parser::parseProgram() {
-    vector<Line> prog;
+vector<AsmLine> Parser::parseProgram() {
+    vector<AsmLine> prog;
     while (true) {
         if (peek().kind == TokenKind::Eof) {
             break;
@@ -56,12 +56,12 @@ vector<Line> Parser::parseProgram() {
 }
 
 //line ::= [ label ":" ] [ instruction ] NEWLINE
-Line Parser::parseLine() {
-    Line line;
+AsmLine Parser::parseLine() {
+    AsmLine line;
     // [label ":" ] ?
     if (peek().kind == TokenKind::Identifier) {
         // can be label OR opcode
-        const Token ident = peek();
+        const MiniCToken ident = peek();
         // Look to the other token to decide
         if (tokens.size() > pos + 1 && tokens[pos + 1].kind == TokenKind::Colon) {
             // is labeled
@@ -88,9 +88,9 @@ Line Parser::parseLine() {
 }
 
 //instruction ::= IDENT operand_list
-Instruction Parser::parseInstruction() {
-    Instruction inst;
-    const Token opTok = expect(TokenKind::Identifier, "opcode");
+AsmInstruction Parser::parseInstruction() {
+    AsmInstruction inst;
+    const MiniCToken opTok = expect(TokenKind::Identifier, "opcode");
     inst.op = opTok.lexeme;
     inst.line = opTok.line;
 
@@ -105,8 +105,8 @@ Instruction Parser::parseInstruction() {
 }
 
 //operand_list ::= operand { "," operand }
-vector<Operand> Parser::parseOperandList() {
-    vector<Operand> args;
+vector<AsmOperand> Parser::parseOperandList() {
+    vector<AsmOperand> args;
     args.push_back(parseOperand());
 
     while (match(TokenKind::Comma)) {
@@ -121,14 +121,14 @@ vector<Operand> Parser::parseOperandList() {
           | memaddr
           | IDENT
 */
-Operand Parser::parseOperand() {
-    const Token& t = peek();
-    Operand op;
+AsmOperand Parser::parseOperand() {
+    const MiniCToken& t = peek();
+    AsmOperand op;
 
     switch (t.kind) {
     case TokenKind::Register: {
-        const Token r = get();
-        op.kind = Operand::Kind::Reg;
+        const MiniCToken r = get();
+        op.kind = AsmOperand::Kind::Reg;
         op.reg = -1;         // lets map this later (semantic phase)
         // we can store the name here to map later
         op.label = r.lexeme;
@@ -137,15 +137,15 @@ Operand Parser::parseOperand() {
 
     case TokenKind::Number: {
         // can be immediate or memaddr number
-        const Token num = get();
+        const MiniCToken num = get();
 
         if (peek().kind == TokenKind::LParen) {
             // is memaddr: num "(" reg ")"
             get(); // consume "("
-            const Token r = expect(TokenKind::Register, "address register");
+            const MiniCToken r = expect(TokenKind::Register, "address register");
             expect(TokenKind::RParen, "')'");
 
-            op.kind = Operand::Kind::Mem;
+            op.kind = AsmOperand::Kind::Mem;
             // parse num -> int
             op.imm = stoi(num.lexeme, nullptr,
                                (num.lexeme.rfind("0x",0)==0 || num.lexeme.rfind("0X",0)==0) ? 16 : 10);
@@ -153,7 +153,7 @@ Operand Parser::parseOperand() {
             op.label = r.lexeme; // name of the reg base
         } else {
             // just immediate
-            op.kind = Operand::Kind::Imm;
+            op.kind = AsmOperand::Kind::Imm;
             op.imm = stoi(num.lexeme, nullptr,
                                (num.lexeme.rfind("0x",0)==0 || num.lexeme.rfind("0X",0)==0) ? 16 : 10);
         }
@@ -163,10 +163,10 @@ Operand Parser::parseOperand() {
     case TokenKind::LParen: {
         // memaddr with no offset: "($sp)"
         get(); // consume "("
-        const Token r = expect(TokenKind::Register, "address register");
+        const MiniCToken r = expect(TokenKind::Register, "address register");
         expect(TokenKind::RParen, "')'");
 
-        op.kind = Operand::Kind::Mem;
+        op.kind = AsmOperand::Kind::Mem;
         op.imm = 0;
         op.baseReg = -1;     // map later
         op.label = r.lexeme; // nome of the base reg
@@ -175,8 +175,8 @@ Operand Parser::parseOperand() {
 
     case TokenKind::Identifier: {
         // can be a label for jump and branche
-        const Token id = get();
-        op.kind = Operand::Kind::LabelRef;
+        const MiniCToken id = get();
+        op.kind = AsmOperand::Kind::LabelRef;
         op.label = id.lexeme;
         break;
     }

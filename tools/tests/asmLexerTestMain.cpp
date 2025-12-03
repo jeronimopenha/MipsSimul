@@ -10,7 +10,7 @@ int main() {
 
     cout << rootPath << endl;
 
-    auto files = getFilesListByExtension(rootPath + benchPath, benchAsmExt);
+    auto files = getFilesListByExtension(rootPath + BenchAsmPath, benchAsmExt);
 
     for (const auto &[fst, snd]: files) {
         cout << fst << endl;
@@ -25,32 +25,32 @@ int main() {
         string src((istreambuf_iterator<char>(in)),
                    istreambuf_iterator<char>());
 
-        Lexer lex(src);
+        AsmLexer lex(src);
 
         while (true) {
-            Token t = lex.next();
-            if (t.kind == TokenKind::Eof) {
+            AsmToken t = lex.next();
+            if (t.kind == AsmTokenKind::Eof) {
                 break;
             }
 
             cout << t.line << ":\t";
 
             switch (t.kind) {
-                case TokenKind::Identifier: cout << "IDENT\t";
+                case AsmTokenKind::Identifier: cout << "IDENT\t";
                     break;
-                case TokenKind::Register: cout << "REG  \t";
+                case AsmTokenKind::Register: cout << "REG  \t";
                     break;
-                case TokenKind::Number: cout << "NUM  \t";
+                case AsmTokenKind::Number: cout << "NUM  \t";
                     break;
-                case TokenKind::Comma: cout << "COMMA\t";
+                case AsmTokenKind::Comma: cout << "COMMA\t";
                     break;
-                case TokenKind::Colon: cout << "COLON\t";
+                case AsmTokenKind::Colon: cout << "COLON\t";
                     break;
-                case TokenKind::LParen: cout << "LPAR \t";
+                case AsmTokenKind::LParen: cout << "LPAR \t";
                     break;
-                case TokenKind::RParen: cout << "RPAR \t";
+                case AsmTokenKind::RParen: cout << "RPAR \t";
                     break;
-                case TokenKind::Newline: cout << "NEWLN\t";
+                case AsmTokenKind::Newline: cout << "NEWLN\t";
                     break;
                 default: cout << "???  \t";
                     break;

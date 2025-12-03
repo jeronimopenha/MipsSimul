@@ -3,7 +3,7 @@
 
 #include <definitions.h>
 
-enum class TokenKind {
+enum class AsmTokenKind {
     Identifier, // opcodes, labels, regs without $
     Register, // tokens with initial $
     Number, // immediate (decimal or hex)
@@ -15,12 +15,12 @@ enum class TokenKind {
     Eof // End of file
 };
 
-struct Token {
-    TokenKind kind;
+struct AsmToken {
+    AsmTokenKind kind;
     std::string lexeme; // original text
     int line; // line of the file to detect error
 };
 
-std::string tokenKindToString(const TokenKind k);
+std::string asmTokenKindToString(AsmTokenKind k);
 
 #endif

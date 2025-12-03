@@ -8,29 +8,29 @@
 
 class Parser {
 public:
-    explicit Parser(const std::vector<Token> &tokens);
+    explicit Parser(const std::vector<AsmToken> &tokens);
 
-    std::vector<Line> parseProgram();
+    std::vector<AsmLine> parseProgram();
 
 private:
-    std::vector<Token> tokens;
+    std::vector<AsmToken> tokens;
     size_t pos = 0;
 
-    const Token &peek();
+    const AsmToken &peek();
 
-    const Token &get();
+    const AsmToken &get();
 
-    bool match(TokenKind k);
+    bool match(AsmToken k);
 
-    const Token &expect(TokenKind k, const std::string &msg);
+    const AsmToken &expect(AsmToken k, const std::string &msg);
 
-    Line parseLine();
+    AsmLine parseLine();
 
-    Instruction parseInstruction();
+    AsmInstruction parseInstruction();
 
-    std::vector<Operand> parseOperandList();
+    std::vector<AsmOperand> parseOperandList();
 
-    Operand parseOperand();
+    AsmOperand parseOperand();
 };
 
 /* - Grammar

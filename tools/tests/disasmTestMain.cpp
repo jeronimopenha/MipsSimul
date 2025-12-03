@@ -1,4 +1,5 @@
 #include <asm.h>
+#include <disasm.h>
 #include <common.h>
 
 using namespace std;
@@ -10,7 +11,7 @@ int main() {
 
     cout << rootPath << endl;
 
-    auto files = getFilesListByExtension(rootPath + benchPath, benchAsmExt);
+    auto files = getFilesListByExtension(rootPath + BenchAsmPath, benchAsmExt);
 
     for (const auto &[fst, snd]: files) {
         cout << fst << endl;
@@ -23,10 +24,10 @@ int main() {
         string src((istreambuf_iterator<char>(in)),
                    istreambuf_iterator<char>());
 
-        Lexer lex(src);
-        vector<Token> tokens;
+        AsmLexer lex(src);
+        vector<MiniCToken> tokens;
         while (true) {
-            Token t = lex.next();
+            MiniCToken t = lex.next();
             tokens.push_back(t);
             if (t.kind == TokenKind::Eof) {
                 break;
@@ -37,12 +38,24 @@ int main() {
         auto prog = p.parseProgram();
 
 
-        auto sym = buildSymbolTable(prog);
-        auto code = generateCode(prog, sym);
+        auto sym = asmBuildSymbolTable(prog);
+        auto code = asmGenerateCode(prog, sym);
 
-        cout << uppercase << hex;
+        auto labels = disasmMakeLabels(code);
+
+        uint32_t pc = baseAsmPc;
         for (auto w: code) {
-            cout << "0x" << setw(8) << setfill('0') << w << "\n";
+            // print LABEL if it exists
+            auto it = labels.find(pc);
+            if (it != labels.end()) {
+                cout << it->second << ":\n";
+            }
+
+            cout << hex << uppercase
+                    << "0x" << setw(8) << setfill('0') << pc
+                    << ":  " << disassembleWord(w, pc, &labels) << "\n";
+
+            pc += 4;
         }
     }
 
