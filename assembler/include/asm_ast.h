@@ -1,5 +1,6 @@
 #ifndef ASSEMBLER_AST_H
 #define ASSEMBLER_AST_H
+
 #include <definitions.h>
 
 struct AsmOperand {

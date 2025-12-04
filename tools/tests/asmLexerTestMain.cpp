@@ -27,30 +27,32 @@ int main() {
 
         AsmLexer lex(src);
 
+
+
         while (true) {
-            AsmToken t = lex.next();
-            if (t.kind == AsmTokenKind::Eof) {
+            Token t = lex.nextToken();
+            if (t.kind == AsmTokenKind::TOK_EOF) {
                 break;
             }
 
             cout << t.line << ":\t";
 
             switch (t.kind) {
-                case AsmTokenKind::Identifier: cout << "IDENT\t";
+                case AsmTokenKind::TOK_IDENT: cout << "IDENT\t";
                     break;
-                case AsmTokenKind::Register: cout << "REG  \t";
+                case AsmTokenKind::TOK_REG: cout << "REG  \t";
                     break;
-                case AsmTokenKind::Number: cout << "NUM  \t";
+                case AsmTokenKind::TOK_INT_LIT: cout << "NUM  \t";
                     break;
-                case AsmTokenKind::Comma: cout << "COMMA\t";
+                case AsmTokenKind::TOK_COMMA: cout << "COMMA\t";
                     break;
-                case AsmTokenKind::Colon: cout << "COLON\t";
+                case AsmTokenKind::TOK_COLON: cout << "COLON\t";
                     break;
-                case AsmTokenKind::LParen: cout << "LPAR \t";
+                case AsmTokenKind::TOK_L_PAREN: cout << "LPAR \t";
                     break;
-                case AsmTokenKind::RParen: cout << "RPAR \t";
+                case AsmTokenKind::TOK_R_PAREN: cout << "RPAR \t";
                     break;
-                case AsmTokenKind::Newline: cout << "NEWLN\t";
+                case AsmTokenKind::TOK_NEWLINE: cout << "NEWLN\t";
                     break;
                 default: cout << "???  \t";
                     break;

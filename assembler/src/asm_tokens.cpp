@@ -4,15 +4,15 @@ using namespace std;
 
 string asmTokenKindToString(const AsmTokenKind k) {
     switch (k) {
-        case AsmTokenKind::Identifier: return "IDENT";
-        case AsmTokenKind::Register: return "REG";
-        case AsmTokenKind::Number: return "NUM";
-        case AsmTokenKind::Comma: return "COMMA";
-        case AsmTokenKind::Colon: return "COLON";
-        case AsmTokenKind::LParen: return "LPAR";
-        case AsmTokenKind::RParen: return "RPAR";
-        case AsmTokenKind::Newline: return "NEWLN";
-        case AsmTokenKind::Eof: return "EOF";
+        case AsmTokenKind::TOK_IDENT: return "IDENT";
+        case AsmTokenKind::TOK_REG: return "REG";
+        case AsmTokenKind::TOK_INT_LIT: return "NUM";
+        case AsmTokenKind::TOK_COMMA: return "COMMA";
+        case AsmTokenKind::TOK_COLON: return "COLON";
+        case AsmTokenKind::TOK_L_PAREN: return "LPAR";
+        case AsmTokenKind::TOK_R_PAREN: return "RPAR";
+        case AsmTokenKind::TOK_NEWLINE: return "NEWLN";
+        case AsmTokenKind::TOK_EOF: return "EOF";
         default: return "UNKNOWN";
     }
 }

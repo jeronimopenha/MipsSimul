@@ -24,6 +24,7 @@ file(GLOB_RECURSE COMMON_SRC common/src/common.cpp)
 # Lexer Test
 file(GLOB_RECURSE LEXER_SRC
         ${COMMON_SRC}
+        common/src/lexer.cpp
         assembler/src/asm_lexer.cpp
         assembler/src/asm_tokens.cpp)
 add_executable(LexerTestMain tools/tests/asmLexerTestMain.cpp ${LEXER_SRC})

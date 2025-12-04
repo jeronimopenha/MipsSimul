@@ -1,29 +1,32 @@
 #ifndef ASSEMBLER_LEXER_H
 #define ASSEMBLER_LEXER_H
 
-#include <common.h>
+#include <definitions.h>
+#include <lexer.h>
 #include <asm_tokens.h>
 
-class AsmLexer {
+class AsmLexer : Lexer {
 public:
     explicit AsmLexer(std::string s);
 
-    AsmToken next();
+    Token nextToken();
 
 private:
-    std::string src;
-    size_t pos = 0;
-    int line = 1;
+    void skipComments() override;
 
-    [[nodiscard]] bool eof() const;
+    int getEofKind() const override;
 
-    [[nodiscard]] char peek() const;
+    bool isIdentStart(char c) const override;
 
-    char get();
+    bool isIdentChar(char c) const override;
 
-    static bool isIdentStart(char c);
+    bool isNumberStart(char c) const override;
 
-    static bool isIdentChar(char c);
+    Token makeIdentifierOrKeyword(const std::string &lexeme) override;
+
+    Token makeNumberToken(const std::string &lexeme) override;
+
+    Token makeOperatorOrPunctToken(std::string first) override;
 };
 
 #endif

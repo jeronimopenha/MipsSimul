@@ -14,7 +14,7 @@ int runLexer(const istream &in, ostream &out) {
 
     AsmLexer lex(src);
     while (true) {
-        MiniCToken t = lex.next();
+        MiniCToken t = lex.nextToken();
         out << t.line << ":\t" << asmTokenKindToString(t.kind) << "\t" << t.lexeme << "\n";
         if (t.kind == TokenKind::Eof) break;
     }
@@ -29,7 +29,7 @@ int runParser(const istream &in, ostream &out) {
     AsmLexer lex(src);
     vector<MiniCToken> toks;
     while (true) {
-        MiniCToken t = lex.next();
+        MiniCToken t = lex.nextToken();
         toks.push_back(t);
         if (t.kind == TokenKind::Eof) break;
     }
@@ -74,7 +74,7 @@ int runAssembler(const istream &in, ostream &out) {
         AsmLexer lex(src);
         vector<MiniCToken> toks;
         while (true) {
-            MiniCToken t = lex.next();
+            MiniCToken t = lex.nextToken();
             toks.push_back(t);
             if (t.kind == TokenKind::Eof) break;
         }

@@ -62,7 +62,7 @@ enum class MiniCTokenKind {
 };
 
 struct MiniCToken {
-    TokenKind kind;
+    MiniCTokenKind kind;
     std::string lexeme; // original text
     int line; // line of the file to detect error
 };

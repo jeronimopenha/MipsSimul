@@ -26,7 +26,7 @@ int main() {
         AsmLexer lex(src);
         vector<MiniCToken> tokens;
         while (true) {
-            MiniCToken t = lex.next();
+            MiniCToken t = lex.nextToken();
             tokens.push_back(t);
             if (t.kind == TokenKind::Eof) {
                 break;

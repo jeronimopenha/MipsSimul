@@ -2,97 +2,74 @@
 
 using namespace std;
 
-AsmLexer::AsmLexer(string s) : src(std::move(s)) {
+AsmLexer::AsmLexer(string s) : Lexer(move(s)) {
 }
 
-bool AsmLexer::eof() const {
-    return pos >= src.size();
-}
-
-char AsmLexer::peek() const {
-    if (eof()) {
-        return '\0';
+void AsmLexer::skipComments() {
+    while (!eof()) {
+        const char c = peek();
+        if (c == '#') {
+            while (!eof() && peek() != '\n') {
+                nextChar();
+            }
+        }
+        break; // if c is not a comment, so return
     }
-    return src[pos];
 }
 
-char AsmLexer::get() {
-    if (eof()) {
-        return '\0';
-    }
-    const char c = src[pos++];
-    if (c == '\n') {
-        line++;
-    }
-    return c;
+int AsmLexer::getEofKind() const {
+    return TOK_EOF;
 }
 
-bool AsmLexer::isIdentStart(char c) {
+bool AsmLexer::isIdentStart(const char c) const {
     return isalpha(static_cast<unsigned char>(c)) || c == '_' || c == '.';
 }
 
-bool AsmLexer::isIdentChar(char c) {
+bool AsmLexer::isIdentChar(const char c) const {
     return isalnum(static_cast<unsigned char>(c)) || c == '_' || c == '.';
 }
 
-AsmToken AsmLexer::next() {
-    // ignore spaces and tabs
-    while (!eof()) {
-        const char c = peek();
-        if (c == ' ' || c == '\t' || c == '\r') {
-            get();
-            continue;
-        }
-        // If comment (#) goes until the end of the line
-        if (c == '#') {
-            while (!eof() && get() != '\n') {
-            }
-            return AsmToken{AsmTokenKind::Newline, "\\n", line};
-        }
-        break;
-    }
+bool AsmLexer::isNumberStart(const char c) const {
+    return isdigit(static_cast<unsigned char>(c));
+}
 
-    if (eof()) {
-        return AsmToken{AsmTokenKind::Eof, "", line};
-    }
+Token AsmLexer::makeIdentifierOrKeyword(const string &lexeme) {
+    if (lexeme == ".data") return Token(TOK_DIRECT_DATA, lexeme, line, col);
+    if (lexeme == ".text") return Token(TOK_DIRECT_TEXT, lexeme, line, col);
+    // etc...
+    return Token(TOK_UNKNOWN, lexeme, line, col);
+}
 
-    const char c = get();
+Token AsmLexer::makeNumberToken(const string &lexeme) {
+    return Token(TOK_UNKNOWN, lexeme, line, col);
+}
 
-    // quebra de linha
-    if (c == '\n') {
-        return AsmToken{AsmTokenKind::Newline, "\\n", line - 1};
-    }
+Token AsmLexer::makeOperatorOrPunctToken(string first) {
+    if (first == ",") return Token(TOK_COMMA, first, line, col);
+    if (first == ":") return Token(TOK_COLON, first, line, col);
+    if (first == "(") return Token(TOK_L_PAREN, first, line, col);
+    if (first == ")") return Token(TOK_R_PAREN, first, line, col);
+    return Token(TOK_UNKNOWN, first, line, col);
+}
 
-    // pontuações simples
-    if (c == ',') {
-        return AsmToken{AsmTokenKind::Comma, ",", line};
-    }
-    if (c == ':') {
-        return AsmToken{AsmTokenKind::Colon, ":", line};
-    }
-    if (c == '(') {
-        return AsmToken{AsmTokenKind::LParen, "(", line};
-    }
-    if (c == ')') {
-        return AsmToken{AsmTokenKind::RParen, ")", line};
-    }
-
-    // register: starts with $
+Token AsmLexer::nextToken() {
+    return Lexer::nextToken();
+    /*// register: starts with $
     if (c == '$') {
         string lex = "$";
         while (!eof() && isIdentChar(peek())) {
-            lex.push_back(get());
+            lex.push_back(nextChar());
         }
-        return AsmToken{AsmTokenKind::Register, lex, line};
+        return AsmToken{AsmTokenKind::TOK_REG, lex, line};
     }
 
     // identifier: opcode, label, etc.
     if (isIdentStart(c)) {
         string lex(1, c);
         while (!eof() && isIdentChar(peek())) {
-            lex.push_back(get());
+            lex.push_back(nextChar());
         }
-        return AsmToken{AsmTokenKind::Identifier, lex, line};
+        return AsmToken{AsmTokenKind::TOK_IDENT, lex, line};
     }
 
     // número: decimal ou hexa
@@ -100,20 +77,20 @@ AsmToken AsmLexer::next() {
         string lex(1, c);
         // se começar com 0x ou 0X, aceita hexa
         if (c == '0' && !eof() && (peek() == 'x' || peek() == 'X')) {
-            lex.push_back(get()); // x ou X
+            lex.push_back(nextChar()); // x ou X
             while (!eof() && isxdigit((unsigned char) peek())) {
-                lex.push_back(get());
+                lex.push_back(nextChar());
             }
         } else {
             // decimal (pode ter mais dígitos)
             while (!eof() && isdigit((unsigned char) peek())) {
-                lex.push_back(get());
+                lex.push_back(nextChar());
             }
         }
-        return AsmToken{AsmTokenKind::Number, lex, line};
+        return AsmToken{AsmTokenKind::TOK_INT_LIT, lex, line};
     }
 
     // se cair aqui, é algo que não tratamos ainda
     cerr << "Caractere inesperado '" << c << "' na linha " << line << "\n";
-    return AsmToken{AsmTokenKind::Eof, "", line};
+    return AsmToken{AsmTokenKind::TOK_EOF, "", line};*/
 }
