@@ -24,18 +24,6 @@ bool Lexer::eof() const {
     return pos >= source.size();
 }
 
-/*bool Lexer::isIdentStart(const char c) const{
-    return isalpha(static_cast<unsigned char>(c)) || c == '_' ;
-}
-
-bool Lexer::isIdentChar(const char c) const{
-    return isalnum(static_cast<unsigned char>(c)) || c == '_' ;
-}
-
-bool Lexer::isNumberStart(const char c) const {
-    return isdigit(static_cast<unsigned char>(c)) || c == '.';
-}*/
-
 void Lexer::skipWhitespace() {
     while (!eof()) {
         const char c = peek();
@@ -75,7 +63,7 @@ Token Lexer::nextToken() {
 
         while (!eof()) {
             const char d = peek();
-            if (isdigit(static_cast<unsigned char>(d))) {
+            if (isNumberStart(d)) {
                 lex.push_back(nextChar());
             } else if (d == '.' && !hasDot) {
                 hasDot = true;
@@ -93,3 +81,16 @@ Token Lexer::nextToken() {
     lex.push_back(nextChar());
     return makeOperatorOrPunctToken(lex);
 }
+
+
+/*bool Lexer::isIdentStart(const char c) const{
+    return isalpha(static_cast<unsigned char>(c)) || c == '_' ;
+}
+
+bool Lexer::isIdentChar(const char c) const{
+    return isalnum(static_cast<unsigned char>(c)) || c == '_' ;
+}
+
+bool Lexer::isNumberStart(const char c) const {
+    return isdigit(static_cast<unsigned char>(c)) || c == '.';
+}*/

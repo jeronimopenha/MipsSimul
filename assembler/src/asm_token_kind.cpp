@@ -1,4 +1,4 @@
-#include <asm_tokens.h>
+#include <asm_token_kind.h>
 
 using namespace std;
 

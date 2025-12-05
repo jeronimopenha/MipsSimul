@@ -41,25 +41,30 @@ Token AsmLexer::makeIdentifierOrKeyword(const string &lexeme) {
 }
 
 Token AsmLexer::makeNumberToken(const string &lexeme) {
+    if (lexeme.find('.') != std::string::npos) {
+        Token t = Token(TOK_UNKNOWN, lexeme, line, col);
+        return t;
+    }
     for (const auto c: lexeme) {
         if (isdigit(static_cast<unsigned char>(c))) {
             string lex(1, c);
             if (c == '0' && !eof() && (peek() == 'x' || peek() == 'X')) {
                 lex.push_back(nextChar()); // x or X - hex
-                while (!eof() && isxdigit((unsigned char) peek())) {
+                while (!eof() && isxdigit(static_cast<unsigned char>(peek()))) {
                     lex.push_back(nextChar());
                 }
             } else {
                 // decimal
-                while (!eof() && isdigit((unsigned char) peek())) {
+                while (!eof() && isdigit(static_cast<unsigned char>(peek()))) {
                     lex.push_back(nextChar());
                 }
             }
-            return Token{TOK_INT_LIT, lex, line, col};
+            Token t = Token{TOK_INT_LIT, lexeme, line, col};
+            return t;
         }
     }
-
-    return Token(TOK_UNKNOWN, lexeme, line, col);
+    Token t = Token(TOK_UNKNOWN, lexeme, line, col);
+    return t;
 }
 
 Token AsmLexer::makeOperatorOrPunctToken(string first) {
@@ -70,5 +75,3 @@ Token AsmLexer::makeOperatorOrPunctToken(string first) {
     if (first == "\n") return Token(TOK_NEWLINE, "\\n", line, col);
     return Token(TOK_UNKNOWN, first, line, col);
 }
-
-

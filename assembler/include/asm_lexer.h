@@ -4,9 +4,9 @@
 #include <definitions.h>
 #include <lexer.h>
 #include <token.h>
-#include <asm_tokens.h>
+#include <asm_token_kind.h>
 
-class AsmLexer : public Lexer {
+class AsmLexer final : public Lexer {
 public:
     explicit AsmLexer(std::string s);
 
