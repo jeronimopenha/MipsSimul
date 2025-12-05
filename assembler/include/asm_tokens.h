@@ -2,7 +2,7 @@
 #define ASSEMBLER_TOKENS_H
 
 #include <definitions.h>
-#include <token.h>
+
 
 enum AsmTokenKind {
     TOK_IDENT, // opcodes, labels, regs without $

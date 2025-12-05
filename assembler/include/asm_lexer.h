@@ -3,13 +3,12 @@
 
 #include <definitions.h>
 #include <lexer.h>
+#include <token.h>
 #include <asm_tokens.h>
 
-class AsmLexer : Lexer {
+class AsmLexer : public Lexer {
 public:
     explicit AsmLexer(std::string s);
-
-    Token nextToken();
 
 private:
     void skipComments() override;

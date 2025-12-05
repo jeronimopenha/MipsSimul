@@ -31,32 +31,13 @@ int main() {
 
         while (true) {
             Token t = lex.nextToken();
-            if (t.kind == AsmTokenKind::TOK_EOF) {
+            if (t.kind == TOK_EOF) {
                 break;
             }
 
             cout << t.line << ":\t";
 
-            switch (t.kind) {
-                case AsmTokenKind::TOK_IDENT: cout << "IDENT\t";
-                    break;
-                case AsmTokenKind::TOK_REG: cout << "REG  \t";
-                    break;
-                case AsmTokenKind::TOK_INT_LIT: cout << "NUM  \t";
-                    break;
-                case AsmTokenKind::TOK_COMMA: cout << "COMMA\t";
-                    break;
-                case AsmTokenKind::TOK_COLON: cout << "COLON\t";
-                    break;
-                case AsmTokenKind::TOK_L_PAREN: cout << "LPAR \t";
-                    break;
-                case AsmTokenKind::TOK_R_PAREN: cout << "RPAR \t";
-                    break;
-                case AsmTokenKind::TOK_NEWLINE: cout << "NEWLN\t";
-                    break;
-                default: cout << "???  \t";
-                    break;
-            }
+            cout << asmTokenKindToString(static_cast<AsmTokenKind>(t.kind)) << "\t";
             cout << t.lexeme << "\n";
         }
     }

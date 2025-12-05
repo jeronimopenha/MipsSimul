@@ -3,17 +3,14 @@
 
 #include <definitions.h>
 
-#include "asm_lexer.h"
-#include "asm_tokens.h"
-
 struct Token {
     int kind;
     std::string lexeme;
     int line;
     int col;
 
-    int32_t intValue;
-    double floatValue;
+    int32_t intValue = 0;
+    double floatValue = 0;
 
     Token(
         const int kind,

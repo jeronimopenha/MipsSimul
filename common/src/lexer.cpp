@@ -57,12 +57,10 @@ Token Lexer::nextToken() {
         return Token(getEofKind(), "", line, col);
     }
 
-    const char c = peek();
-
     // Identifier or keyword
-    if (isIdentStart(c)) {
+    if (isIdentStart(peek())) {
         string lex;
-        while (!eof() && isIdentChar(c)) {
+        while (!eof() && isIdentChar(peek())) {
             const char charTemp = nextChar();
             lex.push_back(charTemp);
         }
@@ -71,7 +69,7 @@ Token Lexer::nextToken() {
     }
 
     // numbers (int or float)
-    if (isNumberStart(c)) {
+    if (isNumberStart(peek())) {
         string lex;
         bool hasDot = false;
 
@@ -91,7 +89,7 @@ Token Lexer::nextToken() {
     }
 
     // Operadores / pontuação
-    const string lex;
+    string lex;
     lex.push_back(nextChar());
     return makeOperatorOrPunctToken(lex);
 }
