@@ -39,4 +39,4 @@ uint32_t asmEncodeJ(uint8_t op, uint32_t target26);
 
 std::vector<uint32_t> asmGenerateCode(const std::vector<AsmLine> &prog, const std::unordered_map<std::string, uint32_t> &sym);
 
-#endif //MIPSSIMUL_ASSEMBLER_H
+#endif

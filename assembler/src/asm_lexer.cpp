@@ -2,9 +2,6 @@
 
 using namespace std;
 
-AsmLexer::AsmLexer(string s) : Lexer(move(s)) {
-}
-
 void AsmLexer::skipComments() {
     while (!eof()) {
         const char c = peek();
@@ -22,56 +19,64 @@ int AsmLexer::getEofKind() const {
 }
 
 bool AsmLexer::isIdentStart(const char c) const {
-    return isalpha(static_cast<unsigned char>(c)) || c == '_' || c == '.' || c == '$';
+    return Lexer::isIdentStart(c) || c == '$';
 }
 
 bool AsmLexer::isIdentChar(const char c) const {
-    return isalnum(static_cast<unsigned int>(c)) || c == '_' || c == '.' || c == '$';
-}
-
-bool AsmLexer::isNumberStart(const char c) const {
-    return isdigit(static_cast<unsigned char>(c));
+    return Lexer::isIdentChar(c) || c == '$';
 }
 
 Token AsmLexer::makeIdentifierOrKeyword(const string &lexeme) {
-    if (lexeme == ".data") return Token(TOK_DIRECT_DATA, lexeme, line, col);
-    if (lexeme == ".text") return Token(TOK_DIRECT_TEXT, lexeme, line, col);
-    if (lexeme.at(0) == '$')return Token(TOK_REG, lexeme, line, col);
-    return Token(TOK_IDENT, lexeme, line, col);
-}
-
-Token AsmLexer::makeNumberToken(const string &lexeme) {
-    if (lexeme.find('.') != std::string::npos) {
-        Token t = Token(TOK_UNKNOWN, lexeme, line, col);
-        return t;
+    Token t(TOK_IDENT, lexeme, line, col);
+    if (lexeme == ".data") {
+        t = Token(TOK_DIRECT_DATA, lexeme, line, col);
+    } else if (lexeme == ".text") {
+        t = Token(TOK_DIRECT_TEXT, lexeme, line, col);
+    } else if (lexeme.at(0) == '$') {
+        t = Token(TOK_REG, lexeme, line, col);
     }
-    for (const auto c: lexeme) {
-        if (isdigit(static_cast<unsigned char>(c))) {
-            string lex(1, c);
-            if (c == '0' && !eof() && (peek() == 'x' || peek() == 'X')) {
-                lex.push_back(nextChar()); // x or X - hex
-                while (!eof() && isxdigit(static_cast<unsigned char>(peek()))) {
-                    lex.push_back(nextChar());
-                }
-            } else {
-                // decimal
-                while (!eof() && isdigit(static_cast<unsigned char>(peek()))) {
-                    lex.push_back(nextChar());
-                }
-            }
-            Token t = Token{TOK_INT_LIT, lexeme, line, col};
-            return t;
-        }
-    }
-    Token t = Token(TOK_UNKNOWN, lexeme, line, col);
     return t;
 }
 
-Token AsmLexer::makeOperatorOrPunctToken(string first) {
-    if (first == ",") return Token(TOK_COMMA, first, line, col);
-    if (first == ":") return Token(TOK_COLON, first, line, col);
-    if (first == "(") return Token(TOK_L_PAREN, first, line, col);
-    if (first == ")") return Token(TOK_R_PAREN, first, line, col);
-    if (first == "\n") return Token(TOK_NEWLINE, "\\n", line, col);
-    return Token(TOK_UNKNOWN, first, line, col);
+Token AsmLexer::makeNumberToken(const string &lexeme) {
+    Token t(TOK_UNKNOWN, lexeme, line, col);
+
+    if (lexeme.find('.') == string::npos) {
+        for (const auto c: lexeme) {
+            if (isdigit(static_cast<unsigned char>(c))) {
+                string lex(1, c);
+                if (c == '0' && !eof() && (peek() == 'x' || peek() == 'X')) {
+                    lex.push_back(nextChar()); // x or X - hex
+                    while (!eof() && isIntXNumber(peek())) {
+                        lex.push_back(nextChar());
+                    }
+                } else {
+                    // decimal
+                    while (!eof() && isIntDNumber(peek())) {
+                        lex.push_back(nextChar());
+                    }
+                }
+                t = Token{TOK_INT_LIT, lexeme, line, col};
+                return t;
+            }
+        }
+    }
+    return t;
+}
+
+Token AsmLexer::makeOperatorOrPunctToken(const string first) {
+    Token t(TOK_UNKNOWN, first, line, col);
+
+    if (first == ",") {
+        t = Token(TOK_COMMA, first, line, col);
+    } else if (first == ":") {
+        t = Token(TOK_COLON, first, line, col);
+    } else if (first == "(") {
+        t = Token(TOK_L_PAREN, first, line, col);
+    } else if (first == ")") {
+        t = Token(TOK_R_PAREN, first, line, col);
+    } else if (first == "\n") {
+        t = Token(TOK_NEWLINE, "\\n", line, col);
+    }
+    return t;
 }

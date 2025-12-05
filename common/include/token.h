@@ -12,6 +12,8 @@ struct Token {
     int32_t intValue = 0;
     double floatValue = 0;
 
+    Token();
+
     Token(
         const int kind,
         std::string lexeme,

@@ -2,26 +2,26 @@
 
 using namespace std;
 
-Parser::Parser(const vector<MiniCToken> &tokens) : tokens(tokens) {
+Parser::Parser(const vector<Token> &tokens) : tokens(tokens) {
 }
 
-const MiniCToken &Parser::peek() {
-    static MiniCToken eofToken{TokenKind::Eof, "", -1};
+const Token &Parser::peek() {
+    static Token eofToken{TOK_EOF, "", -1,-1};
     if (pos >= tokens.size()) {
         return eofToken;
     }
     return tokens[pos];
 }
 
-const MiniCToken &Parser::get() {
-    const MiniCToken &t = peek();
+const Token &Parser::get() {
+    const Token &t = peek();
     if (pos < tokens.size()) {
         pos++;
     }
     return t;
 }
 
-bool Parser::match(const TokenKind k) {
+bool Parser::match(const AsmTokenKind k) {
     if (peek().kind == k) {
         get();
         return true;
@@ -29,7 +29,7 @@ bool Parser::match(const TokenKind k) {
     return false;
 }
 
-const MiniCToken &Parser::expect(const TokenKind k, const string &msg) {
+const Token &Parser::expect(const AsmTokenKind k, const string &msg) {
     if (peek().kind != k) {
         cerr << "Error on line " << peek().line
                 << ": expected " << msg << "\n";
@@ -42,11 +42,11 @@ const MiniCToken &Parser::expect(const TokenKind k, const string &msg) {
 vector<AsmLine> Parser::parseProgram() {
     vector<AsmLine> prog;
     while (true) {
-        if (peek().kind == TokenKind::Eof) {
+        if (peek().kind == TOK_EOF) {
             break;
         }
         // multiple Newlines
-        if (peek().kind == TokenKind::Newline) {
+        if (peek().kind == TOK_NEWLINE) {
             get();
             continue;
         }
@@ -59,11 +59,11 @@ vector<AsmLine> Parser::parseProgram() {
 AsmLine Parser::parseLine() {
     AsmLine line;
     // [label ":" ] ?
-    if (peek().kind == TokenKind::Identifier) {
+    if (peek().kind == TOK_IDENT) {
         // can be label OR opcode
-        const MiniCToken ident = peek();
+        const Token ident = peek();
         // Look to the other token to decide
-        if (tokens.size() > pos + 1 && tokens[pos + 1].kind == TokenKind::Colon) {
+        if (tokens.size() > pos + 1 && tokens[pos + 1].kind == TOK_COLON) {
             // is labeled
             get(); // consume IDENT
             get(); // consume COLON
@@ -73,13 +73,13 @@ AsmLine Parser::parseLine() {
 
     // [instruction] ?
     // if the next token is IDENT or REGISTER etc, try instruction
-    if (peek().kind == TokenKind::Identifier) {
+    if (peek().kind == TOK_IDENT) {
         line.hasInstr = true;
         line.instr = parseInstruction();
     }
 
     // consume at least a NEWLINE (could be more)
-    while (peek().kind == TokenKind::Newline) {
+    while (peek().kind == TOK_NEWLINE) {
         get();
         break;
     }
@@ -90,12 +90,12 @@ AsmLine Parser::parseLine() {
 //instruction ::= IDENT operand_list
 AsmInstruction Parser::parseInstruction() {
     AsmInstruction inst;
-    const MiniCToken opTok = expect(TokenKind::Identifier, "opcode");
+    const Token opTok = expect(TOK_IDENT, "opcode");
     inst.op = opTok.lexeme;
     inst.line = opTok.line;
 
     // if line ends after the opcode (ex: "nop")
-    if (peek().kind == TokenKind::Newline || peek().kind == TokenKind::Eof) {
+    if (peek().kind == TOK_NEWLINE || peek().kind == TOK_EOF) {
         return inst;
     }
 
@@ -109,7 +109,7 @@ vector<AsmOperand> Parser::parseOperandList() {
     vector<AsmOperand> args;
     args.push_back(parseOperand());
 
-    while (match(TokenKind::Comma)) {
+    while (match(TOK_COMMA)) {
         args.push_back(parseOperand());
     }
     return args;
@@ -122,12 +122,12 @@ vector<AsmOperand> Parser::parseOperandList() {
           | IDENT
 */
 AsmOperand Parser::parseOperand() {
-    const MiniCToken& t = peek();
+    const Token& t = peek();
     AsmOperand op;
 
     switch (t.kind) {
-    case TokenKind::Register: {
-        const MiniCToken r = get();
+    case TOK_REG: {
+        const Token r = get();
         op.kind = AsmOperand::Kind::Reg;
         op.reg = -1;         // lets map this later (semantic phase)
         // we can store the name here to map later
@@ -135,15 +135,15 @@ AsmOperand Parser::parseOperand() {
         break;
     }
 
-    case TokenKind::Number: {
+    case TOK_INT_LIT: {
         // can be immediate or memaddr number
-        const MiniCToken num = get();
+        const Token num = get();
 
-        if (peek().kind == TokenKind::LParen) {
+        if (peek().kind ==TOK_L_PAREN) {
             // is memaddr: num "(" reg ")"
             get(); // consume "("
-            const MiniCToken r = expect(TokenKind::Register, "address register");
-            expect(TokenKind::RParen, "')'");
+            const Token r = expect(TOK_REG, "address register");
+            expect(TOK_R_PAREN, "')'");
 
             op.kind = AsmOperand::Kind::Mem;
             // parse num -> int
@@ -160,11 +160,11 @@ AsmOperand Parser::parseOperand() {
         break;
     }
 
-    case TokenKind::LParen: {
+    case TOK_L_PAREN: {
         // memaddr with no offset: "($sp)"
         get(); // consume "("
-        const MiniCToken r = expect(TokenKind::Register, "address register");
-        expect(TokenKind::RParen, "')'");
+        const Token r = expect(TOK_REG, "address register");
+        expect(TOK_R_PAREN, "')'");
 
         op.kind = AsmOperand::Kind::Mem;
         op.imm = 0;
@@ -173,9 +173,9 @@ AsmOperand Parser::parseOperand() {
         break;
     }
 
-    case TokenKind::Identifier: {
+    case TOK_IDENT: {
         // can be a label for jump and branche
-        const MiniCToken id = get();
+        const Token id = get();
         op.kind = AsmOperand::Kind::LabelRef;
         op.label = id.lexeme;
         break;

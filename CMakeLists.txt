@@ -26,7 +26,7 @@ file(GLOB_RECURSE LEXER_SRC
         ${COMMON_SRC}
         common/src/lexer.cpp
         assembler/src/asm_lexer.cpp
-        assembler/src/asm_token_kind.cpp)
+        assembler/src/asm_t_kind.cpp)
 add_executable(LexerTestMain tools/tests/asmLexerTestMain.cpp ${LEXER_SRC})
 #target_include_directories(LexerTestMain PRIVATE
 #        ${CMAKE_SOURCE_DIR}/assembler/include

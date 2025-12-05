@@ -35,6 +35,26 @@ void Lexer::skipWhitespace() {
     }
 }
 
+bool Lexer::isIdentStart(const char c) const {
+    return isalpha(static_cast<unsigned char>(c)) || c == '_' || c == '.';
+}
+
+bool Lexer::isIdentChar(const char c) const {
+    return isalnum(c) || c == '_' || c == '.';
+}
+
+bool Lexer::isNumberStart(const char c) const {
+    return isdigit(static_cast<unsigned char>(c));
+}
+
+bool Lexer::isIntDNumber(const char c) const {
+    return isdigit(static_cast<unsigned char>(c));
+}
+
+bool Lexer::isIntXNumber(const char c) const {
+    return isxdigit(static_cast<unsigned char>(c));
+}
+
 Token Lexer::nextToken() {
     // spaces
     skipWhitespace();
@@ -81,16 +101,3 @@ Token Lexer::nextToken() {
     lex.push_back(nextChar());
     return makeOperatorOrPunctToken(lex);
 }
-
-
-/*bool Lexer::isIdentStart(const char c) const{
-    return isalpha(static_cast<unsigned char>(c)) || c == '_' ;
-}
-
-bool Lexer::isIdentChar(const char c) const{
-    return isalnum(static_cast<unsigned char>(c)) || c == '_' ;
-}
-
-bool Lexer::isNumberStart(const char c) const {
-    return isdigit(static_cast<unsigned char>(c)) || c == '.';
-}*/

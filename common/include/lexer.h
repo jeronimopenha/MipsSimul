@@ -4,6 +4,8 @@
 #include <definitions.h>
 #include <token.h>
 
+#include <utility>
+
 class Lexer {
 public:
     explicit Lexer(std::string src) : source(std::move(src)) {
@@ -19,25 +21,28 @@ protected:
     int line = 1;
     int col = 1;
 
-    char peek() const;
+    [[nodiscard]] char peek() const;
 
     char nextChar();
 
-    bool eof() const;
+    [[nodiscard]] bool eof() const;
 
     void skipWhitespace();
 
-
     // hooks for languages
-    virtual bool isIdentStart(char c) const = 0;
+    [[nodiscard]] virtual bool isIdentStart(char c) const ;
 
-    virtual bool isIdentChar(char c) const = 0;
+    [[nodiscard]] virtual bool isIdentChar(char c) const ;
 
-    virtual bool isNumberStart(char c) const = 0;
+    [[nodiscard]] virtual bool isNumberStart(char c) const;
 
-    virtual void skipComments() =0;
+    [[nodiscard]] virtual bool isIntDNumber(char c) const;
 
-    virtual int getEofKind() const = 0;
+    [[nodiscard]] virtual bool isIntXNumber(char c) const;
+
+    virtual void skipComments() = 0;
+
+    [[nodiscard]] virtual int getEofKind() const = 0;
 
     virtual Token makeIdentifierOrKeyword(const std::string &lexeme) = 0;
 

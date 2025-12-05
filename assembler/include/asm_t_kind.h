@@ -19,13 +19,6 @@ enum AsmTokenKind {
     TOK_UNKNOWN // special for errors
 };
 
-/*
-struct AsmToken {
-    AsmTokenKind kind;
-    std::string lexeme; // original text
-    int line; // line of the file to detect error
-};*/
-
 std::string asmTokenKindToString(AsmTokenKind k);
 
 #endif
