@@ -2,43 +2,6 @@
 
 using namespace std;
 
-/*
- Step 1 – Build the simbol table (labels → address)
-
-Assuming:
-
-Instructions starts with base_pc = 0x00400000;
-Each instruction ocupies 4 bytes;
-Every line has hasInstr == true is instruction.
-*/
-
-//Look for every label changing it for a valid address
-unordered_map<string, uint32_t> asmBuildSymbolTable(const vector<AsmLine> &prog) {
-    unordered_map<string, uint32_t> sym;
-    uint32_t pc = baseAsmPc;
-
-    for (const auto &line: prog) {
-        if (!line.label.empty()) {
-            if (sym.count(line.label)) {
-                throw runtime_error("Repeated label: " + line.label);
-            }
-            sym[line.label] = pc;
-        }
-
-        if (line.hasInstr) {
-            pc += 4; // next instruction
-        }
-    }
-
-#ifdef DEBUG
-    for (auto &[name, addr]: sym) {
-        cout << name << " -> 0x" << hex << addr << "\n";
-    }
-#endif
-
-    return sym;
-}
-
 
 uint32_t asmEncodeR(const uint8_t rs, const uint8_t rt, const uint8_t rd, const uint8_t shamt, const uint8_t funct) {
     return (0u << 26) |
@@ -71,8 +34,53 @@ vector<uint32_t> asmGenerateCode(const vector<AsmLine> &prog, const unordered_ma
             continue; // only label
         }
 
-
         const AsmInstruction &inst = line.instr;
+
+        //pseudo instructions first
+        if (inst.op == "nop") {
+            // nop => add $zero,$zero,$zero
+            uint32_t w = asmEncodeR(
+                /*rs*/ 0,
+                       /*rt*/ 0,
+                       /*rd*/ 0,
+                       /*shamt*/ 0,
+                       /*funct*/ 0x20 // funct do ADD
+            );
+            machine.push_back(w);
+            pc += 4;
+            continue;
+        }
+
+        if (inst.op == "move") {
+            if (inst.args.size() != 2) {
+                throw runtime_error("move needs 2 operands");
+            }
+
+            const AsmOperand &dst = inst.args[0];
+            const AsmOperand &src = inst.args[1];
+
+            if (dst.kind != AsmOperand::Kind::Reg ||
+                src.kind != AsmOperand::Kind::Reg) {
+                throw runtime_error("move: both operands must be registers");
+            }
+
+            const int rd = regNumber(dst.label); // "$t0" -> 8
+            const int rs = regNumber(src.label);
+            constexpr int rt = 0; // $zero
+
+            uint32_t w = asmEncodeR(
+                /*rs*/ rs,
+                       /*rt*/ rt,
+                       /*rd*/ rd,
+                       /*shamt*/ 0,
+                       /*funct*/ 0x20 // add
+            );
+            machine.push_back(w);
+            pc += 4;
+            continue;
+        }
+
+        //now, other instructions
         const AsmInstrDesc *desc = asmFindInstrByName(inst.op);
         if (!desc) {
             throw runtime_error("Opcode not supported: " + inst.op);
@@ -117,7 +125,21 @@ vector<uint32_t> asmGenerateCode(const vector<AsmLine> &prog, const unordered_ma
                 w = asmEncodeR(0 /*rs*/, rt, rd, shamt, funct);
             } else if (form == Rs) {
                 //jr
-                int a;
+                if (inst.args.size() != 1) {
+                    throw runtime_error(desc->name + " needs 1 operands");
+                }
+
+                const AsmOperand &opRs = inst.args[0];
+                if (opRs.kind != AsmOperand::Kind::Reg) {
+                    throw runtime_error(desc->name + ": operand must be register");
+                }
+
+                const int rs = regNumber(opRs.label);
+                constexpr int rt = 0;
+                constexpr int rd = 0;
+                constexpr int shamt = 0;
+
+                w = asmEncodeR(rs, rt, rd, shamt, funct);
             } else {
                 throw runtime_error("Unknown R-form for " + desc->name);
             }
@@ -221,4 +243,41 @@ vector<uint32_t> asmGenerateCode(const vector<AsmLine> &prog, const unordered_ma
     }
 
     return machine;
+}
+
+/*
+ Step 1 – Build the simbol table (labels → address)
+
+Assuming:
+
+Instructions starts with base_pc = 0x00400000;
+Each instruction ocupies 4 bytes;
+Every line has hasInstr == true is instruction.
+*/
+
+//Look for every label changing it for a valid address
+unordered_map<string, uint32_t> asmBuildSymbolTable(const vector<AsmLine> &prog) {
+    unordered_map<string, uint32_t> sym;
+    uint32_t pc = baseAsmPc;
+
+    for (const auto &line: prog) {
+        if (!line.label.empty()) {
+            if (sym.count(line.label)) {
+                throw runtime_error("Repeated label: " + line.label);
+            }
+            sym[line.label] = pc;
+        }
+
+        if (line.hasInstr) {
+            pc += 4; // next instruction
+        }
+    }
+
+#ifdef DEBUG
+    for (auto &[name, addr]: sym) {
+        cout << name << " -> 0x" << hex << addr << "\n";
+    }
+#endif
+
+    return sym;
 }

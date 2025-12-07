@@ -4,7 +4,12 @@
 #include <definitions.h>
 
 struct AsmOperand {
-    enum class Kind { Reg, Imm, Mem, LabelRef } kind;
+    enum Kind {
+        Reg,
+        Imm,
+        Mem,
+        LabelRef
+    } kind;
 
     int reg = 0; // if register
     int imm = 0; // if immediate or offset
