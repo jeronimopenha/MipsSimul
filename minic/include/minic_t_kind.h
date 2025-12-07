@@ -1,9 +1,9 @@
-#ifndef ASSEMBLER_TOKENS_H
-#define ASSEMBLER_TOKENS_H
+#ifndef MINIC_T_KIND_H
+#define MINIC_T_KIND_H
 
 #include <definitions.h>
 
-enum class MiniCTokenKind {
+enum MiniCTokenKind {
     //keywords
     TOK_INT, // reserved  - int
     TOK_FLOAT, // reserved  - float
@@ -61,12 +61,6 @@ enum class MiniCTokenKind {
     TOK_INVALID
 };
 
-struct MiniCToken {
-    MiniCTokenKind kind;
-    std::string lexeme; // original text
-    int line; // line of the file to detect error
-};
+std::string minicTokenKindToString( MiniCTokenKind k);
 
-std::string asmTokenKindToString(const TokenKind k);
-
-#endif
+#endif //MIPSSIMUL_MINIC_T_KIND_H

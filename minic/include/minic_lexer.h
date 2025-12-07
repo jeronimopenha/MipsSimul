@@ -1,29 +1,30 @@
 #ifndef MINIC_LEXER_H
 #define MINIC_LEXER_H
 
-#include <common.h>
-#include <asm_tokens.h>
+#include <definitions.h>
+#include <lexer.h>
+#include <token.h>
+#include <asm_t_kind.h>
 
-class AsmLexer {
+class AsmLexer final : public Lexer {
 public:
-    explicit AsmLexer(std::string s);
-
-    MiniCToken next();
+    explicit AsmLexer(const std::string &s) : Lexer(s) {
+    }
 
 private:
-    std::string src;
-    size_t pos = 0;
-    int line = 1;
+    void skipComments() override;
 
-    [[nodiscard]] bool eof() const;
+    [[nodiscard]] int getEofKind() const override;
 
-    [[nodiscard]] char peek() const;
+    [[nodiscard]] bool isIdentStart(char c) const override;
 
-    char get();
+    [[nodiscard]] bool isIdentChar(char c) const override;
 
-    static bool isIdentStart(char c);
+    Token makeIdentifierOrKeyword(const std::string &lexeme) override;
 
-    static bool isIdentChar(char c);
+    Token makeNumberToken(const std::string &lexeme) override;
+
+    Token makeOperatorOrPunctToken(std::string first) override;
 };
 
 #endif

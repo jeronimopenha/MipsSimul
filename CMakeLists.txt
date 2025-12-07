@@ -19,42 +19,42 @@ include_directories(
 )
 
 
-file(GLOB_RECURSE COMMON_SRC
-        common/src/common.cpp
-)
-
-# Lexer Test
-file(GLOB_RECURSE LEXER_SRC
-        ${COMMON_SRC}
-        common/src/lexer.cpp
-        assembler/src/asm_lexer.cpp
-        assembler/src/asm_t_kind.cpp
-)
-add_executable(LexerTestMain
-        tools/tests/asmLexerTestMain.cpp
-        ${LEXER_SRC}
-)
-
 #target_include_directories(LexerTestMain PRIVATE
 #        ${CMAKE_SOURCE_DIR}/assembler/include
 #        ${CMAKE_SOURCE_DIR}/common/include
 #        ${CMAKE_SOURCE_DIR}/tools/include
 #)
 
+file(GLOB_RECURSE COMMON_SRC
+        common/src/common.cpp
+)
+
 # Asm Lexer Test
-file(GLOB_RECURSE PARSER_SRC
-        ${LEXER_SRC}
+file(GLOB_RECURSE ASM_LEXER_SRC
+        ${COMMON_SRC}
+        common/src/lexer.cpp
+        assembler/src/asm_lexer.cpp
+        assembler/src/asm_t_kind.cpp
+)
+add_executable(AsmLexerTestMain
+        tools/tests/asmLexerTestMain.cpp
+        ${ASM_LEXER_SRC}
+)
+
+# Asm Lexer Test
+file(GLOB_RECURSE ASM_PARSER_SRC
+        ${ASM_LEXER_SRC}
         common/src/parser.cpp
         assembler/src/asm_parser.cpp
 )
-add_executable(ParserTestMain
+add_executable(AsmParserTestMain
         tools/tests/asmParserTestMain.cpp
-        ${PARSER_SRC}
+        ${ASM_PARSER_SRC}
 )
 
 # Asm Test
 file(GLOB_RECURSE ASSEMBLER_SRC
-        ${PARSER_SRC}
+        ${ASM_PARSER_SRC}
         assembler/src/asm_registers.cpp
         assembler/src/asm_isa.cpp
         assembler/src/asm.cpp
@@ -75,7 +75,16 @@ add_executable(DisassemblerTestMain
 )
 
 # MiniC Lexer Test
-
+file(GLOB_RECURSE MINIC_LEXER_SRC
+        ${COMMON_SRC}
+        common/src/lexer.cpp
+        minic/src/minic_lexer.cpp
+        minic/src/minic_t_kind.cpp
+)
+add_executable(MinicLexerTestMain
+        tools/tests/asmLexerTestMain.cpp
+        ${MINIC_LEXER_SRC}
+)
 
 # assembler tool
 file(GLOB_RECURSE ASSEMBLER_TOOLS_SRC
