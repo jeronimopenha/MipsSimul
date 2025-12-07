@@ -64,7 +64,7 @@ vector<uint32_t> asmGenerateCode(const vector<AsmLine> &prog, const unordered_ma
                 throw runtime_error("move: both operands must be registers");
             }
 
-            const int rd = regNumber(dst.label); // "$t0" -> 8
+            const int rd = regNumber(dst.label);
             const int rs = regNumber(src.label);
             constexpr int rt = 0; // $zero
 
