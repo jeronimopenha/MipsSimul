@@ -34,7 +34,7 @@ int main() {
             }
         }
 
-        Parser p(tokens);
+        AsmParser p(tokens);
         auto prog = p.parseProgram();
 
 

@@ -112,14 +112,3 @@ NOP -> ADD $zero,$zero,$zero
 ```
 
 ---
-
-## Efeitos
-
-É possível executar:
-
-- Mini-C v0.1 completo
-- Recursão
-- Ponteiros e vetores
-- Hardware mapeado em memória
-- Sistemas bare-metal
-- Mini-kernels

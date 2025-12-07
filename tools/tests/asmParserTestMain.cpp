@@ -33,7 +33,7 @@ int main() {
             }
         }
 
-        Parser p(tokens);
+        AsmParser p(tokens);
         auto prog = p.parseProgram();
 
         // Só pra testar: imprimir o que o parser entendeu

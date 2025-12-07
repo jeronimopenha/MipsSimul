@@ -62,7 +62,8 @@ Token Lexer::nextToken() {
     skipComments();
 
     if (eof()) {
-        return Token(getEofKind(), "", line, col);
+        Token t(getEofKind(), "", line, col);
+        return t;
     }
 
     // Identifier or keyword

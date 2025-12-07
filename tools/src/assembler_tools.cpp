@@ -14,9 +14,9 @@ int runLexer(const istream &in, ostream &out) {
 
     AsmLexer lex(src);
     while (true) {
-        MiniCToken t = lex.nextToken();
+        Token t = lex.nextToken();
         out << t.line << ":\t" << asmTokenKindToString(t.kind) << "\t" << t.lexeme << "\n";
-        if (t.kind == TokenKind::Eof) break;
+        if (t.kind == TOK_EOF) break;
     }
     return 0;
 }
@@ -34,7 +34,7 @@ int runParser(const istream &in, ostream &out) {
         if (t.kind == TokenKind::Eof) break;
     }
 
-    Parser p(toks);
+    AsmParser p(toks);
     const auto prog = p.parseProgram();
 
     // print representation
@@ -79,7 +79,7 @@ int runAssembler(const istream &in, ostream &out) {
             if (t.kind == TokenKind::Eof) break;
         }
 
-        Parser p(toks);
+        AsmParser p(toks);
         auto prog = p.parseProgram();
 
         auto sym = asmBuildSymbolTable(prog);

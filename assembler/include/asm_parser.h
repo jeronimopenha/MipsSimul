@@ -3,27 +3,18 @@
 
 #include <definitions.h>
 #include <asm_lexer.h>
+#include <parser.h>
 #include <asm_ast.h>
 
 
-class Parser {
+class AsmParser : public Parser {
 public:
-    explicit Parser(const std::vector<Token> &tokens);
+    AsmParser(const std::vector<Token> &tokens) : Parser(tokens) {
+    }
 
     std::vector<AsmLine> parseProgram();
 
 private:
-    std::vector<Token> tokens;
-    size_t pos = 0;
-
-    const Token &peek();
-
-    const Token &get();
-
-    bool match(AsmTokenKind k);
-
-    const Token &expect(AsmTokenKind k, const std::string &msg);
-
     AsmLine parseLine();
 
     AsmInstruction parseInstruction();

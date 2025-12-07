@@ -60,8 +60,7 @@ uint32_t asmEncodeJ(const uint8_t op, const uint32_t target26) {
     return (op << 26) | (target26 & 0x03FFFFFFu);
 }
 
-vector<uint32_t> asmGenerateCode(const vector<AsmLine> &prog,
-                              const unordered_map<string, uint32_t> &sym) {
+vector<uint32_t> asmGenerateCode(const vector<AsmLine> &prog, const unordered_map<string, uint32_t> &sym) {
     vector<uint32_t> machine;
     machine.reserve(prog.size());
 
@@ -87,8 +86,8 @@ vector<uint32_t> asmGenerateCode(const vector<AsmLine> &prog,
         uint32_t w = 0;
 
         // ---------------- R-TYPE ----------------
-        if (type == AsmInstrType::R) {
-            if (form == AsmInstrForm::RdRsRt) {
+        if (type == R) {
+            if (form == RdRsRt) {
                 // Ex.: add rd, rs, rt ; and, or, slt
                 if (inst.args.size() != 3) {
                     throw runtime_error(desc->name + " needs 3 operands");
@@ -99,7 +98,7 @@ vector<uint32_t> asmGenerateCode(const vector<AsmLine> &prog,
                 const int rt = regNumber(inst.args[2].label);
 
                 w = asmEncodeR(rs, rt, rd, 0, funct);
-            } else if (form == AsmInstrForm::RdRtShamt) {
+            } else if (form == RdRtShamt) {
                 // Ex.: sll rd, rt, shamt
                 if (inst.args.size() != 3) {
                     throw runtime_error(desc->name + " needs 3 operands");
@@ -116,14 +115,17 @@ vector<uint32_t> asmGenerateCode(const vector<AsmLine> &prog,
                 const int shamt = shOp.imm;
 
                 w = asmEncodeR(0 /*rs*/, rt, rd, shamt, funct);
+            } else if (form == Rs) {
+                //jr
+                int a;
             } else {
                 throw runtime_error("Unknown R-form for " + desc->name);
             }
         }
 
         // ---------------- I-TYPE ----------------
-        else if (type == AsmInstrType::I) {
-            if (form == AsmInstrForm::RtRsImm) {
+        else if (type == I) {
+            if (form == RtRsImm) {
                 // Ex.: addi rt, rs, imm
                 if (inst.args.size() != 3) {
                     throw runtime_error(desc->name + " needs 3 operands");
@@ -140,7 +142,7 @@ vector<uint32_t> asmGenerateCode(const vector<AsmLine> &prog,
                 const int16_t imm = static_cast<int16_t>(immOp.imm);
 
                 w = asmEncodeI(opcode, rs, rt, imm);
-            } else if (form == AsmInstrForm::RtMem) {
+            } else if (form == RtMem) {
                 // Ex.: lw/sw rt, imm(rs)
                 if (inst.args.size() != 2) {
                     throw runtime_error(desc->name + " needs 2 operands");
@@ -157,7 +159,7 @@ vector<uint32_t> asmGenerateCode(const vector<AsmLine> &prog,
                 const int16_t imm = static_cast<int16_t>(mem.imm);
 
                 w = asmEncodeI(opcode, rs, rt, imm);
-            } else if (form == AsmInstrForm::RsRtRel) {
+            } else if (form == RsRtRel) {
                 // Ex.: beq rs, rt, label
                 if (inst.args.size() != 3) {
                     throw runtime_error(desc->name + " needs 3 operands");
@@ -181,14 +183,16 @@ vector<uint32_t> asmGenerateCode(const vector<AsmLine> &prog,
                 const int16_t offset = static_cast<int16_t>(diff / 4);
 
                 w = asmEncodeI(opcode, rs, rt, offset);
+            } else if (form == RtImm) {
+                //lui
             } else {
                 throw runtime_error("Unknown I-form for " + desc->name);
             }
         }
 
         // ---------------- J-TYPE ----------------
-        else if (type == AsmInstrType::J) {
-            if (form != AsmInstrForm::Jump) {
+        else if (type == J) {
+            if (form != Jump) {
                 throw runtime_error("Unknown J-form for " + desc->name);
             }
 

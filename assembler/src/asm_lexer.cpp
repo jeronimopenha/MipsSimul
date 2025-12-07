@@ -27,7 +27,25 @@ bool AsmLexer::isIdentChar(const char c) const {
 }
 
 Token AsmLexer::makeIdentifierOrKeyword(const string &lexeme) {
+    static const std::unordered_map<std::string, AsmTokenKind> keywordMap = {
+        {".data", TOK_DIRECT_DATA},
+        {".text", TOK_DIRECT_TEXT},
+    };
+
     Token t(TOK_IDENT, lexeme, line, col);
+
+    if (!lexeme.empty() && lexeme[0] == '$') {
+        t = Token(TOK_REG, lexeme, line, col);
+    } else {
+        auto it = keywordMap.find(lexeme);
+        if (it != keywordMap.end()) {
+            t = Token(it->second, lexeme, line, col);
+        }
+    }
+
+    return t;
+
+    /*Token t(TOK_IDENT, lexeme, line, col);
     if (lexeme == ".data") {
         t = Token(TOK_DIRECT_DATA, lexeme, line, col);
     } else if (lexeme == ".text") {
@@ -35,7 +53,7 @@ Token AsmLexer::makeIdentifierOrKeyword(const string &lexeme) {
     } else if (lexeme.at(0) == '$') {
         t = Token(TOK_REG, lexeme, line, col);
     }
-    return t;
+    return t;*/
 }
 
 Token AsmLexer::makeNumberToken(const string &lexeme) {
@@ -67,6 +85,23 @@ Token AsmLexer::makeNumberToken(const string &lexeme) {
 Token AsmLexer::makeOperatorOrPunctToken(const string first) {
     Token t(TOK_UNKNOWN, first, line, col);
 
+    static const std::unordered_map<std::string, AsmTokenKind> punctMap = {
+        {",", TOK_COMMA},
+        {":", TOK_COLON},
+        {"(", TOK_L_PAREN},
+        {")", TOK_R_PAREN},
+        {"\n", TOK_NEWLINE}
+    };
+
+    auto it = punctMap.find(first);
+    if (it != punctMap.end()) {
+        t = Token(it->second, (first == "\n" ? "\\n" : first), line, col);
+    }
+
+    return t;
+
+    /*Token t(TOK_UNKNOWN, first, line, col);
+
     if (first == ",") {
         t = Token(TOK_COMMA, first, line, col);
     } else if (first == ":") {
@@ -78,5 +113,5 @@ Token AsmLexer::makeOperatorOrPunctToken(const string first) {
     } else if (first == "\n") {
         t = Token(TOK_NEWLINE, "\\n", line, col);
     }
-    return t;
+    return t;*/
 }
