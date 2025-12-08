@@ -18,6 +18,7 @@ enum MiniCTokenKind {
 
     //literals
     TOK_INT_LIT, // int literals
+    TOK_HEX_LIT, // int literals
     TOK_FLOAT_LIT, // float literals
 
     //arithmetic operators
@@ -29,11 +30,11 @@ enum MiniCTokenKind {
 
     // relational operators
     TOK_EQ, // ==
-    TOK_NEQ, // Not Equal
-    TOK_LE, // Less or equal than
-    TOK_GE, //Greater or equal than
-    TOK_LT, //Less than
-    TOK_GT, //Greater than
+    TOK_NEQ, // !=
+    TOK_LE, // <=
+    TOK_GE, //>=
+    TOK_LT, //<
+    TOK_GT, //>
 
     //logical operators
     TOK_AND_AND, // &&
@@ -57,6 +58,7 @@ enum MiniCTokenKind {
     TOK_RBRACKET, // ]
 
     //Specials
+    TOK_NEWLN, //New Line
     TOK_EOF, // End of file
     TOK_UNKNOWN
 };

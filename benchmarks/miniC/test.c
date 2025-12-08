@@ -15,6 +15,8 @@ float g_f4 = .5;
 float g_f5 = 2.5f;
 float g_f6 = 1.0e3;
 float g_f7 = 6.02E23f;
+float g_f8 = 6.02E+23f;
+float g_f9 = 6.02E+23f;
 
 /* Builtins (apenas nomes para o lexer) */
 

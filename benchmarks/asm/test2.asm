@@ -1,3 +1,5 @@
+.Data
+.Text
         # 0: t0 = 5
         addi $t0, $zero, 5
 

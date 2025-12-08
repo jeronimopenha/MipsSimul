@@ -12,6 +12,63 @@ public:
     }
 
 private:
+    const std::unordered_map<std::string, MiniCTokenKind> oneCharMap = {
+        //Arithmetic
+        {"+", TOK_PLUS},
+        {"-", TOK_MINUS},
+        {"/", TOK_SLASH},
+        {"*", TOK_STAR},
+        {"%", TOK_PERCENT},
+
+        //Assign
+        {"=", TOK_ASSIGN},
+
+        //Pointers
+        {"&", TOK_AMP},
+
+        //Delimitations
+        {";", TOK_SEMI},
+        {",", TOK_COMMA},
+        {"(", TOK_LPAREN},
+        {")", TOK_RPAREN},
+        {"{", TOK_LBRACE},
+        {"}", TOK_RBRACE},
+        {"[", TOK_LBRACKET},
+        {"]", TOK_RBRACKET},
+
+        //logical operators
+        {"!", TOK_NOT},
+
+        // relational operators
+        {"<", TOK_LT},
+        {">", TOK_GT},
+
+        //new line
+        {"\n", TOK_NEWLN}
+    };
+
+    const std::unordered_map<std::string, MiniCTokenKind> twoCharMap = {
+        // relational operators
+        {"==", TOK_EQ},
+        {"!=", TOK_NEQ},
+        {"<=", TOK_LE},
+        {">=", TOK_GE},
+
+        //logical operators
+        {"&&", TOK_AND_AND},
+        {"||", TOK_OR_OR},
+    };
+
+    const std::unordered_map<std::string, MiniCTokenKind> keywordMap = {
+        {"int", TOK_INT},
+        {"float", TOK_FLOAT},
+        {"void", TOK_VOID},
+        {"if", TOK_IF},
+        {"else", TOK_ELSE},
+        {"while", TOK_WHILE},
+        {"return", TOK_RETURN}
+    };
+
     void skipComments() override;
 
     [[nodiscard]] int getEofKind() const override;

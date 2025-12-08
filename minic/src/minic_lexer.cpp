@@ -5,13 +5,11 @@ using namespace std;
 void MiniCLexer::skipComments() {
     while (!eof()) {
         char c = peek();
+        char c2 = peekNext();
         if (c == '/') {
-            if (eof()) {
-                return;
-            }
-            nextChar();
-            c = peek();
-            if (c == '/') {
+            if (c2 == '/') {
+                nextChar();
+                nextChar();
                 while (!eof()) {
                     c = peek();
                     if (c == '\n') {
@@ -19,20 +17,26 @@ void MiniCLexer::skipComments() {
                     }
                     nextChar();
                 }
-            } else if (c == '*') {
-                char c2 = c;
+            } else if (c2 == '*') {
+                nextChar();
                 nextChar();
                 while (!eof()) {
                     c = peek();
+                    c2 = peekNext();
 
-                    if (c2 == '*' && c == '/') {
+                    if (c == '*' && c2 == '/') {
+                        nextChar();
                         nextChar();
                         break;
                     }
-                    c2 = nextChar();
+                    nextChar();
                 }
+            }else {
+                //It is not a comment
+                break;
             }
         } else {
+            //it does not begin with '/'
             break;
         }
     }
@@ -51,16 +55,6 @@ bool MiniCLexer::isIdentChar(const char c) const {
 }
 
 Token MiniCLexer::makeIdentifierOrKeyword(const string &lexeme, const int startLine, const int startCol) {
-    static const std::unordered_map<std::string, MiniCTokenKind> keywordMap = {
-        {"int", TOK_INT},
-        {"float", TOK_FLOAT},
-        {"void", TOK_VOID},
-        {"if", TOK_IF},
-        {"else", TOK_ELSE},
-        {"while", TOK_WHILE},
-        {"return", TOK_RETURN}
-    };
-
     Token t(TOK_IDENT, lexeme, startLine, startCol);
 
     auto it = keywordMap.find(lexeme);
@@ -72,77 +66,45 @@ Token MiniCLexer::makeIdentifierOrKeyword(const string &lexeme, const int startL
     return t;
 }
 
-Token MiniCLexer::makeNumberToken(const string &lexeme, int startLine, int startCol) {
-    Token t(TOK_UNKNOWN, lexeme, startLine, startCol);
+Token MiniCLexer::makeNumberToken(const string &lexeme, const int startLine, const int startCol) {
+    const bool hasDot = (lexeme.find('.') != std::string::npos);
+    const bool hasE = (lexeme.find('e') != std::string::npos || lexeme.find('E') != std::string::npos);
+    const bool hasX = (lexeme.size() >= 2 && lexeme[0] == '0' && (lexeme[1] == 'x' || lexeme[1] == 'X'));
+    const bool hasF = (!lexeme.empty() && (lexeme.back() == 'f' || lexeme.back() == 'F'));
 
-    if (lexeme.find('.') == string::npos) {
-        for (const auto c: lexeme) {
-            if (isdigit(static_cast<unsigned char>(c))) {
-                string lex(1, c);
-                if (c == '0' && !eof() && (peek() == 'x' || peek() == 'X')) {
-                    lex.push_back(nextChar()); // x or X - hex
-                    while (!eof() && isIntXNumber(peek())) {
-                        lex.push_back(nextChar());
-                    }
-                } else {
-                    // decimal
-                    while (!eof() && isIntDNumber(peek())) {
-                        lex.push_back(nextChar());
-                    }
-                }
-                t = Token{TOK_INT_LIT, lexeme, startLine, startCol};
-                return t;
-            }
-        }
+
+    //normal int
+    Token t = Token(TOK_INT_LIT, lexeme, startLine, startCol);
+
+    if (hasX) {
+        // int hex
+        t = Token(TOK_HEX_LIT, lexeme, startLine, startCol);
+    } else if (hasDot || hasE || hasF) {
+        //float
+        t = Token(TOK_FLOAT_LIT, lexeme, startLine, startCol);
     }
     return t;
 }
 
-Token MiniCLexer::makeOperatorOrPunctToken(const string first, int startLine, int startCol) {
+Token MiniCLexer::makeOperatorOrPunctToken(const string first, const int startLine, const int startCol) {
     Token t(TOK_UNKNOWN, first, startLine, startCol);
-    /*//arithmetic operators
-        case TOK_PLUS: return "PLUS"; // +
-        case TOK_MINUS: return "MINUS"; // -
-        case TOK_STAR: return "STAR"; //*
-        case TOK_SLASH: return "SLASH"; // /
-        case TOK_PERCENT: return "PERCENT"; //%
-        // relational operators
-        case TOK_EQ: return "EQUAL"; // ==
-        case TOK_NEQ: return "N_EQEUAL"; // Not Equal
-        case TOK_LE: return "LESS_EQUAL_THAN"; // Less or equal than
-        case TOK_GE: return "GRATER_EQUAL_THAN"; //Greater or equal than
-        case TOK_LT: return "LESS_THAN"; //Less than
-        case TOK_GT: return "GREATER_THAN"; //Greater than
-        //logical operators
-        case TOK_AND_AND: return "AND_AND"; // &&
-        case TOK_OR_OR: return "OR_OR"; //||
-        case TOK_NOT: return "NOT"; //!
-        //assign
-        case TOK_ASSIGN: return "ASSIGN"; // =
-        //pointers
-        case TOK_AMP: return "AMP"; // &
-        // Delimitations
-        case TOK_SEMI: return "SEMICOLON"; // ;
-        case TOK_COMMA: return "COMMA"; // ,
-        case TOK_LPAREN: return "LPAREN"; // (
-        case TOK_RPAREN: return "RPAREN"; // )
-        case TOK_LBRACE: return "LBRACE"; // {
-        case TOK_RBRACE: return "RBRACE"; // }
-        case TOK_LBRACKET: return "LBRACKET"; // [
-        case TOK_RBRACKET: return "RBRACKET"; // ]*/
-    static const std::unordered_map<std::string, MiniCTokenKind> punctMap = {
-        {"+", TOK_PLUS},
-        {"-", TOK_MINUS},
-        {"/", TOK_SLASH},
-        {"*", TOK_STAR},
-        {"%", TOK_PERCENT},
 
-        {",", TOK_COMMA}
-    };
+    if (!eof()) {
+        const char c2 = peek();
+        const std::string two = first + c2;
 
-    auto it = punctMap.find(first);
-    if (it != punctMap.end()) {
-        t = Token(it->second, (first == "\n" ? "\\n" : first), startLine, startCol);
+        auto it2 = twoCharMap.find(two);
+        if (it2 != twoCharMap.end()) {
+            nextChar();
+            t = Token(it2->second, two, startLine, startCol);
+            return t;
+        }
     }
+
+    auto it1 = oneCharMap.find(first);
+    if (it1 != oneCharMap.end()) {
+        t = Token(it1->second, first == "\n" ? "\\n" : first, startLine, startCol);
+    }
+
     return t;
 }

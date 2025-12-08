@@ -16,6 +16,7 @@ string minicTokenKindToString(const MiniCTokenKind k) {
         case TOK_IDENT: return "IDENT"; // everything that is not a keyword and other tokens
         //literals
         case TOK_INT_LIT: return "INT_LIT"; // int literals
+        case TOK_HEX_LIT: return "HEX_LIT"; // int literals
         case TOK_FLOAT_LIT: return "FLOAT_LIT"; // float literals
         //arithmetic operators
         case TOK_PLUS: return "PLUS"; // +
@@ -25,11 +26,11 @@ string minicTokenKindToString(const MiniCTokenKind k) {
         case TOK_PERCENT: return "PERCENT"; //%
         // relational operators
         case TOK_EQ: return "EQUAL"; // ==
-        case TOK_NEQ: return "N_EQEUAL"; // Not Equal
-        case TOK_LE: return "LESS_EQUAL_THAN"; // Less or equal than
-        case TOK_GE: return "GRATER_EQUAL_THAN"; //Greater or equal than
-        case TOK_LT: return "LESS_THAN"; //Less than
-        case TOK_GT: return "GREATER_THAN"; //Greater than
+        case TOK_NEQ: return "N_EQEUAL"; // !=
+        case TOK_LE: return "LESS_EQUAL_THAN"; // <
+        case TOK_GE: return "GRATER_EQUAL_THAN"; //>=
+        case TOK_LT: return "LESS_THAN"; //<
+        case TOK_GT: return "GREATER_THAN"; //>
         //logical operators
         case TOK_AND_AND: return "AND_AND"; // &&
         case TOK_OR_OR: return "OR_OR"; //||
@@ -49,6 +50,7 @@ string minicTokenKindToString(const MiniCTokenKind k) {
         case TOK_RBRACKET: return "RBRACKET"; // ]
         //Specials
         case TOK_EOF: return "EOF"; // End of file
+        case TOK_NEWLN: return "NEWLN"; // End of file
         default: return "UNKNOWN";
     }
 }

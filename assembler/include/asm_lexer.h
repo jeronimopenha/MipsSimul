@@ -12,6 +12,19 @@ public:
     }
 
 private:
+    const std::unordered_map<std::string, AsmTokenKind> punctMap = {
+        {",", TOK_COMMA},
+        {":", TOK_COLON},
+        {"(", TOK_L_PAREN},
+        {")", TOK_R_PAREN},
+        {"\n", TOK_NEWLINE}
+    };
+
+    const std::unordered_map<std::string, AsmTokenKind> keywordMap = {
+        {".data", TOK_DIRECT_DATA},
+        {".text", TOK_DIRECT_TEXT},
+    };
+
     void skipComments() override;
 
     [[nodiscard]] int getEofKind() const override;

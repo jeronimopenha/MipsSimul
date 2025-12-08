@@ -23,6 +23,8 @@ protected:
 
     [[nodiscard]] char peek() const;
 
+    [[nodiscard]] char peekNext() const;
+
     char nextChar();
 
     [[nodiscard]] bool eof() const;
