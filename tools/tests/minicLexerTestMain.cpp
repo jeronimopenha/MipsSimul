@@ -1,5 +1,5 @@
 #include <common.h>
-#include <asm_lexer.h>
+#include <minic_lexer.h>
 
 using namespace std;
 
@@ -10,7 +10,7 @@ int main() {
 
     cout << rootPath << endl;
 
-    auto files = getFilesListByExtension(rootPath + BenchAsmPath, benchAsmExt);
+    auto files = getFilesListByExtension(rootPath + BenchMiniCPath, benchMiniCExt);
 
     for (const auto &[fst, snd]: files) {
         cout << fst << endl;
@@ -25,8 +25,7 @@ int main() {
         string src((istreambuf_iterator<char>(in)),
                    istreambuf_iterator<char>());
 
-        AsmLexer lex(src);
-
+        MiniCLexer lex(src);
 
 
         while (true) {
@@ -38,7 +37,7 @@ int main() {
             cout << t.line << ":\t";
             cout << t.col << ":\t";
 
-            cout << asmTokenKindToString(static_cast<AsmTokenKind>(t.kind)) << "\t";
+            cout << minicTokenKindToString(static_cast<MiniCTokenKind>(t.kind)) << "\t";
             cout << t.lexeme << "\n";
         }
     }

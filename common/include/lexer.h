@@ -30,9 +30,9 @@ protected:
     void skipWhitespace();
 
     // hooks for languages
-    [[nodiscard]] virtual bool isIdentStart(char c) const ;
+    [[nodiscard]] virtual bool isIdentStart(char c) const;
 
-    [[nodiscard]] virtual bool isIdentChar(char c) const ;
+    [[nodiscard]] virtual bool isIdentChar(char c) const;
 
     [[nodiscard]] virtual bool isNumberStart(char c) const;
 
@@ -44,11 +44,11 @@ protected:
 
     [[nodiscard]] virtual int getEofKind() const = 0;
 
-    virtual Token makeIdentifierOrKeyword(const std::string &lexeme) = 0;
+    virtual Token makeIdentifierOrKeyword(const std::string &lexeme, int startLine, int startCol) = 0;
 
-    virtual Token makeNumberToken(const std::string &lexeme) = 0;
+    virtual Token makeNumberToken(const std::string &lexeme, int startLine, int startCol) = 0;
 
-    virtual Token makeOperatorOrPunctToken(std::string first) = 0;
+    virtual Token makeOperatorOrPunctToken(std::string first, int startLine, int startCol) = 0;
 };
 
 #endif

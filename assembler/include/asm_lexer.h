@@ -20,11 +20,11 @@ private:
 
     [[nodiscard]] bool isIdentChar(char c) const override;
 
-    Token makeIdentifierOrKeyword(const std::string &lexeme) override;
+    Token makeIdentifierOrKeyword(const std::string &lexeme, int startLine, int startCol) override;
 
-    Token makeNumberToken(const std::string &lexeme) override;
+    Token makeNumberToken(const std::string &lexeme, int startLine, int startCol) override;
 
-    Token makeOperatorOrPunctToken(std::string first) override;
+    Token makeOperatorOrPunctToken(std::string first, int startLine, int startCol) override;
 };
 
 #endif

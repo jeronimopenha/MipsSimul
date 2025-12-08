@@ -82,7 +82,7 @@ file(GLOB_RECURSE MINIC_LEXER_SRC
         minic/src/minic_t_kind.cpp
 )
 add_executable(MinicLexerTestMain
-        tools/tests/asmLexerTestMain.cpp
+        tools/tests/minicLexerTestMain.cpp
         ${MINIC_LEXER_SRC}
 )
 

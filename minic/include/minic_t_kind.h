@@ -58,7 +58,7 @@ enum MiniCTokenKind {
 
     //Specials
     TOK_EOF, // End of file
-    TOK_INVALID
+    TOK_UNKNOWN
 };
 
 std::string minicTokenKindToString( MiniCTokenKind k);

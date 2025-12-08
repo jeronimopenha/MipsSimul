@@ -26,38 +26,28 @@ bool AsmLexer::isIdentChar(const char c) const {
     return Lexer::isIdentChar(c) || c == '$';
 }
 
-Token AsmLexer::makeIdentifierOrKeyword(const string &lexeme) {
+Token AsmLexer::makeIdentifierOrKeyword(const string &lexeme, const int startLine, const int startCol) {
     static const std::unordered_map<std::string, AsmTokenKind> keywordMap = {
         {".data", TOK_DIRECT_DATA},
         {".text", TOK_DIRECT_TEXT},
     };
 
-    Token t(TOK_IDENT, lexeme, line, col);
+    Token t(TOK_IDENT, lexeme, startLine, startCol);
 
     if (!lexeme.empty() && lexeme[0] == '$') {
-        t = Token(TOK_REG, lexeme, line, col);
+        t = Token(TOK_REG, lexeme, startLine, startCol);
     } else {
         auto it = keywordMap.find(lexeme);
         if (it != keywordMap.end()) {
-            t = Token(it->second, lexeme, line, col);
+            t = Token(it->second, lexeme, startLine, startCol);
         }
     }
 
     return t;
-
-    /*Token t(TOK_IDENT, lexeme, line, col);
-    if (lexeme == ".data") {
-        t = Token(TOK_DIRECT_DATA, lexeme, line, col);
-    } else if (lexeme == ".text") {
-        t = Token(TOK_DIRECT_TEXT, lexeme, line, col);
-    } else if (lexeme.at(0) == '$') {
-        t = Token(TOK_REG, lexeme, line, col);
-    }
-    return t;*/
 }
 
-Token AsmLexer::makeNumberToken(const string &lexeme) {
-    Token t(TOK_UNKNOWN, lexeme, line, col);
+Token AsmLexer::makeNumberToken(const string &lexeme, const int startLine, const int startCol) {
+    Token t(TOK_UNKNOWN, lexeme, startLine, startCol);
 
     if (lexeme.find('.') == string::npos) {
         for (const auto c: lexeme) {
@@ -74,7 +64,7 @@ Token AsmLexer::makeNumberToken(const string &lexeme) {
                         lex.push_back(nextChar());
                     }
                 }
-                t = Token{TOK_INT_LIT, lexeme, line, col};
+                t = Token{TOK_INT_LIT, lexeme, startLine, startCol};
                 return t;
             }
         }
@@ -82,8 +72,8 @@ Token AsmLexer::makeNumberToken(const string &lexeme) {
     return t;
 }
 
-Token AsmLexer::makeOperatorOrPunctToken(const string first) {
-    Token t(TOK_UNKNOWN, first, line, col);
+Token AsmLexer::makeOperatorOrPunctToken(const string first, int startLine, int startCol) {
+    Token t(TOK_UNKNOWN, first, startLine, startCol);
 
     static const std::unordered_map<std::string, AsmTokenKind> punctMap = {
         {",", TOK_COMMA},
@@ -95,23 +85,8 @@ Token AsmLexer::makeOperatorOrPunctToken(const string first) {
 
     auto it = punctMap.find(first);
     if (it != punctMap.end()) {
-        t = Token(it->second, (first == "\n" ? "\\n" : first), line, col);
+        t = Token(it->second, (first == "\n" ? "\\n" : first), startLine, startCol);
     }
 
     return t;
-
-    /*Token t(TOK_UNKNOWN, first, line, col);
-
-    if (first == ",") {
-        t = Token(TOK_COMMA, first, line, col);
-    } else if (first == ":") {
-        t = Token(TOK_COLON, first, line, col);
-    } else if (first == "(") {
-        t = Token(TOK_L_PAREN, first, line, col);
-    } else if (first == ")") {
-        t = Token(TOK_R_PAREN, first, line, col);
-    } else if (first == "\n") {
-        t = Token(TOK_NEWLINE, "\\n", line, col);
-    }
-    return t;*/
 }

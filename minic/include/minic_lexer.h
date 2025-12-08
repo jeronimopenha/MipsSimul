@@ -4,11 +4,11 @@
 #include <definitions.h>
 #include <lexer.h>
 #include <token.h>
-#include <asm_t_kind.h>
+#include <minic_t_kind.h>
 
-class AsmLexer final : public Lexer {
+class MiniCLexer final : public Lexer {
 public:
-    explicit AsmLexer(const std::string &s) : Lexer(s) {
+    explicit MiniCLexer(const std::string &s) : Lexer(s) {
     }
 
 private:
@@ -20,11 +20,11 @@ private:
 
     [[nodiscard]] bool isIdentChar(char c) const override;
 
-    Token makeIdentifierOrKeyword(const std::string &lexeme) override;
+    Token makeIdentifierOrKeyword(const std::string &lexeme, int startLine, int startCol) override;
 
-    Token makeNumberToken(const std::string &lexeme) override;
+    Token makeNumberToken(const std::string &lexeme, int startLine, int startCol) override;
 
-    Token makeOperatorOrPunctToken(std::string first) override;
+    Token makeOperatorOrPunctToken(std::string first, int startLine, int startCol) override;
 };
 
 #endif

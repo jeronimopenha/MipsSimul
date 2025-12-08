@@ -14,7 +14,9 @@ char Lexer::nextChar() {
         return '\0';
     }
     const char c = source[pos++];
+    col++;
     if (c == '\n') {
+        col = 0;
         line++;
     }
     return c;
@@ -68,17 +70,23 @@ Token Lexer::nextToken() {
 
     // Identifier or keyword
     if (isIdentStart(peek())) {
+        const int startLine = line;
+        const int startCol = col;
+
         string lex;
         while (!eof() && isIdentChar(peek())) {
             const char charTemp = nextChar();
             lex.push_back(charTemp);
         }
         // The heir choose if it is an identifier or a keyword
-        return makeIdentifierOrKeyword(lex);
+        return makeIdentifierOrKeyword(lex, startLine, startCol);
     }
 
     // numbers (int or float)
     if (isNumberStart(peek())) {
+        const int startLine = line;
+        const int startCol = col;
+
         string lex;
         bool hasDot = false;
 
@@ -94,11 +102,14 @@ Token Lexer::nextToken() {
             }
         }
         // The heir decides if this is int float or whatever
-        return makeNumberToken(lex);
+        return makeNumberToken(lex, startLine, startCol);
     }
 
     // Operadores / pontuação
+    const int startLine = line;
+    const int startCol = col;
+
     string lex;
     lex.push_back(nextChar());
-    return makeOperatorOrPunctToken(lex);
+    return makeOperatorOrPunctToken(lex, startLine, startCol);
 }

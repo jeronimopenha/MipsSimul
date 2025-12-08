@@ -3,7 +3,7 @@
 
 using namespace std;
 
-string asmTokenKindToString(const MiniCTokenKind k) {
+string minicTokenKindToString(const MiniCTokenKind k) {
     switch (k) {
         case TOK_INT: return "INT"; // reserved  - int
         case TOK_FLOAT: return "FLOAT"; // reserved  - float
@@ -49,7 +49,6 @@ string asmTokenKindToString(const MiniCTokenKind k) {
         case TOK_RBRACKET: return "RBRACKET"; // ]
         //Specials
         case TOK_EOF: return "EOF"; // End of file
-        case TOK_INVALID: return "INVALID";
         default: return "UNKNOWN";
     }
 }
