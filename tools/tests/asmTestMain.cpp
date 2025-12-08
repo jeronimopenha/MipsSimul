@@ -28,7 +28,7 @@ int main() {
         while (true) {
             Token t = lex.nextToken();
             tokens.push_back(t);
-            if (t.kind == TOK_EOF) {
+            if (t.kind == ASM_EOF) {
                 break;
             }
         }

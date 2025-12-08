@@ -34,7 +34,7 @@ vector<uint32_t> asmGenerateCode(const vector<AsmLine> &prog, const unordered_ma
             continue; // only label
         }
 
-        const AsmInstruction &inst = line.instr;
+        const MiniCInstruction &inst = line.instr;
 
         //pseudo instructions first
         if (inst.op == "nop") {

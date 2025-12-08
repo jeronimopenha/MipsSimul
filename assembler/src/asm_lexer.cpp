@@ -15,7 +15,7 @@ void AsmLexer::skipComments() {
 }
 
 int AsmLexer::getEofKind() const {
-    return TOK_EOF;
+    return ASM_EOF;
 }
 
 bool AsmLexer::isIdentStart(const char c) const {
@@ -27,10 +27,10 @@ bool AsmLexer::isIdentChar(const char c) const {
 }
 
 Token AsmLexer::makeIdentifierOrKeyword(const string &lexeme, const int startLine, const int startCol) {
-    Token t(TOK_IDENT, lexeme, startLine, startCol);
+    Token t(ASM_IDENT, lexeme, startLine, startCol);
 
     if (!lexeme.empty() && lexeme[0] == '$') {
-        t = Token(TOK_REG, lexeme, startLine, startCol);
+        t = Token(ASM_REG, lexeme, startLine, startCol);
     } else {
         auto it = keywordMap.find(lexeme);
         if (it != keywordMap.end()) {
@@ -42,7 +42,7 @@ Token AsmLexer::makeIdentifierOrKeyword(const string &lexeme, const int startLin
 }
 
 Token AsmLexer::makeNumberToken(const string &lexeme, const int startLine, const int startCol) {
-    Token t(TOK_UNKNOWN, lexeme, startLine, startCol);
+    Token t(ASM_UNKNOWN, lexeme, startLine, startCol);
 
     if (lexeme.find('.') == string::npos) {
         for (const auto c: lexeme) {
@@ -59,7 +59,7 @@ Token AsmLexer::makeNumberToken(const string &lexeme, const int startLine, const
                         lex.push_back(nextChar());
                     }
                 }
-                t = Token{TOK_INT_LIT, lexeme, startLine, startCol};
+                t = Token{ASM_INT_LIT, lexeme, startLine, startCol};
                 return t;
             }
         }
@@ -68,7 +68,7 @@ Token AsmLexer::makeNumberToken(const string &lexeme, const int startLine, const
 }
 
 Token AsmLexer::makeOperatorOrPunctToken(const string first, int startLine, int startCol) {
-    Token t(TOK_UNKNOWN, first, startLine, startCol);
+    Token t(ASM_UNKNOWN, first, startLine, startCol);
 
 
     auto it = punctMap.find(first);

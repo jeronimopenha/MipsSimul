@@ -5,18 +5,18 @@
 
 
 enum AsmTokenKind {
-    TOK_IDENT, // opcodes, labels, regs without $
-    TOK_REG, // tokens with initial $
-    TOK_INT_LIT, // immediate (decimal or hex)
-    TOK_COMMA, // ,
-    TOK_COLON, // :
-    TOK_L_PAREN, // (
-    TOK_R_PAREN, // )
-    TOK_NEWLINE, // end of line
-    TOK_DIRECT_DATA, // .Data
-    TOK_DIRECT_TEXT, //.Text
-    TOK_EOF, // End of file
-    TOK_UNKNOWN // special for errors
+    ASM_IDENT, // opcodes, labels, regs without $
+    ASM_REG, // tokens with initial $
+    ASM_INT_LIT, // immediate (decimal or hex)
+    ASM_COMMA, // ,
+    ASM_COLON, // :
+    ASM_L_PAREN, // (
+    ASM_R_PAREN, // )
+    ASM_NEWLINE, // end of line
+    ASM_DIRECT_DATA, // .Data
+    ASM_DIRECT_TEXT, //.Text
+    ASM_EOF, // End of file
+    ASM_UNKNOWN // special for errors
 };
 
 std::string asmTokenKindToString(AsmTokenKind k);

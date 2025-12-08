@@ -16,7 +16,7 @@ int runLexer(const istream &in, ostream &out) {
     while (true) {
         Token t = lex.nextToken();
         out << t.line << ":\t" << asmTokenKindToString(t.kind) << "\t" << t.lexeme << "\n";
-        if (t.kind == TOK_EOF) break;
+        if (t.kind == ASM_EOF) break;
     }
     return 0;
 }

@@ -6,11 +6,11 @@ using namespace std;
 vector<AsmLine> AsmParser::parseProgram() {
     vector<AsmLine> prog;
     while (true) {
-        if (peek().kind == TOK_EOF) {
+        if (peek().kind == ASM_EOF) {
             break;
         }
         // multiple Newlines
-        if (peek().kind == TOK_NEWLINE) {
+        if (peek().kind == ASM_NEWLINE) {
             get();
             continue;
         }
@@ -23,11 +23,11 @@ vector<AsmLine> AsmParser::parseProgram() {
 AsmLine AsmParser::parseLine() {
     AsmLine line;
     // [label ":" ] ?
-    if (peek().kind == TOK_IDENT) {
+    if (peek().kind == ASM_IDENT) {
         // can be label OR opcode
         const Token ident = peek();
         // Look to the other token to decide
-        if (tokens.size() > pos + 1 && tokens[pos + 1].kind == TOK_COLON) {
+        if (tokens.size() > pos + 1 && tokens[pos + 1].kind == ASM_COLON) {
             // is labeled
             get(); // consume IDENT
             get(); // consume COLON
@@ -37,13 +37,13 @@ AsmLine AsmParser::parseLine() {
 
     // [instruction] ?
     // if the next token is IDENT or REGISTER etc, try instruction
-    if (peek().kind == TOK_IDENT) {
+    if (peek().kind == ASM_IDENT) {
         line.hasInstr = true;
         line.instr = parseInstruction();
     }
 
     // consume at least a NEWLINE (could be more)
-    while (peek().kind == TOK_NEWLINE) {
+    while (peek().kind == ASM_NEWLINE) {
         get();
         break;
     }
@@ -52,14 +52,14 @@ AsmLine AsmParser::parseLine() {
 }
 
 //instruction ::= IDENT operand_list
-AsmInstruction AsmParser::parseInstruction() {
-    AsmInstruction inst;
-    const Token opTok = expect(TOK_IDENT, "opcode");
+MiniCInstruction AsmParser::parseInstruction() {
+    MiniCInstruction inst;
+    const Token opTok = expect(ASM_IDENT, "opcode");
     inst.op = opTok.lexeme;
     inst.line = opTok.line;
 
     // if line ends after the opcode (ex: "nop")
-    if (peek().kind == TOK_NEWLINE || peek().kind == TOK_EOF) {
+    if (peek().kind == ASM_NEWLINE || peek().kind == ASM_EOF) {
         return inst;
     }
 
@@ -73,7 +73,7 @@ vector<AsmOperand> AsmParser::parseOperandList() {
     vector<AsmOperand> args;
     args.push_back(parseOperand());
 
-    while (match(TOK_COMMA)) {
+    while (match(ASM_COMMA)) {
         args.push_back(parseOperand());
     }
     return args;
@@ -90,7 +90,7 @@ AsmOperand AsmParser::parseOperand() {
     AsmOperand op;
 
     switch (t.kind) {
-        case TOK_REG: {
+        case ASM_REG: {
             const Token r = get();
             op.kind = AsmOperand::Kind::Reg;
             op.reg = -1; // lets map this later (semantic phase)
@@ -99,15 +99,15 @@ AsmOperand AsmParser::parseOperand() {
             break;
         }
 
-        case TOK_INT_LIT: {
+        case ASM_INT_LIT: {
             // can be immediate or memaddr number
             const Token num = get();
 
-            if (peek().kind == TOK_L_PAREN) {
+            if (peek().kind == ASM_L_PAREN) {
                 // is memaddr: num "(" reg ")"
                 get(); // consume "("
-                const Token r = expect(TOK_REG, "address register");
-                expect(TOK_R_PAREN, "')'");
+                const Token r = expect(ASM_REG, "address register");
+                expect(ASM_R_PAREN, "')'");
 
                 op.kind = AsmOperand::Kind::Mem;
                 // parse num -> int
@@ -124,11 +124,11 @@ AsmOperand AsmParser::parseOperand() {
             break;
         }
 
-        case TOK_L_PAREN: {
+        case ASM_L_PAREN: {
             // memaddr with no offset: "($sp)"
             get(); // consume "("
-            const Token r = expect(TOK_REG, "address register");
-            expect(TOK_R_PAREN, "')'");
+            const Token r = expect(ASM_REG, "address register");
+            expect(ASM_R_PAREN, "')'");
 
             op.kind = AsmOperand::Kind::Mem;
             op.imm = 0;
@@ -137,7 +137,7 @@ AsmOperand AsmParser::parseOperand() {
             break;
         }
 
-        case TOK_IDENT: {
+        case ASM_IDENT: {
             // can be a label for jump and branche
             const Token id = get();
             op.kind = AsmOperand::Kind::LabelRef;

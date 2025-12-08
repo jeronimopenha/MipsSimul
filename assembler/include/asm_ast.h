@@ -17,7 +17,7 @@ struct AsmOperand {
     std::string label; // if LabelRef
 };
 
-struct AsmInstruction {
+struct MiniCInstruction {
     std::string op; // "addi", "lw", "j", ...
     std::vector<AsmOperand> args;
     int line = 0;
@@ -26,7 +26,7 @@ struct AsmInstruction {
 struct AsmLine {
     std::string label; // "" if empty
     bool hasInstr = false;
-    AsmInstruction instr;
+    MiniCInstruction instr;
 };
 
 #endif

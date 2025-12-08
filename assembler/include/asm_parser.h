@@ -17,7 +17,7 @@ public:
 private:
     AsmLine parseLine();
 
-    AsmInstruction parseInstruction();
+    MiniCInstruction parseInstruction();
 
     std::vector<AsmOperand> parseOperandList();
 

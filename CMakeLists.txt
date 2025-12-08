@@ -86,6 +86,17 @@ add_executable(MinicLexerTestMain
         ${MINIC_LEXER_SRC}
 )
 
+# MiniC Parser Test
+file(GLOB_RECURSE MINIC_PARSER_SRC
+        ${MINIC_LEXER_SRC}
+        common/src/parser.cpp
+        minic/src/minic_parser.cpp
+)
+add_executable(MinicParserTestMain
+        tools/tests/minicParserTestMain.cpp
+        ${MINIC_PARSER_SRC}
+)
+
 # assembler tool
 file(GLOB_RECURSE ASSEMBLER_TOOLS_SRC
         ${DISASSEMBLER_SRC}

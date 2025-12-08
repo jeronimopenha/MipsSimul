@@ -1,5 +1,6 @@
-#include <asm_parser.h>
+#include <minic_parser.h>
 #include <common.h>
+#include <minic_lexer.h>
 
 using namespace std;
 
@@ -10,7 +11,7 @@ int main() {
 
     cout << rootPath << endl;
 
-    auto files = getFilesListByExtension(rootPath + BenchAsmPath, benchAsmExt);
+    auto files = getFilesListByExtension(rootPath + BenchMiniCPath, benchMiniCExt);
 
     for (const auto &[fst, snd]: files) {
         cout << fst << endl;
@@ -23,21 +24,22 @@ int main() {
         string src((istreambuf_iterator<char>(in)),
                    istreambuf_iterator<char>());
 
-        AsmLexer lex(src);
+        MiniCLexer lex(src);
         vector<Token> tokens;
         while (true) {
             Token t = lex.nextToken();
             tokens.push_back(t);
-            if (t.kind == ASM_EOF) {
+            if (t.kind == MiniCTokenKind::TOK_EOF) {
                 break;
             }
         }
 
-        AsmParser p(tokens);
-        auto prog = p.parseProgram();
+        MiniCParser p(tokens);
+        //FIXME fix this in future
+        auto prog = p.parseExpr();
 
         // Só pra testar: imprimir o que o parser entendeu
-        for (auto &line: prog) {
+        /*for (auto &line: prog) {
             if (!line.label.empty()) {
                 cout << line.label << ":\n";
             }
@@ -59,7 +61,7 @@ int main() {
                 }
                 cout << "\n";
             }
-        }
+        }*/
     }
 
 

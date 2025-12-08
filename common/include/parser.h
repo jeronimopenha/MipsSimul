@@ -9,6 +9,13 @@ protected:
     const std::vector<Token> &tokens;
     size_t pos = 0;
 
+    [[nodiscard]] const Token &previous() const;
+
+    [[nodiscard]] bool check(int kind) const;
+
+    // match com vários kinds de uma vez (igual eu usei no parser de expressões)
+    bool match(std::initializer_list<int> kinds);
+
 public:
     explicit Parser(const std::vector<Token> &toks)
         : tokens(toks) {
