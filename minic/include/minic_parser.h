@@ -15,33 +15,23 @@ public:
     }
 
     // FIXME CHANGE ON FUTURE
-    std::unique_ptr<Expr> parseExpr();
+    ExprNode *parseExpr(); // ainda vamos definir depois
+    ExprNode *parsePrimary();
 
 private:
-    std::unique_ptr<Expr> parseAssignExpr();
 
-    std::unique_ptr<Expr> parseLogicalOrExpr();
-
-    std::unique_ptr<Expr> parseLogicalAndExpr();
-
-    std::unique_ptr<Expr> parseEqualityExpr();
-
-    std::unique_ptr<Expr> parseRelationalExpr();
-
-    std::unique_ptr<Expr> parseAdditiveExpr();
-
-    std::unique_ptr<Expr> parseMultiplicativeExpr();
-
-    std::unique_ptr<Expr> parseUnaryExpr();
-
-    std::unique_ptr<Expr> parsePostfixExpr();
-
-    std::unique_ptr<Expr> parsePrimaryExpr();
-
-    [[noreturn]] void error(const Token &token, const std::string &msg);
 
     void skipNewLines();
 };
+
+/*
+ * New grammar
+ *
+ * program ::= { external_decl } TOK_EOF
+ *
+ *
+ *
+ */
 
 
 /* - Grammar

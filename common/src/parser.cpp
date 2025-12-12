@@ -57,3 +57,11 @@ bool Parser::match(const initializer_list<int> kinds) {
     }
     return false;
 }
+
+void Parser::error(const Token &token, const string &msg) {
+    ostringstream oss;
+    oss << "Parser error at line " << token.line
+            << ", col " << token.col << ": " << msg
+            << " (found '" << token.lexeme << "')";
+    throw runtime_error(oss.str());
+}

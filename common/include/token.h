@@ -10,7 +10,7 @@ struct Token {
     int col;
 
     int32_t intValue = 0;
-    double floatValue = 0;
+    double floatValue = 0.0;
 
     Token();
 

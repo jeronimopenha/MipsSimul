@@ -42,6 +42,8 @@ protected:
 
     [[nodiscard]] virtual bool isIntXNumber(char c) const;
 
+    static void error(const Token &token, const std::string &msg);
+
     virtual void skipComments() = 0;
 
     [[nodiscard]] virtual int getEofKind() const = 0;

@@ -150,3 +150,11 @@ Token Lexer::nextToken() {
     lex.push_back(nextChar());
     return makeOperatorOrPunctToken(lex, startLine, startCol);
 }
+
+void Lexer::error(const Token &token, const string &msg) {
+    ostringstream oss;
+    oss << "Parser error at line " << token.line
+            << ", col " << token.col << ": " << msg
+            << " (found '" << token.lexeme << "')";
+    throw runtime_error(oss.str());
+}

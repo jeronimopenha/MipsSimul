@@ -34,10 +34,14 @@ int main() {
             }
         }
 
-        MiniCParser p(tokens);
+        MiniCParser parser(tokens);
         //FIXME fix this in future
-        auto prog = p.parseExpr();
-
+        //auto prog = p.parseExpr();
+        while (!(parser.peek().kind == TOK_EOF)) {
+            ExprNode *prog = parser.parsePrimary();
+            prog->dump();
+        }
+        int a=1;
         // Só pra testar: imprimir o que o parser entendeu
         /*for (auto &line: prog) {
             if (!line.label.empty()) {

@@ -4,49 +4,112 @@
 #include <definitions.h>
 #include <token.h>
 
-struct Expr {
-    virtual ~Expr() = default;
+
+// ----------------------------------------------
+/*primary_expr ::= TOK_INT_LIT
+               | TOK_HEX_LIT
+               | TOK_FLOAT_LIT
+               | TOK_IDENT
+               | TOK_LPAREN expr TOK_RPAREN
+*/
+
+struct ExprNode {
+    virtual ~ExprNode() = default;
+
+    virtual void dump() =0;
 };
 
-struct BinaryExpr : Expr {
-    std::unique_ptr<Expr> left;
-    Token op;
-    std::unique_ptr<Expr> right;
+struct HexLiteralNode : ExprNode {
+    int32_t value;
 
-    BinaryExpr(std::unique_ptr<Expr> l, Token o, std::unique_ptr<Expr> r)
-        : left(std::move(l)), op(o), right(std::move(r)) {
+    explicit HexLiteralNode(const int32_t v) : value(v) {
+    }
+
+    void dump() override {
+        std::cout << "HexLiteralNode(" << value << ")\n";
     }
 };
 
-struct UnaryExpr : Expr {
-    Token op;
-    std::unique_ptr<Expr> expr;
+struct IntLiteralNode : ExprNode {
+    int32_t value;
 
-    UnaryExpr(Token o, std::unique_ptr<Expr> e)
-        : op(o), expr(std::move(e)) {
+    explicit IntLiteralNode(const int32_t v) : value(v) {
+    }
+
+    void dump() override {
+        std::cout << "IntLiteralNode(" << value << ")\n";
     }
 };
 
-struct LiteralExpr : Expr {
-    Token value;
+struct FloatLiteralNode : ExprNode {
+    double value;
 
-    explicit LiteralExpr(const Token &t) : value(t) {
+    explicit FloatLiteralNode(const double v) : value(v) {
+    }
+
+    void dump() override {
+        std::cout << "FloatLiteralNode(" << value << ")\n";
     }
 };
 
-struct VariableExpr : Expr {
-    Token name;
+struct IdentNode : ExprNode {
+    std::string name;
 
-    explicit VariableExpr(const Token &t) : name(t) {
+    IdentNode(const std::string &s) : name(s) {
+    }
+
+    void dump() override {
+        std::cout << "IdentNode(" << name << ")\n";
     }
 };
 
-struct GroupingExpr : Expr {
-    std::unique_ptr<Expr> expr;
+struct ParenExprNode : ExprNode {
+    ExprNode *expr;
 
-    explicit GroupingExpr(std::unique_ptr<Expr> e)
-        : expr(std::move(e)) {
+    ParenExprNode(ExprNode *e) : expr(e) {
+    }
+
+    void dump() override {
+        expr->dump();
     }
 };
+
+// ----------------------------------------------
+
 
 #endif
+
+/*
+* step 1 — Expressions
+
+primary
+unary
+multiplicative
+additive
+relational
+equality
+logical
+assignment
+expr_stmt
+
+step 2 — Declarations and statements
+
+var_decl
+block { ... }
+return
+if
+while
+
+step 3 — Functions
+
+parameters
+parameters list
+function body
+complete function
+
+step 4 — Programa
+
+external_decl
+program
+
+ */

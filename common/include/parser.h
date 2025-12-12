@@ -30,6 +30,8 @@ public:
     const Token &expect(int kind, const std::string &msg);
 
     [[nodiscard]] bool eof() const;
+
+    static void error(const Token &token, const std::string &msg);
 };
 
 

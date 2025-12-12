@@ -31,7 +31,7 @@ void MiniCLexer::skipComments() {
                     }
                     nextChar();
                 }
-            }else {
+            } else {
                 //It is not a comment
                 break;
             }
@@ -74,15 +74,29 @@ Token MiniCLexer::makeNumberToken(const string &lexeme, const int startLine, con
 
 
     //normal int
-    Token t = Token(TOK_INT_LIT, lexeme, startLine, startCol);
+    Token t(TOK_INT_LIT, lexeme, startLine, startCol);
+    try {
+        if (hasX) {
+            // int hex
+            t.kind = TOK_HEX_LIT;
+            t.intValue = static_cast<int32_t>(stoll(lexeme, nullptr, 16));
+        } else if (hasDot || hasE || hasF) {
+            //float
+            t.kind = TOK_FLOAT_LIT;
+            std::string floatLex = lexeme;
+            if (hasF) {
+                floatLex.pop_back(); // remove 'f' or 'F'
+            }
 
-    if (hasX) {
-        // int hex
-        t = Token(TOK_HEX_LIT, lexeme, startLine, startCol);
-    } else if (hasDot || hasE || hasF) {
-        //float
-        t = Token(TOK_FLOAT_LIT, lexeme, startLine, startCol);
+            t.floatValue = std::stod(floatLex);
+        } else {
+            t.kind = TOK_INT_LIT;
+            t.intValue = static_cast<int32_t>(stoll(lexeme, nullptr, 16));
+        }
+    } catch (const std::exception &e) {
+        error(t, "Invalid numeric literal");
     }
+
     return t;
 }
 
