@@ -4,6 +4,14 @@
 #include <definitions.h>
 #include <token.h>
 
+#include <utility>
+
+#include "minic_t_kind.h"
+
+inline void printIndent(const int n) {
+    for (int i = 0; i < n; ++i)
+        std::cout << ' ';
+}
 
 // ----------------------------------------------
 /*primary_expr ::= TOK_INT_LIT
@@ -16,7 +24,7 @@
 struct ExprNode {
     virtual ~ExprNode() = default;
 
-    virtual void dump() =0;
+    virtual void dump(int ident) =0;
 };
 
 struct HexLiteralNode : ExprNode {
@@ -25,8 +33,9 @@ struct HexLiteralNode : ExprNode {
     explicit HexLiteralNode(const int32_t v) : value(v) {
     }
 
-    void dump() override {
-        std::cout << "HexLiteralNode(" << value << ")\n";
+    void dump(const int ident) override {
+        printIndent(ident);
+        std::cout << "INT(" << value << ")\n";
     }
 };
 
@@ -36,8 +45,9 @@ struct IntLiteralNode : ExprNode {
     explicit IntLiteralNode(const int32_t v) : value(v) {
     }
 
-    void dump() override {
-        std::cout << "IntLiteralNode(" << value << ")\n";
+    void dump(int ident) override {
+        printIndent(ident);
+        std::cout << "INT(" << value << ")\n";
     }
 };
 
@@ -47,30 +57,55 @@ struct FloatLiteralNode : ExprNode {
     explicit FloatLiteralNode(const double v) : value(v) {
     }
 
-    void dump() override {
-        std::cout << "FloatLiteralNode(" << value << ")\n";
+    void dump(const int ident) override {
+        printIndent(ident);
+        std::cout << "FLOAT(" << value << ")\n";
     }
 };
 
 struct IdentNode : ExprNode {
     std::string name;
 
-    IdentNode(const std::string &s) : name(s) {
+    explicit IdentNode(std::string s) : name(std::move(s)) {
     }
 
-    void dump() override {
-        std::cout << "IdentNode(" << name << ")\n";
+    void dump(int ident) override {
+        printIndent(ident);
+        std::cout << "ID(" << name << ")\n";
     }
 };
 
-struct ParenExprNode : ExprNode {
+struct UnaryOpNode : ExprNode {
+    int op; // token kind: TOK_MINUS, TOK_NOT, TOK_STAR, TOK_AMP
+    //ParenExprNode *expr; // the operand
     ExprNode *expr;
 
-    ParenExprNode(ExprNode *e) : expr(e) {
+    UnaryOpNode(const int op, ExprNode *expr)
+        : op(op), expr(expr) {
     }
 
-    void dump() override {
-        expr->dump();
+
+    void dump(const int ident) override {
+        printIndent(ident);
+        std::cout << "(" << minicTokenKindToSimbol(op) << ")\n";
+        expr->dump(ident + 2);
+    }
+};
+
+struct BinaryOpNode : ExprNode {
+    int op; // TOK_STAR, TOK_SLASH, TOK_PERCENT, ...
+    ExprNode *left;
+    ExprNode *right;
+
+    BinaryOpNode(ExprNode *l, int op, ExprNode *r)
+        : op(op), left(l), right(r) {
+    }
+
+    void dump(const int ident) override {
+        printIndent(ident);
+        std::cout << "(" << minicTokenKindToSimbol(op) << ")\n";
+        left->dump(ident + 2);
+        right->dump(ident + 2);
     }
 };
 

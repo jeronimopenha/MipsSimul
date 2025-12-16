@@ -2,14 +2,14 @@
 
 using namespace std;
 
-const Token &Parser::peek() const {
+const Token &Parser::peek() {
     if (pos >= tokens.size())
         return tokens.back();
     return tokens[pos];
 }
 
 
-Token Parser::peekNext() const {
+const Token Parser::peekNext() {
     if (pos >= tokens.size()) {
         return tokens.back();
     }
@@ -49,17 +49,18 @@ bool Parser::eof() const {
 }
 
 const Token &Parser::previous() const {
-    return tokens[pos - 1];
+    if (pos - 1 > 0)
+        return tokens[pos - 1];
+    return tokens[0];
 }
 
 const Token &Parser::previousTwo() const {
     if (pos - 2 > 0)
         return tokens[pos - 2];
-
     return tokens[0];
 }
 
-bool Parser::check(const int kind) const {
+bool Parser::check(const int kind)  {
     if (eof()) {
         return false;
     }

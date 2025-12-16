@@ -63,6 +63,7 @@ enum MiniCTokenKind {
     TOK_UNKNOWN
 };
 
-std::string minicTokenKindToString( MiniCTokenKind k);
+std::string minicTokenKindToString( int k);
+std::string minicTokenKindToSimbol( int k);
 
 #endif //MIPSSIMUL_MINIC_T_KIND_H

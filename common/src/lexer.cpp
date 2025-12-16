@@ -133,7 +133,7 @@ Token Lexer::nextToken() {
         //handle the F or f char
         if (!eof()) {
             const char d = peek();
-            if ((d == 'f' || d == 'F') && (hasDot || hasE)) {
+            if ((d == 'f' || d == 'F') && !(hasDot || hasE)) {
                 // só faz sentido 'f' se isso já for um float
                 lex.push_back(nextChar());
             }

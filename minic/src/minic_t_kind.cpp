@@ -3,7 +3,7 @@
 
 using namespace std;
 
-string minicTokenKindToString(const MiniCTokenKind k) {
+string minicTokenKindToString(const int k) {
     switch (k) {
         case TOK_INT: return "INT"; // reserved  - int
         case TOK_FLOAT: return "FLOAT"; // reserved  - float
@@ -51,6 +51,35 @@ string minicTokenKindToString(const MiniCTokenKind k) {
         //Specials
         case TOK_EOF: return "EOF"; // End of file
         case TOK_NEWLN: return "NEWLN"; // End of file
+        default: return "UNKNOWN";
+    }
+}
+
+string minicTokenKindToSimbol(const int k) {
+    switch (k) {
+        //arithmetic operators
+        case TOK_PLUS: return "+"; // +
+        case TOK_MINUS: return "-"; // -
+        case TOK_STAR: return "*"; //*
+        case TOK_SLASH: return "/"; // /
+        case TOK_PERCENT: return "%"; //%
+        // relational operators
+        case TOK_EQ: return "=="; // ==
+        case TOK_NEQ: return "!="; // !=
+        case TOK_LE: return "<="; // <
+        case TOK_GE: return ">="; //>=
+        case TOK_LT: return "<"; //<
+        case TOK_GT: return ">"; //>
+        //logical operators
+        case TOK_AND_AND: return "&&"; // &&
+        case TOK_OR_OR: return "||"; //||
+        case TOK_NOT: return "!"; //!
+        //assign
+        case TOK_ASSIGN: return "="; // =
+        //pointers
+        case TOK_AMP: return "&"; // &
+        // Delimitations
+        case TOK_SEMI: return "SEMICOLON"; // ;
         default: return "UNKNOWN";
     }
 }

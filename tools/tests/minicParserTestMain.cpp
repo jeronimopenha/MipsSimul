@@ -38,11 +38,12 @@ int main() {
         //FIXME fix this in future
         //auto prog = p.parseExpr();
         while (parser.peek().kind != TOK_EOF) {
-            ExprNode *prog = parser.parsePrimary();
-            prog->dump();
+            if (parser.match(TOK_NEWLN) )continue;
+            ExprNode *prog = parser.parseExpr();
+            prog->dump(0);
         }
         int a=1;
-        // Só pra testar: imprimir o que o parser entendeu
+
         /*for (auto &line: prog) {
             if (!line.label.empty()) {
                 cout << line.label << ":\n";

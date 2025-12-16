@@ -16,21 +16,54 @@ public:
 
     // FIXME CHANGE ON FUTURE
     ExprNode *parseExpr(); // ainda vamos definir depois
+    ExprNode *parseAdd();
+
+    ExprNode *parseMul();
+
+    ExprNode *parseUnary();
+
     ExprNode *parsePrimary();
 
 private:
-
-
     void skipNewLines();
 };
+
+/*
+ * Precedency order
+ * postfix (call, indexing)
+ * unary (- ! * &)
+ * mul (* / %)
+ * add (+ -)
+ * rel (< <= > >=)
+ * eq (== !=)
+ * and (&&)
+ * or (||)
+ * assign (=) (weak and rhs)
+ */
 
 /*
  * New grammar
  *
  * program ::= { external_decl } TOK_EOF
  *
+ * add_expr ::= mul_expr { (TOK_PLUS | TOK_MINUS) mul_expr }
  *
+ * mul_expr ::= unary_expr { (TOK_STAR | TOK_SLASH | TOK_PERCENT) unary_expr }
  *
+ * unary_expr ::= unary_op unary_expr
+ *                | primary_expr
+ *
+ * unary_op ::= TOK_MINUS
+ *              | TOK_PLUS
+ *              | TOK_NOT
+ *              | TOK_STAR
+ *              | TOK_AMP
+ *
+ * primary_expr ::= TOK_INT_LIT
+ *                | TOK_HEX_LIT
+ *                | TOK_FLOAT_LIT
+ *                | TOK_IDENT
+ *                | TOK_LPAREN expr TOK_RPAREN
  */
 
 
