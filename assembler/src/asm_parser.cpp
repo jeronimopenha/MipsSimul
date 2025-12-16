@@ -1,5 +1,7 @@
 #include <asm_parser.h>
 
+#include "disasm.h"
+
 using namespace std;
 
 //program    ::= { line }
@@ -87,70 +89,100 @@ vector<AsmOperand> AsmParser::parseOperandList() {
           | IDENT
 */
 AsmOperand AsmParser::parseOperand() {
-    const Token &t = peek();
-    AsmOperand op;
+    if (match(ASM_REG)) {
+        const Token r = previous();
+        AsmOperand op = {AsmOperand::Kind::REG, -1, -1, -1, r.lexeme,};
+        return op;
+    }
 
-    switch (t.kind) {
-        case ASM_REG: {
-            const Token r = get();
-            op.kind = AsmOperand::Kind::Reg;
-            op.reg = -1; // lets map this later (semantic phase)
-            // we can store the name here to map later
-            op.label = r.lexeme;
-            break;
+
+    if (match(ASM_MINUS)) {
+        if (!check(ASM_INT_LIT)) {
+            error(peekNext(), "integer expected");
+        }
+    }
+
+    if (match(ASM_INT_LIT)) {
+        // can be immediate or memaddr number
+        const Token num = previous();
+
+        int imm = stoi( // parse num -> int
+            num.lexeme,
+            nullptr,
+            (
+                num.lexeme.rfind("0x", 0) == 0 ||
+                num.lexeme.rfind("0X", 0) == 0
+            )
+                ? 16
+                : 10
+        );
+
+        if (previousTwo().kind == ASM_MINUS) {
+            imm *= -1;
         }
 
-        case ASM_INT_LIT: {
-            // can be immediate or memaddr number
-            const Token num = get();
-
-            if (peek().kind == ASM_L_PAREN) {
-                // is memaddr: num "(" reg ")"
-                get(); // consume "("
-                const Token r = expect(ASM_REG, "address register");
-                expect(ASM_R_PAREN, "')'");
-
-                op.kind = AsmOperand::Kind::Mem;
-                // parse num -> int
-                op.imm = stoi(num.lexeme, nullptr,
-                              (num.lexeme.rfind("0x", 0) == 0 || num.lexeme.rfind("0X", 0) == 0) ? 16 : 10);
-                op.baseReg = -1; // map later
-                op.label = r.lexeme; // name of the reg base
-            } else {
-                // just immediate
-                op.kind = AsmOperand::Kind::Imm;
-                op.imm = stoi(num.lexeme, nullptr,
-                              (num.lexeme.rfind("0x", 0) == 0 || num.lexeme.rfind("0X", 0) == 0) ? 16 : 10);
-            }
-            break;
-        }
-
-        case ASM_L_PAREN: {
-            // memaddr with no offset: "($sp)"
+        if (check(ASM_L_PAREN)) {
+            // is mem addr: num "(" reg ")"
             get(); // consume "("
             const Token r = expect(ASM_REG, "address register");
             expect(ASM_R_PAREN, "')'");
 
-            op.kind = AsmOperand::Kind::Mem;
-            op.imm = 0;
-            op.baseReg = -1; // map later
-            op.label = r.lexeme; // nome of the base reg
-            break;
+
+            AsmOperand op = {
+                AsmOperand::Kind::MEM,
+                -1,
+                imm,
+                -1, // map later
+                r.lexeme // name of the reg base
+            };
+            return op;
         }
 
-        case ASM_IDENT: {
-            // can be a label for jump and branche
-            const Token id = get();
-            op.kind = AsmOperand::Kind::LabelRef;
-            op.label = id.lexeme;
-            break;
-        }
+        // just immediate
+        AsmOperand op = {
+            AsmOperand::Kind::IMM,
+            -1,
+            imm,
+            -1, // map later
+        };
 
-        default:
-            error(t,"Unexpected operand");
-            /*cerr << "Unexpected operand on line" << t.line << ", column " << t.col << " with lexeme: '" << t.lexeme <<"'" << "\n";
-            throw runtime_error("parsing errorg: operand");*/
+        return op;
     }
 
-    return op;
+    if (match(ASM_L_PAREN)) {
+        // memaddr with no offset: "($sp)"
+        const Token r = expect(ASM_REG, "address register");
+        expect(ASM_R_PAREN, "')'");
+
+        AsmOperand op = {
+            AsmOperand::Kind::MEM,
+            -1,
+            0,
+            -1,
+            r.lexeme
+
+        };
+        return op;
+    }
+
+    if (match(ASM_IDENT)) {
+        // can be a label for jump and branche
+        const Token id = previous();
+
+        AsmOperand op = {
+            AsmOperand::Kind::LABELREF,
+            -1,
+            -1,
+            -1,
+            id.lexeme
+
+        };
+        return op;
+    }
+
+
+    error(peek(), "Unexpected operand");
+    /*cerr << "Unexpected operand on line" << t.line << ", column " << t.col << " with lexeme: '" << t.lexeme <<"'" << "\n";
+    throw runtime_error("parsing errorg: operand");*/
+    return {};
 }

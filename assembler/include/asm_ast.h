@@ -5,10 +5,10 @@
 
 struct AsmOperand {
     enum Kind {
-        Reg,
-        Imm,
-        Mem,
-        LabelRef
+        REG,
+        IMM,
+        MEM,
+        LABELREF
     } kind;
 
     int reg = 0; // if register

@@ -46,13 +46,13 @@ int main() {
                 for (auto &a: line.instr.args) {
                     cout << "  [";
                     switch (a.kind) {
-                        case AsmOperand::Kind::Reg: cout << "Reg " << a.label;
+                        case AsmOperand::Kind::REG: cout << "Reg " << a.label;
                             break;
-                        case AsmOperand::Kind::Imm: cout << "Imm " << a.imm;
+                        case AsmOperand::Kind::IMM: cout << "Imm " << a.imm;
                             break;
-                        case AsmOperand::Kind::Mem: cout << "Mem off=" << a.imm << " base=" << a.label;
+                        case AsmOperand::Kind::MEM: cout << "Mem off=" << a.imm << " base=" << a.label;
                             break;
-                        case AsmOperand::Kind::LabelRef: cout << "Label " << a.label;
+                        case AsmOperand::Kind::LABELREF: cout << "Label " << a.label;
                             break;
                     }
                     cout << "]";

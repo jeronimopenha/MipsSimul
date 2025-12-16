@@ -48,13 +48,13 @@ int runParser(const istream &in, ostream &out) {
             for (const auto &a: inst.args) {
                 out << "  [";
                 switch (a.kind) {
-                    case AsmOperand::Kind::Reg: out << "Reg " << a.label;
+                    case AsmOperand::Kind::REG: out << "Reg " << a.label;
                         break;
-                    case AsmOperand::Kind::Imm: out << "Imm " << a.imm;
+                    case AsmOperand::Kind::IMM: out << "Imm " << a.imm;
                         break;
-                    case AsmOperand::Kind::Mem: out << "Mem off=" << a.imm << " base=" << a.label;
+                    case AsmOperand::Kind::MEM: out << "Mem off=" << a.imm << " base=" << a.label;
                         break;
-                    case AsmOperand::Kind::LabelRef: out << "Label " << a.label;
+                    case AsmOperand::Kind::LABELREF: out << "Label " << a.label;
                         break;
                 }
                 out << "]";

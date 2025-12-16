@@ -59,8 +59,8 @@ vector<uint32_t> asmGenerateCode(const vector<AsmLine> &prog, const unordered_ma
             const AsmOperand &dst = inst.args[0];
             const AsmOperand &src = inst.args[1];
 
-            if (dst.kind != AsmOperand::Kind::Reg ||
-                src.kind != AsmOperand::Kind::Reg) {
+            if (dst.kind != AsmOperand::Kind::REG ||
+                src.kind != AsmOperand::Kind::REG) {
                 throw runtime_error("move: both operands must be registers");
             }
 
@@ -116,7 +116,7 @@ vector<uint32_t> asmGenerateCode(const vector<AsmLine> &prog, const unordered_ma
                 const int rt = regNumber(inst.args[1].label);
 
                 const AsmOperand &shOp = inst.args[2];
-                if (shOp.kind != AsmOperand::Kind::Imm) {
+                if (shOp.kind != AsmOperand::Kind::IMM) {
                     throw runtime_error(desc->name + ": shamt must be immediate");
                 }
 
@@ -130,7 +130,7 @@ vector<uint32_t> asmGenerateCode(const vector<AsmLine> &prog, const unordered_ma
                 }
 
                 const AsmOperand &opRs = inst.args[0];
-                if (opRs.kind != AsmOperand::Kind::Reg) {
+                if (opRs.kind != AsmOperand::Kind::REG) {
                     throw runtime_error(desc->name + ": operand must be register");
                 }
 
@@ -157,7 +157,7 @@ vector<uint32_t> asmGenerateCode(const vector<AsmLine> &prog, const unordered_ma
                 const int rs = regNumber(inst.args[1].label);
 
                 const AsmOperand &immOp = inst.args[2];
-                if (immOp.kind != AsmOperand::Kind::Imm) {
+                if (immOp.kind != AsmOperand::Kind::IMM) {
                     throw runtime_error(desc->name + ": third operand must be immediate");
                 }
 
@@ -173,7 +173,7 @@ vector<uint32_t> asmGenerateCode(const vector<AsmLine> &prog, const unordered_ma
                 const int rt = regNumber(inst.args[0].label);
                 const AsmOperand &mem = inst.args[1];
 
-                if (mem.kind != AsmOperand::Kind::Mem) {
+                if (mem.kind != AsmOperand::Kind::MEM) {
                     throw runtime_error(desc->name + ": second operand must be Mem");
                 }
 
@@ -191,7 +191,7 @@ vector<uint32_t> asmGenerateCode(const vector<AsmLine> &prog, const unordered_ma
                 const int rt = regNumber(inst.args[1].label);
                 const AsmOperand &lab = inst.args[2];
 
-                if (lab.kind != AsmOperand::Kind::LabelRef) {
+                if (lab.kind != AsmOperand::Kind::LABELREF) {
                     throw runtime_error(desc->name + ": third operand must be Label");
                 }
 
@@ -223,7 +223,7 @@ vector<uint32_t> asmGenerateCode(const vector<AsmLine> &prog, const unordered_ma
             }
 
             const AsmOperand &a0 = inst.args[0];
-            if (a0.kind != AsmOperand::Kind::LabelRef) {
+            if (a0.kind != AsmOperand::Kind::LABELREF) {
                 throw runtime_error(desc->name + ": operand must be Label");
             }
 

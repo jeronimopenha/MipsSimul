@@ -11,6 +11,8 @@ protected:
 
     [[nodiscard]] const Token &previous() const;
 
+    const Token &previousTwo() const;
+
     [[nodiscard]] bool check(int kind) const;
 
     // match com vários kinds de uma vez (igual eu usei no parser de expressões)
@@ -22,6 +24,8 @@ public:
     }
 
     [[nodiscard]] const Token &peek() const;
+
+    [[nodiscard]] Token peekNext() const;
 
     const Token &get();
 

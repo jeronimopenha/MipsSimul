@@ -8,6 +8,17 @@ const Token &Parser::peek() const {
     return tokens[pos];
 }
 
+
+Token Parser::peekNext() const {
+    if (pos >= tokens.size()) {
+        return tokens.back();
+    }
+    if (pos + 1 >= tokens.size()) {
+        return tokens.back();
+    }
+    return tokens[pos + 1];
+}
+
 const Token &Parser::get() {
     const Token &t = peek();
     if (pos < tokens.size()) {
@@ -39,6 +50,13 @@ bool Parser::eof() const {
 
 const Token &Parser::previous() const {
     return tokens[pos - 1];
+}
+
+const Token &Parser::previousTwo() const {
+    if (pos - 2 > 0)
+        return tokens[pos - 2];
+
+    return tokens[0];
 }
 
 bool Parser::check(const int kind) const {
