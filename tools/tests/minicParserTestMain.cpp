@@ -37,7 +37,7 @@ int main() {
         MiniCParser parser(tokens);
         //FIXME fix this in future
         //auto prog = p.parseExpr();
-        while (!(parser.peek().kind == TOK_EOF)) {
+        while (parser.peek().kind != TOK_EOF) {
             ExprNode *prog = parser.parsePrimary();
             prog->dump();
         }

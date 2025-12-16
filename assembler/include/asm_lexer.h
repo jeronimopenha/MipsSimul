@@ -17,6 +17,7 @@ private:
         {":", ASM_COLON},
         {"(", ASM_L_PAREN},
         {")", ASM_R_PAREN},
+        {"-",ASM_MINUS},
         {"\n", ASM_NEWLINE}
     };
 

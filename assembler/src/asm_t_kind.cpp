@@ -6,6 +6,7 @@ string asmTokenKindToString(const AsmTokenKind k) {
     switch (k) {
         case ASM_IDENT: return "IDENT";
         case ASM_REG: return "REG";
+        case ASM_MINUS: return "MINUS";
         case ASM_INT_LIT: return "NUM";
         case ASM_COMMA: return "COMMA";
         case ASM_COLON: return "COLON";

@@ -7,6 +7,7 @@
 enum AsmTokenKind {
     ASM_IDENT, // opcodes, labels, regs without $
     ASM_REG, // tokens with initial $
+    ASM_MINUS, // - Simbol used to make negative numbers
     ASM_INT_LIT, // immediate (decimal or hex)
     ASM_COMMA, // ,
     ASM_COLON, // :

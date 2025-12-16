@@ -79,6 +79,7 @@ vector<AsmOperand> AsmParser::parseOperandList() {
     return args;
 }
 
+//TODO implement with "match()"
 /*
  operand ::= REGISTER
           | NUMBER
@@ -146,8 +147,9 @@ AsmOperand AsmParser::parseOperand() {
         }
 
         default:
-            cerr << "Unexpected operand on line " << t.line << "\n";
-            throw runtime_error("parsing errorg: operand");
+            error(t,"Unexpected operand");
+            /*cerr << "Unexpected operand on line" << t.line << ", column " << t.col << " with lexeme: '" << t.lexeme <<"'" << "\n";
+            throw runtime_error("parsing errorg: operand");*/
     }
 
     return op;
