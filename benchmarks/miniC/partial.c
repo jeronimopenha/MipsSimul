@@ -92,3 +92,60 @@ a + b*c - d/e;
 (0x10) * (-3);
 0x20 + 4*2;
 (0x2A - 10) + (3 * 7);
+
+// ===== relational (< <= > >=) =====
+a < b;
+a <= b;
+a > b;
+a >= b;
+
+// precedência: add/mul antes de rel
+a + 1 < b * 2;
+(a + 1) < (b * 2);
+a * 2 <= b + 3;
+(a*b) > (c/d);
+
+// com unário
+-a < b;
+!(a < b);          // unary '!' aplicado a um rel via parênteses
+(-a) >= (+b);
+
+// com literais int/hex/float (SEM sufixo f/F)
+0 < 1;
+0x10 >= 15;
+3.14 < 10.;
+.5 <= 1.0e3;
+-(6.02E23) > 0.0;
+
+// cadeia (C aceita; bom pra ver AST e associatividade)
+a < b < c;
+
+
+// ===== equality (== !=) =====
+a == b;
+a != b;
+
+// precedência: rel antes de eq
+a < b == c < d;
+(a < b) == (c < d);
+
+// mistura com add/mul
+a + 1 == b * 2;
+a * 2 != b + 3;
+(a*b) == (c/d);
+
+// com unário e parênteses
+!(a == b);
+!((a < b) != (c >= d));
+
+// literais (SEM sufixo f/F)
+0 == 0;
+0 != 1;
+0x10 == 16;
+3.14 != 10.;
+.5 == 0.5;
+1.0e3 == 1000.0;
+
+// cadeia (só pra ver associatividade na AST)
+a == b == c;
+a != b != c;

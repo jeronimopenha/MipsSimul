@@ -16,6 +16,10 @@ public:
 
     // FIXME CHANGE ON FUTURE
     ExprNode *parseExpr(); // ainda vamos definir depois
+    ExprNode *parseEql();
+
+    ExprNode *parseRel();
+
     ExprNode *parseAdd();
 
     ExprNode *parseMul();
@@ -45,6 +49,10 @@ private:
  * New grammar
  *
  * program ::= { external_decl } TOK_EOF
+ *
+ * eql_expr ::= rel_expr { (TOK_EQ | TOK_NEQ ) rel_expr }
+ *
+ * rel_expr ::= add_expr { (TOK_LT | TOK_LE | TOK_GT | TOK_GE) add_expr }
  *
  * add_expr ::= mul_expr { (TOK_PLUS | TOK_MINUS) mul_expr }
  *

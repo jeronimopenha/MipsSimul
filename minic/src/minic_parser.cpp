@@ -5,9 +5,41 @@ using namespace std;
 //TODO fix lexer that is transformim 10 in 16. It is thinkink 10 is hex, but not
 
 ExprNode *MiniCParser::parseExpr() {
-    ExprNode *expr = parseAdd();
+    ExprNode *expr = parseEql();
     match(TOK_SEMI);
     return expr;
+}
+
+/*
+ * eql_expr ::= rel_expr { (TOK_EQ | TOK_NEQ ) rel_expr }
+ */
+ExprNode *MiniCParser::parseEql() {
+    ExprNode *lhs = parseRel();
+
+    while (match(TOK_EQ) || match(TOK_NEQ)) {
+        const int op = previous().kind;
+
+        ExprNode *rhs = parseRel();
+        lhs = new BinaryOpNode(lhs, op, rhs);
+    }
+
+    return lhs;
+}
+
+/*
+ * rel_expr ::= add_expr { (TOK_LT | TOK_LE | TOK_GT | TOK_GE) add_expr }
+ */
+ExprNode *MiniCParser::parseRel() {
+    ExprNode *lhs = parseAdd();
+
+    while (match(TOK_LT) || match(TOK_LE) || match(TOK_GT) || match(TOK_GE)) {
+        const int op = previous().kind;
+
+        ExprNode *rhs = parseAdd();
+        lhs = new BinaryOpNode(lhs, op, rhs);
+    }
+
+    return lhs;
 }
 
 /*
@@ -17,7 +49,7 @@ ExprNode *MiniCParser::parseAdd() {
     ExprNode *lhs = parseMul();
 
     while (match(TOK_PLUS) || match(TOK_MINUS)) {
-        int op = previous().kind;
+        const int op = previous().kind;
 
         ExprNode *rhs = parseMul();
         lhs = new BinaryOpNode(lhs, op, rhs);
@@ -33,7 +65,7 @@ ExprNode *MiniCParser::parseMul() {
     ExprNode *lhs = parseUnary();
 
     while (match(TOK_STAR) || match(TOK_SLASH) || match(TOK_PERCENT)) {
-        int op = previous().kind;
+        const int op = previous().kind;
 
         ExprNode *rhs = parseUnary();
         lhs = new BinaryOpNode(lhs, op, rhs);

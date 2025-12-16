@@ -91,7 +91,7 @@ Token MiniCLexer::makeNumberToken(const string &lexeme, const int startLine, con
             t.floatValue = std::stod(floatLex);
         } else {
             t.kind = TOK_INT_LIT;
-            t.intValue = static_cast<int32_t>(stoll(lexeme, nullptr, 16));
+            t.intValue = static_cast<int32_t>(stoll(lexeme, nullptr, 10));
         }
     } catch (const std::exception &e) {
         error(t, "Invalid numeric literal");
