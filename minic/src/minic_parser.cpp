@@ -11,41 +11,50 @@ unique_ptr<ExprNode> MiniCParser::parseExpr() {
 }
 
 /*
- * assign_expr := or_expr | lvalue TOP_EQ assign_expr
+ * assign_expr := lvalue TOK_EQ assign_expr | or_expr
  */
 std::unique_ptr<ExprNode> MiniCParser::parseAssign() {
-    auto lhs = parseOR();
+    unique_ptr<ExprNode> lhs = parseOR();
 
     if (!match(TOK_ASSIGN)) {
         return lhs; // without '=' is not an assignment
     }
 
-    lhs = parseLValue();
+    const Token opTok = previous(); // '='
 
-    auto rhs = parseAssign(); // right-assoc: a = (b = c)
-    return std::make_unique<AssignNode>(std::move(lhs), TOK_ASSIGN, std::move(rhs));
-}
-
-/*
- * lvalue ::= TOK_IDENT
- *            | '*' unary_expr
- *            | lvalue '[' expr ']'
-*/
-std::unique_ptr<ExprNode> MiniCParser::parseLValue() {
-    if (match(TOK_IDENT)) {
-        return
-    }
-    if (match(TOK_STAR)) {
-
+    if (!isLValue(lhs.get())) {
+        error(opTok, "left side of '=' is not assignable");
     }
 
+    unique_ptr<ExprNode> rhs = parseAssign();
 
-    //lvalue [ expr ] não sei como
-
-    error(get(), "expected Lvalue");
-
+    return make_unique<AssignNode>(std::move(lhs), opTok.kind, std::move(rhs));
 }
 
+bool MiniCParser::isLValue(ExprNode *n) {
+    if (!n) return false;
+
+    // IDENT
+    const auto id = dynamic_cast<IdentNode *>(n);
+    if (id) {
+        return true;
+    }
+
+    // 2) *p   → unreference
+    const auto un = dynamic_cast<UnaryOpNode *>(n);
+    if (un) {
+        return un->op == TOK_STAR;
+    }
+
+    // 3) v[i] ou v[i][j], index
+    const auto idx = dynamic_cast<IndexNode *>(n);
+    if (idx) {
+        return true;
+    }
+
+    // 4) nothing
+    return false;
+}
 
 /*
 * or_expr ::= and_expr { (TOK_OR_OR ) and_expr }
@@ -206,4 +215,44 @@ unique_ptr<ExprNode> MiniCParser::parsePrimary() {
 
 void MiniCParser::skipNewLines() {
     while (match(TOK_NEWLN));
+}
+
+/*
+ * lvalue ::=  lvalue_base { TOK_LBRACKET expr TOK_RBRACKET }
+*/
+std::unique_ptr<ExprNode> MiniCParser::parseLValue() {
+    unique_ptr<ExprNode> node = parseLValueBase();
+
+    while (match(TOK_LBRACKET)) {
+        unique_ptr<ExprNode> idx = parseExpr();
+        expect(TOK_RBRACKET, "expected ']'");
+        node = std::make_unique<IndexNode>(std::move(node), std::move(idx));
+    }
+
+    return node;
+}
+
+
+/*
+ * lvalue_base ::= TOK_IDENT
+ *                 | '*' unary_expr
+ *                 | TOK_LPAREN lvalue TOK_RPAREN
+*/
+std::unique_ptr<ExprNode> MiniCParser::parseLValueBase() {
+    if (match(TOK_IDENT)) {
+        Token idTok = previous();
+        return std::make_unique<IdentNode>(idTok.lexeme);
+    }
+    if (match(TOK_STAR)) {
+        auto rhs = parseUnary();
+        return std::make_unique<UnaryOpNode>(TOK_STAR, std::move(rhs));
+    }
+    if (match(TOK_LPAREN)) {
+        auto inner = parseLValue();
+        expect(TOK_RPAREN, "expected ')'");
+        return inner;
+    }
+
+    error(get(), "expected lvalue");
+    return {};
 }

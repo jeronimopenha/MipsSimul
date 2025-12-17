@@ -19,7 +19,11 @@ public:
 
     std::unique_ptr<ExprNode> parseAssign();
 
+    static bool isLValue(ExprNode *n);
+
     std::unique_ptr<ExprNode> parseLValue();
+
+    std::unique_ptr<ExprNode> parseLValueBase();
 
     std::unique_ptr<ExprNode> parseOR();
 
@@ -59,13 +63,15 @@ private:
  *
  * program ::= { external_decl } TOK_EOF
  *
- * expr := or_expr TOK_SEMI
+ * expr := assign_expr TOK_SEMI
  *
- * assign_expr := or_expr | lvalue TOP_EQ assign_expr
+ * assign_expr := or_expr | lvalue TOK_ASSIGN assign_expr
  *
- * lvalue ::= TOK_IDENT
+ * lvalue ::=  lvalue_base { TOK_LBRACKET expr TOK_RBRACKET}
+ *
+ * lvalue_base ::= TOK_IDENT
  *            | '*' unary_expr
- *            | lvalue '[' expr ']'
+ *            | TOK_LPAREN lvalue TOK_RPAREN
  *
  * or_expr ::= and_expr { (TOK_OR_OR ) and_expr }
  *

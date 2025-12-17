@@ -75,6 +75,22 @@ struct IdentNode : ExprNode {
     }
 };
 
+struct IndexNode : ExprNode {
+    std::unique_ptr<ExprNode> base;
+    std::unique_ptr<ExprNode> index;
+
+    IndexNode(std::unique_ptr<ExprNode> b, std::unique_ptr<ExprNode> i)
+        : base(std::move(b)), index(std::move(i)) {}
+
+    void dump(const int ident) override {
+        printIndent(ident);
+        std::cout << "INDEX\n";
+        base->dump(ident + 2);
+        index->dump(ident + 2);
+    }
+};
+
+
 struct UnaryOpNode : ExprNode {
     int op; // token kind: TOK_MINUS, TOK_NOT, TOK_STAR, TOK_AMP
     //ParenExprNode *expr; // the operand
