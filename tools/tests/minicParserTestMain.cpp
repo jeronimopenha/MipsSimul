@@ -38,11 +38,11 @@ int main() {
         //FIXME fix this in future
         //auto prog = p.parseExpr();
         while (parser.peek().kind != TOK_EOF) {
-            if (parser.match(TOK_NEWLN) )continue;
-            ExprNode *prog = parser.parseExpr();
+            if (parser.match(TOK_NEWLN))continue;
+            unique_ptr<ExprNode> prog = parser.parseExpr();
             prog->dump(0);
         }
-        int a=1;
+        int a = 1;
 
         /*for (auto &line: prog) {
             if (!line.label.empty()) {

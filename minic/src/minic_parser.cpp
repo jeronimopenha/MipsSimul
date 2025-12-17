@@ -4,23 +4,93 @@ using namespace std;
 
 //TODO fix lexer that is transformim 10 in 16. It is thinkink 10 is hex, but not
 
-ExprNode *MiniCParser::parseExpr() {
-    ExprNode *expr = parseEql();
+unique_ptr<ExprNode> MiniCParser::parseExpr() {
+    unique_ptr<ExprNode> expr = parseAssign();
     match(TOK_SEMI);
     return expr;
 }
 
 /*
+ * assign_expr := or_expr | lvalue TOP_EQ assign_expr
+ */
+std::unique_ptr<ExprNode> MiniCParser::parseAssign() {
+    auto lhs = parseOR();
+
+    if (!match(TOK_ASSIGN)) {
+        return lhs; // without '=' is not an assignment
+    }
+
+    lhs = parseLValue();
+
+    auto rhs = parseAssign(); // right-assoc: a = (b = c)
+    return std::make_unique<AssignNode>(std::move(lhs), TOK_ASSIGN, std::move(rhs));
+}
+
+/*
+ * lvalue ::= TOK_IDENT
+ *            | '*' unary_expr
+ *            | lvalue '[' expr ']'
+*/
+std::unique_ptr<ExprNode> MiniCParser::parseLValue() {
+    if (match(TOK_IDENT)) {
+        return
+    }
+    if (match(TOK_STAR)) {
+
+    }
+
+
+    //lvalue [ expr ] não sei como
+
+    error(get(), "expected Lvalue");
+
+}
+
+
+/*
+* or_expr ::= and_expr { (TOK_OR_OR ) and_expr }
+*/
+unique_ptr<ExprNode> MiniCParser::parseOR() {
+    unique_ptr<ExprNode> lhs = parseAnd();
+
+    while (match(TOK_OR_OR)) {
+        const int op = previous().kind;
+
+        unique_ptr<ExprNode> rhs = parseAnd();
+        lhs = make_unique<BinaryOpNode>(std::move(lhs), op, std::move(rhs));
+    }
+
+    return lhs;
+}
+
+/*
+* and_expr ::= eql_expr { (TOK_AND_AND ) eql_expr }
+*/
+
+unique_ptr<ExprNode> MiniCParser::parseAnd() {
+    unique_ptr<ExprNode> lhs = parseEql();
+
+    while (match(TOK_AND_AND)) {
+        const int op = previous().kind;
+
+        unique_ptr<ExprNode> rhs = parseEql();
+        lhs = make_unique<BinaryOpNode>(std::move(lhs), op, std::move(rhs));
+    }
+
+    return lhs;
+}
+
+/*
  * eql_expr ::= rel_expr { (TOK_EQ | TOK_NEQ ) rel_expr }
  */
-ExprNode *MiniCParser::parseEql() {
-    ExprNode *lhs = parseRel();
+unique_ptr<ExprNode> MiniCParser::parseEql() {
+    unique_ptr<ExprNode> lhs = parseRel();
 
     while (match(TOK_EQ) || match(TOK_NEQ)) {
         const int op = previous().kind;
 
-        ExprNode *rhs = parseRel();
-        lhs = new BinaryOpNode(lhs, op, rhs);
+        unique_ptr<ExprNode> rhs = parseRel();
+        lhs = make_unique<BinaryOpNode>(std::move(lhs), op, std::move(rhs));
     }
 
     return lhs;
@@ -29,14 +99,14 @@ ExprNode *MiniCParser::parseEql() {
 /*
  * rel_expr ::= add_expr { (TOK_LT | TOK_LE | TOK_GT | TOK_GE) add_expr }
  */
-ExprNode *MiniCParser::parseRel() {
-    ExprNode *lhs = parseAdd();
+unique_ptr<ExprNode> MiniCParser::parseRel() {
+    unique_ptr<ExprNode> lhs = parseAdd();
 
     while (match(TOK_LT) || match(TOK_LE) || match(TOK_GT) || match(TOK_GE)) {
         const int op = previous().kind;
 
-        ExprNode *rhs = parseAdd();
-        lhs = new BinaryOpNode(lhs, op, rhs);
+        unique_ptr<ExprNode> rhs = parseAdd();
+        lhs = make_unique<BinaryOpNode>(std::move(lhs), op, std::move(rhs));
     }
 
     return lhs;
@@ -45,14 +115,14 @@ ExprNode *MiniCParser::parseRel() {
 /*
  * add_expr ::= mul_expr { (TOK_PLUS | TOK_MINUS) mul_expr }
  */
-ExprNode *MiniCParser::parseAdd() {
-    ExprNode *lhs = parseMul();
+unique_ptr<ExprNode> MiniCParser::parseAdd() {
+    unique_ptr<ExprNode> lhs = parseMul();
 
     while (match(TOK_PLUS) || match(TOK_MINUS)) {
         const int op = previous().kind;
 
-        ExprNode *rhs = parseMul();
-        lhs = new BinaryOpNode(lhs, op, rhs);
+        unique_ptr<ExprNode> rhs = parseMul();
+        lhs = make_unique<BinaryOpNode>(std::move(lhs), op, std::move(rhs));
     }
 
     return lhs;
@@ -61,14 +131,14 @@ ExprNode *MiniCParser::parseAdd() {
 /*
  * mul_expr ::= unary_expr { (TOK_STAR | TOK_SLASH | TOK_PERCENT) unary_expr }
  */
-ExprNode *MiniCParser::parseMul() {
-    ExprNode *lhs = parseUnary();
+unique_ptr<ExprNode> MiniCParser::parseMul() {
+    unique_ptr<ExprNode> lhs = parseUnary();
 
     while (match(TOK_STAR) || match(TOK_SLASH) || match(TOK_PERCENT)) {
         const int op = previous().kind;
 
-        ExprNode *rhs = parseUnary();
-        lhs = new BinaryOpNode(lhs, op, rhs);
+        unique_ptr<ExprNode> rhs = parseUnary();
+        lhs = make_unique<BinaryOpNode>(std::move(lhs), op, std::move(rhs));
     }
 
     return lhs;
@@ -85,11 +155,11 @@ ExprNode *MiniCParser::parseMul() {
  *              | TOK_STAR
  *              | TOK_AMP
  */
-ExprNode *MiniCParser::parseUnary() {
+unique_ptr<ExprNode> MiniCParser::parseUnary() {
     if (match(TOK_MINUS) || match(TOK_PLUS) || match(TOK_NOT) || match(TOK_STAR) || match(TOK_AMP)) {
         const Token &opTok = previous();
-        ExprNode *rhs = parseUnary();
-        return new UnaryOpNode(opTok.kind, rhs);
+        unique_ptr<ExprNode> rhs = parseUnary();
+        return make_unique<UnaryOpNode>(opTok.kind, std::move(rhs));
     }
     return parsePrimary();
 }
@@ -101,24 +171,29 @@ ExprNode *MiniCParser::parseUnary() {
  *                | TOK_IDENT
  *                | TOK_LPAREN expr TOK_RPAREN
  */
-ExprNode *MiniCParser::parsePrimary() {
-    if (match(TOK_INT_LIT) || match(TOK_HEX_LIT)) {
+unique_ptr<ExprNode> MiniCParser::parsePrimary() {
+    if (match(TOK_INT_LIT)) {
         const Token &t = previous();
-        return new IntLiteralNode(t.intValue);
+        return make_unique<IntLiteralNode>(t.intValue);
+    }
+
+    if (match(TOK_HEX_LIT)) {
+        const Token &t = previous();
+        return make_unique<HexLiteralNode>(t.intValue);
     }
 
     if (match(TOK_FLOAT_LIT)) {
         const Token &t = previous();
-        return new FloatLiteralNode(t.floatValue);
+        return make_unique<FloatLiteralNode>(t.floatValue);
     }
 
     if (match(TOK_IDENT)) {
         const Token &t = previous();
-        return new IdentNode(t.lexeme);
+        return make_unique<IdentNode>(t.lexeme);
     }
 
     if (match(TOK_LPAREN)) {
-        ExprNode *e = parseExpr();
+        unique_ptr<ExprNode> e = parseExpr();
         expect(TOK_RPAREN, "expected ')'");
         return e;
     }

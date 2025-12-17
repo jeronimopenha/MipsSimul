@@ -15,18 +15,27 @@ public:
     }
 
     // FIXME CHANGE ON FUTURE
-    ExprNode *parseExpr(); // ainda vamos definir depois
-    ExprNode *parseEql();
+    std::unique_ptr<ExprNode> parseExpr();
 
-    ExprNode *parseRel();
+    std::unique_ptr<ExprNode> parseAssign();
 
-    ExprNode *parseAdd();
+    std::unique_ptr<ExprNode> parseLValue();
 
-    ExprNode *parseMul();
+    std::unique_ptr<ExprNode> parseOR();
 
-    ExprNode *parseUnary();
+    std::unique_ptr<ExprNode> parseAnd();
 
-    ExprNode *parsePrimary();
+    std::unique_ptr<ExprNode> parseEql();
+
+    std::unique_ptr<ExprNode> parseRel();
+
+    std::unique_ptr<ExprNode> parseAdd();
+
+    std::unique_ptr<ExprNode> parseMul();
+
+    std::unique_ptr<ExprNode> parseUnary();
+
+    std::unique_ptr<ExprNode> parsePrimary();
 
 private:
     void skipNewLines();
@@ -49,6 +58,18 @@ private:
  * New grammar
  *
  * program ::= { external_decl } TOK_EOF
+ *
+ * expr := or_expr TOK_SEMI
+ *
+ * assign_expr := or_expr | lvalue TOP_EQ assign_expr
+ *
+ * lvalue ::= TOK_IDENT
+ *            | '*' unary_expr
+ *            | lvalue '[' expr ']'
+ *
+ * or_expr ::= and_expr { (TOK_OR_OR ) and_expr }
+ *
+ * and_expr ::= eql_expr { (TOK_AND_AND ) eql_expr }
  *
  * eql_expr ::= rel_expr { (TOK_EQ | TOK_NEQ ) rel_expr }
  *

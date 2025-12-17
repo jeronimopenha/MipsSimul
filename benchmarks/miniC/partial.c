@@ -149,3 +149,34 @@ a * 2 != b + 3;
 // cadeia (só pra ver associatividade na AST)
 a == b == c;
 a != b != c;
+
+// ===== logical AND/OR (&& ||) =====
+a && b;
+a || b;
+
+a && b && c;        // left-assoc: ((a&&b)&&c)
+a || b || c;        // left-assoc: ((a||b)||c)
+
+a && b || c;        // precedência: (a&&b) || c
+a || b && c;        // precedência: a || (b&&c)
+
+(a || b) && c;      // parênteses forçando
+a && (b || c);      // parênteses forçando
+
+// mistura com == e rel
+a < b && c < d;
+a == b || c != d;
+(a < b) && (c == d);
+(a == b) || (c >= d);
+
+// mistura com unário !
+!a && b;
+!(a && b);
+!(a < b) || (c != d);
+
+// literais (int/hex/float sem sufixo f/F)
+0 && 1;
+0 || 1;
+1 && 1;
+(0x10 == 16) && (3.14 < 10.);
+(.5 <= 1.0e3) || (0 != 1);

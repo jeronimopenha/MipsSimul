@@ -35,7 +35,7 @@ struct HexLiteralNode : ExprNode {
 
     void dump(const int ident) override {
         printIndent(ident);
-        std::cout << "INT(" << value << ")\n";
+        std::cout << "INT_HEX(" << value << ")\n";
     }
 };
 
@@ -47,7 +47,7 @@ struct IntLiteralNode : ExprNode {
 
     void dump(int ident) override {
         printIndent(ident);
-        std::cout << "INT(" << value << ")\n";
+        std::cout << "INT_DEC(" << value << ")\n";
     }
 };
 
@@ -78,10 +78,10 @@ struct IdentNode : ExprNode {
 struct UnaryOpNode : ExprNode {
     int op; // token kind: TOK_MINUS, TOK_NOT, TOK_STAR, TOK_AMP
     //ParenExprNode *expr; // the operand
-    ExprNode *expr;
+    std::unique_ptr<ExprNode> expr;
 
-    UnaryOpNode(const int op, ExprNode *expr)
-        : op(op), expr(expr) {
+    UnaryOpNode(const int op, std::unique_ptr<ExprNode> expr)
+        : op(op), expr(std::move(expr)) {
     }
 
 
@@ -94,11 +94,28 @@ struct UnaryOpNode : ExprNode {
 
 struct BinaryOpNode : ExprNode {
     int op; // TOK_STAR, TOK_SLASH, TOK_PERCENT, ...
-    ExprNode *left;
-    ExprNode *right;
+    std::unique_ptr<ExprNode> left;
+    std::unique_ptr<ExprNode> right;
 
-    BinaryOpNode(ExprNode *l, int op, ExprNode *r)
-        : op(op), left(l), right(r) {
+    BinaryOpNode(std::unique_ptr<ExprNode> l, const int op, std::unique_ptr<ExprNode> r)
+        : op(op), left(std::move(l)), right(std::move(r)) {
+    }
+
+    void dump(const int ident) override {
+        printIndent(ident);
+        std::cout << "(" << minicTokenKindToSimbol(op) << ")\n";
+        left->dump(ident + 2);
+        right->dump(ident + 2);
+    }
+};
+
+struct AssignNode : ExprNode {
+    int op;
+    std::unique_ptr<ExprNode> left;
+    std::unique_ptr<ExprNode> right;
+
+    AssignNode(std::unique_ptr<ExprNode> l, const int op, std::unique_ptr<ExprNode> r)
+        : op(op), left(std::move(l)), right(std::move(r)) {
     }
 
     void dump(const int ident) override {
