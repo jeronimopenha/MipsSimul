@@ -80,7 +80,8 @@ struct IndexNode : ExprNode {
     std::unique_ptr<ExprNode> index;
 
     IndexNode(std::unique_ptr<ExprNode> b, std::unique_ptr<ExprNode> i)
-        : base(std::move(b)), index(std::move(i)) {}
+        : base(std::move(b)), index(std::move(i)) {
+    }
 
     void dump(const int ident) override {
         printIndent(ident);
@@ -142,6 +143,49 @@ struct AssignNode : ExprNode {
     }
 };
 
+struct StmtNode {
+    virtual ~StmtNode() = default;
+
+    virtual void dump(int ident) = 0;
+};
+
+struct ExprStmtNode : StmtNode {
+    int op;
+    std::unique_ptr<ExprNode> expr; // pode ser null para ";"
+    ExprStmtNode(const int op, std::unique_ptr<ExprNode> _expr) : op(op), expr(std::move(_expr)) {
+    }
+
+    void dump(const int ident) override {
+        printIndent(ident);
+        std::cout << minicTokenKindToSimbol(op) << "\n";
+    }
+};
+
+struct ReturnStmtNode : StmtNode {
+    std::unique_ptr<ExprNode> expr; // pode ser null
+};
+
+struct WhileStmtNode : StmtNode {
+    std::unique_ptr<ExprNode> cond;
+    std::unique_ptr<StmtNode> body;
+};
+
+struct IfStmtNode : StmtNode {
+    std::unique_ptr<ExprNode> cond;
+    std::unique_ptr<StmtNode> thenBranch;
+    std::unique_ptr<StmtNode> elseBranch; // pode ser null
+};
+
+struct BlockStmtNode : StmtNode {
+    std::vector<std::unique_ptr<StmtNode> > items;
+};
+
+struct BreakStmtNode : StmtNode {
+};
+
+struct ContinueStmtNode : StmtNode {
+};
+
 // ----------------------------------------------
 
 
@@ -153,7 +197,7 @@ struct AssignNode : ExprNode {
 primary
 unary
 multiplicative
-additive
+addictive
 relational
 equality
 logical

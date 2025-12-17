@@ -14,6 +14,10 @@ public:
         : Parser(toks) {
     }
 
+    std::unique_ptr<ExprNode> parseStmt();
+
+    std::unique_ptr<StmtNode> parseExprStmt();
+
     // FIXME CHANGE ON FUTURE
     std::unique_ptr<ExprNode> parseExpr();
 
@@ -39,6 +43,8 @@ public:
 
     std::unique_ptr<ExprNode> parseUnary();
 
+    std::unique_ptr<ExprNode> parsePostfix();
+
     std::unique_ptr<ExprNode> parsePrimary();
 
 private:
@@ -59,11 +65,41 @@ private:
  */
 
 /*
+* expr_stmt
+* return_stmt
+* compound_stmt
+* if_stmt
+* while_stmt
+* stmt (dispatcher)
+ */
+
+/*
+*decl_stmt     ::= type_spec declarator_list TOK_SEMI
+type_spec     ::= TOK_INT | TOK_FLOAT | TOK_VOID
+break_stmt    ::= TOK_BREAK TOK_SEMI
+continue_stmt ::= TOK_CONTINUE TOK_SEMI
+for_stmt      ::= TOK_FOR TOK_LPAREN expr_stmt expr_stmt expr? TOK_RPAREN stmt
+
+ *
  * New grammar
  *
  * program ::= { external_decl } TOK_EOF
  *
- * expr := assign_expr TOK_SEMI
+ * stmt ::= while_stmt
+ *        | if_stmt
+ *        | compound_stmt
+ *        | return_stmt
+ *        | break_stmt
+ *        | continue_stmt
+ *        | for_stmt
+ *        | decl_stmt
+ *        | expr_stmt
+ *
+ * return_stmt ::= TOK_RETURN expr? TOK_SEMI
+ *
+ * expr_stmt ::= expr? TOK_SEMI
+ *
+ * expr := [assign_expr]
  *
  * assign_expr := or_expr | lvalue TOK_ASSIGN assign_expr
  *
@@ -86,13 +122,15 @@ private:
  * mul_expr ::= unary_expr { (TOK_STAR | TOK_SLASH | TOK_PERCENT) unary_expr }
  *
  * unary_expr ::= unary_op unary_expr
- *                | primary_expr
+ *                | postfix_expr
  *
  * unary_op ::= TOK_MINUS
  *              | TOK_PLUS
  *              | TOK_NOT
  *              | TOK_STAR
  *              | TOK_AMP
+ *
+ * postfix_expr ::= primary_expr { TOK_LBRACKET expr TOK_RBRACKET }
  *
  * primary_expr ::= TOK_INT_LIT
  *                | TOK_HEX_LIT

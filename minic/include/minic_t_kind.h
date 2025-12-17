@@ -11,7 +11,10 @@ enum MiniCTokenKind {
     TOK_IF, // reserved  - if
     TOK_ELSE, // reserved  - else
     TOK_WHILE, // reserved  - while
+    TOK_BREAK, // reserved  - break
+    TOK_CONTINUE, // reserved - continue
     TOK_RETURN, // reserved  - return
+    TOK_FOR, // reserved - for
 
     //identificator
     TOK_IDENT, // everything that is not a keyword and other tokens
@@ -63,7 +66,8 @@ enum MiniCTokenKind {
     TOK_UNKNOWN
 };
 
-std::string minicTokenKindToString( int k);
-std::string minicTokenKindToSimbol( int k);
+std::string minicTokenKindToString(int k);
+
+std::string minicTokenKindToSimbol(int k);
 
 #endif //MIPSSIMUL_MINIC_T_KIND_H

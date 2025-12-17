@@ -2,11 +2,66 @@
 
 using namespace std;
 
-//TODO fix lexer that is transformim 10 in 16. It is thinkink 10 is hex, but not
+/*
+ * stmt ::= while_stmt
+ *        | if_stmt
+ *        | compound_stmt
+ *        | return_stmt
+ *        | break_stmt
+ *        | continue_stmt
+ *        | for_stmt
+ *        | decl_stmt
+ *        | expr_stmt
+ */
 
+unique_ptr<ExprNode> MiniCParser::parseStmt() {
+    if (match(TOK_WHILE)) {
+        throw runtime_error("Not implemented");
+    }
+    if (match(TOK_IF)) {
+        throw runtime_error("Not implemented");
+    }
+    if (match(TOK_LBRACE)) {
+        throw runtime_error("Not implemented");
+    }
+    if (match(TOK_RETURN)) {
+    }
+    if (match(TOK_BREAK)) {
+        throw runtime_error("Not implemented");
+    }
+    if (match(TOK_CONTINUE)) {
+        throw runtime_error("Not implemented");
+    }
+    if (match(TOK_FOR)) {
+        throw runtime_error("Not implemented");
+    }
+    //TODO decl_stmt
+
+    unique_ptr<ExprNode> expr = parseExpr();
+    match(TOK_SEMI);
+    return expr;
+}
+
+/*
+ *
+ */
+
+/*
+ * expr_stmt ::= expr? TOK_SEMI
+ */
+unique_ptr<StmtNode> MiniCParser::parseExprStmt() {
+    unique_ptr<ExprNode> expr = parseExpr();
+    match(TOK_SEMI);
+    Token opTok = previous();
+    unique_ptr<StmtNode> stmt = make_unique<ExprStmtNode>(opTok.kind, std::move(expr));
+    return stmt;
+}
+
+/*
+ * expr := [assign_expr]
+ */
 unique_ptr<ExprNode> MiniCParser::parseExpr() {
     unique_ptr<ExprNode> expr = parseAssign();
-    match(TOK_SEMI);
     return expr;
 }
 
@@ -20,10 +75,10 @@ std::unique_ptr<ExprNode> MiniCParser::parseAssign() {
         return lhs; // without '=' is not an assignment
     }
 
-    const Token opTok = previous(); // '='
+    const Token opTok = previous();
 
     if (!isLValue(lhs.get())) {
-        error(opTok, "left side of '=' is not assignable");
+        error(previousTwo(), "left side of '=' is not assignable");
     }
 
     unique_ptr<ExprNode> rhs = parseAssign();
@@ -75,7 +130,6 @@ unique_ptr<ExprNode> MiniCParser::parseOR() {
 /*
 * and_expr ::= eql_expr { (TOK_AND_AND ) eql_expr }
 */
-
 unique_ptr<ExprNode> MiniCParser::parseAnd() {
     unique_ptr<ExprNode> lhs = parseEql();
 
@@ -156,7 +210,7 @@ unique_ptr<ExprNode> MiniCParser::parseMul() {
 
 /*
  * unary_expr ::= unary_op unary_expr
- *                | primary_expr
+ *                | postfix_expr
  *
  * unary_op ::= TOK_MINUS
  *              | TOK_PLUS
@@ -170,7 +224,24 @@ unique_ptr<ExprNode> MiniCParser::parseUnary() {
         unique_ptr<ExprNode> rhs = parseUnary();
         return make_unique<UnaryOpNode>(opTok.kind, std::move(rhs));
     }
-    return parsePrimary();
+    return parsePostfix();
+}
+
+/*
+ * postfix_expr ::= primary_expr { TOK_LBRACKET expr TOK_RBRACKET }
+ */
+unique_ptr<ExprNode> MiniCParser::parsePostfix() {
+    unique_ptr<ExprNode> node = parsePrimary();
+
+    while (match(TOK_LBRACKET)) {
+        unique_ptr<ExprNode> idx = parseExpr();
+
+        expect(TOK_RBRACKET, "expected ']'");
+
+        node = make_unique<IndexNode>(std::move(node), std::move(idx));
+    }
+
+    return node;
 }
 
 /*
@@ -219,7 +290,7 @@ void MiniCParser::skipNewLines() {
 
 /*
  * lvalue ::=  lvalue_base { TOK_LBRACKET expr TOK_RBRACKET }
-*/
+ */
 std::unique_ptr<ExprNode> MiniCParser::parseLValue() {
     unique_ptr<ExprNode> node = parseLValueBase();
 
@@ -237,7 +308,7 @@ std::unique_ptr<ExprNode> MiniCParser::parseLValue() {
  * lvalue_base ::= TOK_IDENT
  *                 | '*' unary_expr
  *                 | TOK_LPAREN lvalue TOK_RPAREN
-*/
+ */
 std::unique_ptr<ExprNode> MiniCParser::parseLValueBase() {
     if (match(TOK_IDENT)) {
         Token idTok = previous();

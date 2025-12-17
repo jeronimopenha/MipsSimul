@@ -39,7 +39,7 @@ int main() {
         //auto prog = p.parseExpr();
         while (parser.peek().kind != TOK_EOF) {
             if (parser.match(TOK_NEWLN))continue;
-            unique_ptr<ExprNode> prog = parser.parseExpr();
+            unique_ptr<ExprNode> prog = parser.parseStmt();
             prog->dump(0);
         }
         int a = 1;

@@ -68,10 +68,12 @@ v[(a + b) * 2] = x;
 p = &v[0];           // lado direito não é lvalue, mas expr
 **pp = 3;            // se permitir, testa isso também
 
+return;
+
 //1 = x;
-/*3.14 = y;
-(a + b) = 10;
-(x * y) = z;
-(a < b) = 1;
-&(a) = p;       // &a não é lvalue (no seu modelo simples)
-v[1 + 2] + 3 = x;*/
+//3.14 = y;
+//(a + b) = 10;
+//(x * y) = z;
+//(a < b) = 1;
+//&(a) = p;       // &a não é lvalue (no seu modelo simples)
+//v[1 + 2] + 3 = x;
