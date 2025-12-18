@@ -18,15 +18,15 @@ public:
 
     std::unique_ptr<StmtNode> parseDeclStmt();
 
-    std::unique_ptr<StmtNode> parseDeclListStmt();
+    std::vector<std::unique_ptr<DeclItem>> parseDeclListStmt();
 
-    std::unique_ptr<StmtNode> parseDeclItemStmt();
+    std::unique_ptr<DeclItem> parseDeclItemStmt();
 
-    std::unique_ptr<StmtNode> parseDeclSufixStmt();
+    std::unique_ptr<DeclItem> parseDeclSufixStmt();
 
-    std::unique_ptr<StmtNode> parseArrayDimsxStmt();
+    std::vector<std::unique_ptr<ExprNode>> parseArrayDimsxStmt();
 
-    std::unique_ptr<StmtNode> parseInitOptStmt();
+    std::unique_ptr<ExprNode> parseInitOptStmt();
 
     std::unique_ptr<StmtNode> parseWhileStmt();
 
@@ -127,10 +127,9 @@ for_stmt      ::= TOK_FOR TOK_LPAREN expr_stmt expr_stmt expr? TOK_RPAREN stmt
  *
  * decl_suffix ::= array_dims? init_opt?
  *
- * array_dims ::= TOK_LBRACKET expr TOK_RBRACKET { TOK_LBRACKET expr TOK_RBRACKET }
+ * array_dims ::= { TOK_LBRACKET (TOK_INT_LIT | TOK_HEX_LIT) TOK_RBRACKET }
  *
- * init_opt ::= TOK_ASSIGN assign_expr
- *            | ε
+ * init_opt ::= TOK_ASSIGN assign_expr | ε
  *
  * while_stmt ::= TOK_WHILE TOK_LPAREN expr TOK_RPAREN compound_stmt
  *
@@ -176,7 +175,7 @@ for_stmt      ::= TOK_FOR TOK_LPAREN expr_stmt expr_stmt expr? TOK_RPAREN stmt
  *              | TOK_NOT
  *              | TOK_STAR
  *              | TOK_AMP
- *
+ * TODO postfix_expr ::= primary_expr { '[' expr ']' | '(' arg_list? ')' }
  * postfix_expr ::= primary_expr { TOK_LBRACKET expr TOK_RBRACKET }
  *
  * primary_expr ::= TOK_INT_LIT

@@ -316,12 +316,21 @@ struct ContinueStmtNode : StmtNode {
     }
 };
 
-struct DeclItem : StmtNode {
+struct DeclItem {
     std::string name;
     std::vector<std::unique_ptr<ExprNode> > dims;
     std::unique_ptr<ExprNode> init;
 
-    void dump(const int ident) override {
+    DeclItem(
+        std::string name,
+        std::vector<std::unique_ptr<ExprNode> > dims,
+        std::unique_ptr<ExprNode> init
+    ) : name(std::move(name)),
+        dims(std::move(dims)),
+        init(std::move(init)) {
+    }
+
+    void dump(const int ident) const {
         printIndent(ident);
         std::cout << "ITEM " << name << "\n";
         for (auto &dim: dims) {

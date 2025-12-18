@@ -9,7 +9,6 @@ using namespace std;
  *        | return_stmt
  *        | break_stmt
  *        | continue_stmt
- *        | for_stmt
  *        | decl_stmt
  *        | expr_stmt
  */
@@ -53,7 +52,7 @@ unique_ptr<StmtNode> MiniCParser::parseStmt() {
     if (check(TOK_INT) || check(TOK_FLOAT) || check(TOK_HEX_LIT)) {
         return parseDeclStmt();
     }
-    //TODO decl_stmt
+
 
     unique_ptr<ExprNode> expr = parseExpr();
     expect(TOK_SEMI, "expected semi");
@@ -63,32 +62,69 @@ unique_ptr<StmtNode> MiniCParser::parseStmt() {
 
 //decl_stmt ::= type decl_list TOK_SEMI
 unique_ptr<StmtNode> MiniCParser::parseDeclStmt() {
-    if (match(TOK_INT) || match(TOK_FLOAT) || match(TOK_HEX_LIT)) {
+    if (match(TOK_INT) || match(TOK_FLOAT)) {
         Token t = previous();
-
+        vector<unique_ptr<DeclItem> > declList = parseDeclListStmt();
         expect(TOK_SEMI, "expected semi");
-        return;
+
+        unique_ptr<DeclStmtNode> decl = make_unique<DeclStmtNode>(t.kind, std::move(declList));
+        return decl;
     }
+    return nullptr;
 }
 
 //decl_list ::= decl_item { TOK_COMMA decl_item }
-unique_ptr<StmtNode> MiniCParser::parseDeclListStmt() {
+vector<unique_ptr<DeclItem> > MiniCParser::parseDeclListStmt() {
+    vector<unique_ptr<DeclItem> > declList;
+    declList.push_back(parseDeclItemStmt());
+    while (match(TOK_COMMA)) {
+        declList.push_back(parseDeclItemStmt());
+    }
+    return declList;
 }
 
 //decl_item ::= TOK_IDENT decl_suffix
-unique_ptr<StmtNode> MiniCParser::parseDeclItemStmt() {
+unique_ptr<DeclItem> MiniCParser::parseDeclItemStmt() {
+    expect(TOK_IDENT, "expected identifier");
+    const Token &t = previous();
+    unique_ptr<DeclItem> item = parseDeclSufixStmt();
+    item->name = t.lexeme;
+    return item;
 }
 
 //decl_suffix ::= array_dims? init_opt?
-unique_ptr<StmtNode> MiniCParser::parseDeclSufixStmt() {
+unique_ptr<DeclItem> MiniCParser::parseDeclSufixStmt() {
+    vector<unique_ptr<ExprNode> > dims = parseArrayDimsxStmt();
+    unique_ptr<ExprNode> init = parseInitOptStmt();
+    unique_ptr<DeclItem> item = make_unique<DeclItem>("", std::move(dims), std::move(init));
+    return item;
 }
 
-//array_dims ::= TOK_LBRACKET expr TOK_RBRACKET { TOK_LBRACKET expr TOK_RBRACKET }
-unique_ptr<StmtNode> MiniCParser::parseArrayDimsxStmt() {
+//array_dims ::= { TOK_LBRACKET (TOK_INT_LIT | TOK_HEX_LIT) TOK_RBRACKET }
+vector<unique_ptr<ExprNode> > MiniCParser::parseArrayDimsxStmt() {
+    vector<unique_ptr<ExprNode> > dims;
+    while (match(TOK_LBRACKET)) {
+        if (match(TOK_INT_LIT)) {
+            const Token &t = previous();
+            dims.push_back(make_unique<IntLiteralNode>(t.intValue));
+        } else if (match(TOK_HEX_LIT)) {
+            const Token &t = previous();
+            dims.push_back(make_unique<HexLiteralNode>(t.intValue));
+        } else {
+            const Token &t = peek();
+            error(t, "expected array dimension literal (int or hex)");
+        }
+        expect(TOK_RBRACKET, "expected ']'");
+    }
+    return dims;
 }
 
 //init_opt ::= TOK_ASSIGN assign_expr | ε
-unique_ptr<StmtNode> MiniCParser::parseInitOptStmt() {
+unique_ptr<ExprNode> MiniCParser::parseInitOptStmt() {
+    if (match(TOK_ASSIGN)) {
+        return parseExpr();
+    }
+    return nullptr;
 }
 
 //while_stmt ::= TOK_WHILE TOK_LPAREN expr TOK_RPAREN compound_stmt

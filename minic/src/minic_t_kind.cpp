@@ -5,6 +5,7 @@ using namespace std;
 
 string minicTokenKindToString(const int k) {
     switch (k) {
+        //reserved words
         case TOK_INT: return "INT"; // reserved  - int
         case TOK_FLOAT: return "FLOAT"; // reserved  - float
         case TOK_VOID: return "VOID"; // reserved  - void
@@ -59,6 +60,12 @@ string minicTokenKindToString(const int k) {
 
 string minicTokenKindToSimbol(const int k) {
     switch (k) {
+        //reserved words
+        case TOK_INT: return "INT"; // reserved  - int
+        case TOK_FLOAT: return "FLOAT"; // reserved  - float
+        case TOK_VOID: return "VOID"; // reserved  - void
+        //identificator
+        case TOK_IDENT: return "IDENT"; // everything that is not a keyword and other tokens
         //arithmetic operators
         case TOK_PLUS: return "+"; // +
         case TOK_MINUS: return "-"; // -
