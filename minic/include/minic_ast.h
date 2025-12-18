@@ -94,7 +94,6 @@ struct IndexNode : ExprNode {
     }
 };
 
-
 struct UnaryOpNode : ExprNode {
     int op; // token kind: TOK_MINUS, TOK_NOT, TOK_STAR, TOK_AMP
     //ParenExprNode *expr; // the operand
@@ -171,6 +170,25 @@ struct AssignNode : ExprNode {
     }
 };
 
+struct CallNode : ExprNode {
+    std::unique_ptr<ExprNode> callee;
+    std::vector<std::unique_ptr<ExprNode> > args;
+
+    CallNode(std::unique_ptr<ExprNode> callee,
+             std::vector<std::unique_ptr<ExprNode> > args)
+        : callee(std::move(callee)), args(std::move(args)) {
+    }
+
+    void dump(const int ident) override {
+        printIndent(ident);
+        std::cout << "CALL\n";
+        callee->dump(ident + 2);
+        for (const auto &a: args) {
+            a->dump(ident + 2);
+        }
+    }
+};
+
 struct StmtNode {
     virtual ~StmtNode() = default;
 
@@ -233,6 +251,7 @@ struct WhileStmtNode : StmtNode {
             printIndent(ident + 2);
             std::cout << "NULL\n";
         }
+        printIndent(ident);
         std::cout << "DO" << "\n";
         if (body) {
             body->dump(ident + 2);
@@ -333,10 +352,14 @@ struct DeclItem {
     void dump(const int ident) const {
         printIndent(ident);
         std::cout << "ITEM " << name << "\n";
+        bool flag = false;
         for (auto &dim: dims) {
             if (dim) {
-                printIndent(ident + 2);
-                std::cout << "DIMS\n";
+                if (!flag) {
+                    printIndent(ident + 2);
+                    std::cout << "DIMS\n";
+                    flag = true;
+                }
                 dim->dump(ident + 4);
             }
         }

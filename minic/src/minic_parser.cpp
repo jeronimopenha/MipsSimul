@@ -13,6 +13,7 @@ using namespace std;
  *        | expr_stmt
  */
 
+
 unique_ptr<StmtNode> MiniCParser::parseStmt() {
     if (match(TOK_SEMI)) {
         return make_unique<ExprStmtNode>(nullptr);
@@ -385,20 +386,46 @@ unique_ptr<ExprNode> MiniCParser::parseUnary() {
 }
 
 /*
- * postfix_expr ::= primary_expr { TOK_LBRACKET expr TOK_RBRACKET }
+ * postfix_expr ::= primary_expr { TOK_LBRACKET expr TOK_RBRACKET | TOK_LPAREN arg_list? TOK_RPAREN }
  */
 unique_ptr<ExprNode> MiniCParser::parsePostfix() {
     unique_ptr<ExprNode> node = parsePrimary();
 
-    while (match(TOK_LBRACKET)) {
-        unique_ptr<ExprNode> idx = parseExpr();
+    while (true) {
+        if (match(TOK_LBRACKET)) {
+            auto idx = parseExpr();
+            expect(TOK_RBRACKET, "expected ']'");
+            node = make_unique<IndexNode>(std::move(node), std::move(idx));
+            continue;
+        }
 
-        expect(TOK_RBRACKET, "expected ']'");
+        if (match(TOK_LPAREN)) {
+            vector<unique_ptr<ExprNode> > args;
 
-        node = make_unique<IndexNode>(std::move(node), std::move(idx));
+            //optional
+            if (!check(TOK_RPAREN)) {
+                args = parseArgList();
+            }
+
+            expect(TOK_RPAREN, "expected ')'");
+            node = make_unique<CallNode>(std::move(node), std::move(args));
+            continue;
+        }
+
+        break;
     }
 
     return node;
+}
+
+// arg_list ::= expr { ',' expr }
+vector<unique_ptr<ExprNode> > MiniCParser::parseArgList() {
+    vector<unique_ptr<ExprNode> > args;
+    args.push_back(parseExpr());
+    while (match(TOK_COMMA)) {
+        args.push_back(parseExpr());
+    }
+    return args;
 }
 
 /*

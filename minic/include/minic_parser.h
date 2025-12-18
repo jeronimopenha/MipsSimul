@@ -18,13 +18,13 @@ public:
 
     std::unique_ptr<StmtNode> parseDeclStmt();
 
-    std::vector<std::unique_ptr<DeclItem>> parseDeclListStmt();
+    std::vector<std::unique_ptr<DeclItem> > parseDeclListStmt();
 
     std::unique_ptr<DeclItem> parseDeclItemStmt();
 
     std::unique_ptr<DeclItem> parseDeclSufixStmt();
 
-    std::vector<std::unique_ptr<ExprNode>> parseArrayDimsxStmt();
+    std::vector<std::unique_ptr<ExprNode> > parseArrayDimsxStmt();
 
     std::unique_ptr<ExprNode> parseInitOptStmt();
 
@@ -42,7 +42,6 @@ public:
 
     std::unique_ptr<StmtNode> parseExprStmt();
 
-    // FIXME CHANGE ON FUTURE
     std::unique_ptr<ExprNode> parseExpr();
 
     std::unique_ptr<ExprNode> parseAssign();
@@ -69,8 +68,9 @@ public:
 
     std::unique_ptr<ExprNode> parsePostfix();
 
-    std::unique_ptr<ExprNode> parsePrimary();
+    std::vector<std::unique_ptr<ExprNode>> parseArgList();
 
+    std::unique_ptr<ExprNode> parsePrimary();
 };
 
 /*
@@ -105,7 +105,15 @@ for_stmt      ::= TOK_FOR TOK_LPAREN expr_stmt expr_stmt expr? TOK_RPAREN stmt
  *
  * New grammar
  *
- * program ::= { external_decl } TOK_EOF
+ * program ::= { global_decl } EOF
+ *
+ * global_decl ::= func_decl | decl_stmt
+ *
+ * func_decl ::= type TOK_IDENT TOK_LPAREN param_list? TOK_RPAREN compound_stmt
+ *
+ * param_list ::= param { TOK_COMMA param }
+ *
+ * param ::= type TOK_IDENT
  *
  * stmt ::= while_stmt
  *        | if_stmt
@@ -175,8 +183,9 @@ for_stmt      ::= TOK_FOR TOK_LPAREN expr_stmt expr_stmt expr? TOK_RPAREN stmt
  *              | TOK_NOT
  *              | TOK_STAR
  *              | TOK_AMP
- * TODO postfix_expr ::= primary_expr { '[' expr ']' | '(' arg_list? ')' }
- * postfix_expr ::= primary_expr { TOK_LBRACKET expr TOK_RBRACKET }
+ * postfix_expr ::= primary_expr { TOK_LBRACKET expr TOK_RBRACKET | TOK_LPAREN arg_list? TOK_RPAREN }
+ *
+ * arg_list ::= expr { ',' expr }
  *
  * primary_expr ::= TOK_INT_LIT
  *                | TOK_HEX_LIT
