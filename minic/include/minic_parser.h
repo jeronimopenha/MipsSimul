@@ -5,13 +5,13 @@
 #include <asm_lexer.h>
 #include <parser.h>
 #include <minic_ast.h>
-#include <minic_t_kind.h>
+
 
 
 class MiniCParser : public Parser {
 public:
-    explicit MiniCParser(const std::vector<Token> &toks)
-        : Parser(toks) {
+    explicit MiniCParser(const std::vector<Token> &tokens)
+        : Parser(tokens) {
     }
 
     std::unique_ptr<StmtNode> parseStmt();
@@ -24,7 +24,7 @@ public:
 
     std::unique_ptr<DeclItem> parseDeclSufixStmt();
 
-    std::vector<std::unique_ptr<ExprNode> > parseArrayDimsxStmt();
+    std::vector<std::unique_ptr<ExprNode> > parseArrayDimsStmt();
 
     std::unique_ptr<ExprNode> parseInitOptStmt();
 
@@ -74,7 +74,7 @@ public:
 };
 
 /*
- * Precedency order
+ * Precedence order
  * postfix (call, indexing)
  * unary (- ! * &)
  * mul (* / %)
@@ -237,7 +237,7 @@ stmt          ::= compound_stmt
                  | while_stmt
                  | return_stmt
                  | expr_stmt
-                 | SEMICOLON ;     // linha vazia opcional, se quiser
+                 | SEMICOLON ;     // empty line, optional
 
 compound_stmt ::= LBRACE { local_decl | stmt } RBRACE ;
 

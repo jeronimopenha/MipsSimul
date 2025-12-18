@@ -50,7 +50,7 @@ unique_ptr<StmtNode> MiniCParser::parseStmt() {
     }
 
     //decl_stmt ::= type decl_list TOK_SEMI
-    if (check(TOK_INT) || check(TOK_FLOAT) || check(TOK_HEX_LIT)) {
+    if (check(TOK_INT) || check(TOK_FLOAT)) {
         return parseDeclStmt();
     }
 
@@ -95,14 +95,14 @@ unique_ptr<DeclItem> MiniCParser::parseDeclItemStmt() {
 
 //decl_suffix ::= array_dims? init_opt?
 unique_ptr<DeclItem> MiniCParser::parseDeclSufixStmt() {
-    vector<unique_ptr<ExprNode> > dims = parseArrayDimsxStmt();
+    vector<unique_ptr<ExprNode> > dims = parseArrayDimsStmt();
     unique_ptr<ExprNode> init = parseInitOptStmt();
     unique_ptr<DeclItem> item = make_unique<DeclItem>("", std::move(dims), std::move(init));
     return item;
 }
 
 //array_dims ::= { TOK_LBRACKET (TOK_INT_LIT | TOK_HEX_LIT) TOK_RBRACKET }
-vector<unique_ptr<ExprNode> > MiniCParser::parseArrayDimsxStmt() {
+vector<unique_ptr<ExprNode> > MiniCParser::parseArrayDimsStmt() {
     vector<unique_ptr<ExprNode> > dims;
     while (match(TOK_LBRACKET)) {
         if (match(TOK_INT_LIT)) {
@@ -137,10 +137,6 @@ unique_ptr<StmtNode> MiniCParser::parseWhileStmt() {
 
     unique_ptr<StmtNode> body = parseCompoundStmt();
 
-    unique_ptr<StmtNode> elseBranch = nullptr;
-    if (match(TOK_ELSE)) {
-        elseBranch = parseCompoundStmt();
-    }
     unique_ptr<StmtNode> stmt = make_unique<WhileStmtNode>(std::move(cond), std::move(body));
     return stmt;
 }
@@ -253,10 +249,10 @@ bool MiniCParser::isLValue(ExprNode *n) {
         return true;
     }
 
-    // 2) *p   → unreference
-    const auto un = dynamic_cast<UnaryOpNode *>(n);
-    if (un) {
-        return un->op == TOK_STAR;
+    // 2) *p   → dereference
+    const auto de = dynamic_cast<UnaryOpNode *>(n);
+    if (de) {
+        return de->op == TOK_STAR;
     }
 
     // 3) v[i] ou v[i][j], index

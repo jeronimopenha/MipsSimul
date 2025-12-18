@@ -4,14 +4,14 @@
 //definitions for all project
 
 //TODO
-//In future I will put here, or in ohter place the specs for each CPU and forms to handle
+//In future I will put here, or in other place the specs for each CPU and forms to handle
 // the mul and div and FP
 
 #include <bits/stdc++.h>
 
 //#define DEBUG
 
-//Asm and Dissasm Definitions.
+//Asm and Disasm Definitions.
 inline constexpr uint32_t baseAsmPc = 0x00400000;
 inline constexpr auto BenchAsmPath = "benchmarks/asm/";
 inline constexpr auto benchAsmExt = ".asm";

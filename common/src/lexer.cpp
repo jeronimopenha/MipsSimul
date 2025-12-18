@@ -134,7 +134,7 @@ Token Lexer::nextToken() {
         if (!eof()) {
             const char d = peek();
             if ((d == 'f' || d == 'F') && !(hasDot || hasE)) {
-                // só faz sentido 'f' se isso já for um float
+                // only if 'f' is a float
                 lex.push_back(nextChar());
             }
         }
@@ -142,7 +142,7 @@ Token Lexer::nextToken() {
         return makeNumberToken(lex, startLine, startCol);
     }
 
-    // Operadores / pontuação
+    // operators / punctuation
     const int startLine = line;
     const int startCol = col;
 

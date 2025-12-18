@@ -2,7 +2,7 @@
 
 using namespace std;
 
-string asmTokenKindToString(const AsmTokenKind k) {
+string asmTokenKindToString(const int k) {
     switch (k) {
         case ASM_IDENT: return "IDENT";
         case ASM_REG: return "REG";

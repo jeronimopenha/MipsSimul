@@ -20,6 +20,6 @@ enum AsmTokenKind {
     ASM_UNKNOWN // special for errors
 };
 
-std::string asmTokenKindToString(AsmTokenKind k);
+std::string asmTokenKindToString(int k);
 
 #endif

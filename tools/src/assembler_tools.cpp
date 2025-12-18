@@ -4,6 +4,7 @@
 #include <asm_parser.h>
 #include <asm.h>
 #include <disasm.h>
+#include <asm_t_kind.h>
 
 using namespace std;
 
@@ -27,14 +28,14 @@ int runParser(const istream &in, ostream &out) {
     const string src = buffer.str();
 
     AsmLexer lex(src);
-    vector<MiniCToken> toks;
+    vector<Token> tokens;
     while (true) {
-        MiniCToken t = lex.nextToken();
-        toks.push_back(t);
-        if (t.kind == TokenKind::Eof) break;
+        Token t = lex.nextToken();
+        tokens.push_back(t);
+        if (t.kind == ASM_EOF) break;
     }
 
-    AsmParser p(toks);
+    AsmParser p(tokens);
     const auto prog = p.parseProgram();
 
     // print representation
@@ -72,14 +73,14 @@ int runAssembler(const istream &in, ostream &out) {
 
     try {
         AsmLexer lex(src);
-        vector<MiniCToken> toks;
+        vector<Token> tokens;
         while (true) {
-            MiniCToken t = lex.nextToken();
-            toks.push_back(t);
-            if (t.kind == TokenKind::Eof) break;
+            Token t = lex.nextToken();
+            tokens.push_back(t);
+            if (t.kind == ASM_EOF) break;
         }
 
-        AsmParser p(toks);
+        AsmParser p(tokens);
         auto prog = p.parseProgram();
 
         auto sym = asmBuildSymbolTable(prog);

@@ -42,7 +42,6 @@ int main() {
             unique_ptr<StmtNode> prog = parser.parseStmt();
             prog->dump(0);
         }
-        int a = 1;
 
         /*for (auto &line: prog) {
             if (!line.label.empty()) {

@@ -16,7 +16,7 @@ std::map<uint32_t, std::string> disasmMakeLabels(const std::vector<uint32_t> &co
 // labels = optional;
 std::string disassembleWord(uint32_t w, uint32_t pc, const std::map<uint32_t, std::string> *labels = nullptr);
 
-static const std::string r(int n);
+static std::string r(int n);
 
 static const AsmInstrDesc *findInstrByOpcodeFunct(uint8_t opcode, uint8_t funct);
 

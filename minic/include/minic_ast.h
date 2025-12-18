@@ -2,22 +2,20 @@
 #define MINIC_MINIC_AST_H
 
 #include <definitions.h>
-#include <token.h>
-
-#include <utility>
-
-#include "minic_t_kind.h"
+#include <minic_t_kind.h>
 
 inline void printIndent(const int n) {
     for (int i = 0; i < n; ++i)
         std::cout << ' ';
 }
 
+struct AstNode {
+    virtual ~AstNode() = default;
 
-struct ExprNode {
-    virtual ~ExprNode() = default;
+    virtual void dump(int ident) = 0;
+};
 
-    virtual void dump(int ident) =0;
+struct ExprNode : AstNode {
 };
 
 struct HexLiteralNode : ExprNode {
@@ -38,7 +36,7 @@ struct IntLiteralNode : ExprNode {
     explicit IntLiteralNode(const int32_t v) : value(v) {
     }
 
-    void dump(int ident) override {
+    void dump(const int ident) override {
         printIndent(ident);
         std::cout << "INT_DEC(" << value << ")\n";
     }
@@ -62,7 +60,7 @@ struct IdentNode : ExprNode {
     explicit IdentNode(std::string s) : name(std::move(s)) {
     }
 
-    void dump(int ident) override {
+    void dump(const int ident) override {
         printIndent(ident);
         std::cout << "ID(" << name << ")\n";
     }
@@ -189,16 +187,13 @@ struct CallNode : ExprNode {
     }
 };
 
-struct StmtNode {
-    virtual ~StmtNode() = default;
-
-    virtual void dump(int ident) = 0;
+struct StmtNode : AstNode {
 };
 
 struct ExprStmtNode : StmtNode {
     std::unique_ptr<ExprNode> expr;
 
-    ExprStmtNode(std::unique_ptr<ExprNode> expr) : expr(std::move(expr)) {
+    explicit ExprStmtNode(std::unique_ptr<ExprNode> expr) : expr(std::move(expr)) {
     }
 
     void dump(const int ident) override {
@@ -216,7 +211,7 @@ struct ExprStmtNode : StmtNode {
 struct ReturnStmtNode : StmtNode {
     std::unique_ptr<ExprNode> expr;
 
-    ReturnStmtNode(std::unique_ptr<ExprNode> expr) : expr(std::move(expr)) {
+    explicit ReturnStmtNode(std::unique_ptr<ExprNode> expr) : expr(std::move(expr)) {
     }
 
     void dump(const int ident) override {
@@ -284,6 +279,7 @@ struct IfStmtNode : StmtNode {
             printIndent(ident + 2);
             std::cout << "NULL\n";
         }
+        printIndent(ident);
         std::cout << "THEN" << "\n";
         if (thenBranch) {
             thenBranch->dump(ident + 2);
@@ -291,6 +287,7 @@ struct IfStmtNode : StmtNode {
             printIndent(ident + 2);
             std::cout << "NULL\n";
         }
+        printIndent(ident);
         std::cout << "ELSE" << "\n";
         if (elseBranch) {
             elseBranch->dump(ident + 2);
@@ -304,7 +301,7 @@ struct IfStmtNode : StmtNode {
 struct BlockStmtNode : StmtNode {
     std::vector<std::unique_ptr<StmtNode> > items;
 
-    BlockStmtNode(std::vector<std::unique_ptr<StmtNode> > items) : items(std::move(items)) {
+    explicit BlockStmtNode(std::vector<std::unique_ptr<StmtNode> > items) : items(std::move(items)) {
     }
 
     void dump(const int ident) override {
@@ -335,7 +332,7 @@ struct ContinueStmtNode : StmtNode {
     }
 };
 
-struct DeclItem {
+struct DeclItem : AstNode {
     std::string name;
     std::vector<std::unique_ptr<ExprNode> > dims;
     std::unique_ptr<ExprNode> init;
@@ -349,7 +346,7 @@ struct DeclItem {
         init(std::move(init)) {
     }
 
-    void dump(const int ident) const {
+    void dump(const int ident) override {
         printIndent(ident);
         std::cout << "ITEM " << name << "\n";
         bool flag = false;
@@ -428,7 +425,7 @@ parameters list
 function body
 complete function
 
-step 4 — Programa
+step 4 — Program
 
 external_decl
 program

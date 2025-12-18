@@ -25,11 +25,11 @@ int main() {
                    istreambuf_iterator<char>());
 
         AsmLexer lex(src);
-        vector<MiniCToken> tokens;
+        vector<Token> tokens;
         while (true) {
-            MiniCToken t = lex.nextToken();
+            Token t = lex.nextToken();
             tokens.push_back(t);
-            if (t.kind == TokenKind::Eof) {
+            if (t.kind == ASM_EOF) {
                 break;
             }
         }

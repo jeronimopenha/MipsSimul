@@ -11,7 +11,7 @@ enum AsmInstrType {
 };
 
 enum AsmInstrForm {
-    //R tyoe
+    //R type
     RdRsRt,
     RdRtShamt,
     Rs,
@@ -70,7 +70,7 @@ const std::vector<AsmInstrDesc> ISA_TABLE = {
     {"lbu", I, RtMem, 0x24, 0x00},
     {"sb", I, RtMem, 0x28, 0x00},
 
-    //Branches and junps
+    //Branches and jumps
     {"beq", I, RsRtRel, 0x04, 0x00},
     {"bne", I, RsRtRel, 0x05, 0x00},
     {"j", J, Jump, 0x02, 0x00},

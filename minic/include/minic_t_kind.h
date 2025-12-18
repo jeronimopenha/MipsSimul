@@ -15,7 +15,7 @@ enum MiniCTokenKind {
     TOK_CONTINUE, // reserved - continue
     TOK_RETURN, // reserved  - return
 
-    //identificator
+    //identification
     TOK_IDENT, // everything that is not a keyword and other tokens
 
     //literals
@@ -69,4 +69,4 @@ std::string minicTokenKindToString(int k);
 
 std::string minicTokenKindToSimbol(int k);
 
-#endif //MIPSSIMUL_MINIC_T_KIND_H
+#endif //MINIC_T_KIND_H

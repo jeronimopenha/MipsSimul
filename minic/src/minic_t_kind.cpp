@@ -15,7 +15,7 @@ string minicTokenKindToString(const int k) {
         case TOK_BREAK: return "BREAK"; // reserved  - break
         case TOK_CONTINUE: return "CONTINUE"; // reserved  - continue
         case TOK_RETURN: return "RETURN"; // reserved  - return
-        //identificator
+        //identification
         case TOK_IDENT: return "IDENT"; // everything that is not a keyword and other tokens
         //literals
         case TOK_INT_LIT: return "INT_LIT"; // int literals
@@ -64,7 +64,7 @@ string minicTokenKindToSimbol(const int k) {
         case TOK_INT: return "INT"; // reserved  - int
         case TOK_FLOAT: return "FLOAT"; // reserved  - float
         case TOK_VOID: return "VOID"; // reserved  - void
-        //identificator
+        //identification
         case TOK_IDENT: return "IDENT"; // everything that is not a keyword and other tokens
         //arithmetic operators
         case TOK_PLUS: return "+"; // +

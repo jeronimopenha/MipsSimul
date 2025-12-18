@@ -1,8 +1,9 @@
 #include <disasm.h>
+#include "asm_registers.h"
 
 using namespace std;
 
-static const string r(int n) {
+static string r(int n) {
     return regNameFromNumber(n);
 }
 
@@ -37,12 +38,12 @@ std::map<uint32_t, std::string> disasmMakeLabels(const std::vector<uint32_t> &co
 
     for (const auto w: code) {
         const uint8_t op = (w >> 26) & 0x3F;
-        const uint8_t rs = (w >> 21) & 0x1F;
-        const uint8_t rt = (w >> 16) & 0x1F;
-        const uint8_t rd = (w >> 11) & 0x1F;
-        const uint8_t shamt = (w >> 6) & 0x1F;
+        //const uint8_t rs = (w >> 21) & 0x1F;
+        //const uint8_t rt = (w >> 16) & 0x1F;
+        //const uint8_t rd = (w >> 11) & 0x1F;
+        //const uint8_t shamt = (w >> 6) & 0x1F;
         const uint8_t funct = (w >> 0) & 0x3F;
-        const int16_t imm16 = static_cast<int16_t>(w & 0xFFFF);
+        const auto imm16 = static_cast<int16_t>(w & 0xFFFF);
         const uint32_t idx = w & 0x03FFFFFF;
 
         const AsmInstrDesc *d = nullptr;
@@ -87,7 +88,7 @@ std::string disassembleWord(const uint32_t w, const uint32_t pc, const std::map<
     const uint8_t rd = (w >> 11) & 0x1F;
     const uint8_t shamt = (w >> 6) & 0x1F;
     const uint8_t funct = (w >> 0) & 0x3F;
-    const int16_t imm16 = static_cast<int16_t>(w & 0xFFFF);
+    const auto imm16 = static_cast<int16_t>(w & 0xFFFF);
     const uint32_t idx = w & 0x03FFFFFF;
 
     std::ostringstream out;

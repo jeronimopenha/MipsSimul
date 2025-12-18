@@ -3,8 +3,6 @@
 
 #include <definitions.h>
 #include <asm_parser.h>
-#include <asm_registers.h>
-#include <asm_isa.h>
 
 struct AsmInstrInfo {
     uint8_t opcode;

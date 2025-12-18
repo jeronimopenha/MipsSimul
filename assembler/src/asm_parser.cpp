@@ -38,7 +38,7 @@ AsmLine AsmParser::parseLine() {
     }
 
     // [instruction] ?
-    // if the next token is IDENT or REGISTER etc, try instruction
+    // if the next token is IDENT or REGISTER etc., try instruction
     if (peek().kind == ASM_IDENT) {
         line.hasInstr = true;
         line.instr = parseInstruction();
@@ -166,7 +166,7 @@ AsmOperand AsmParser::parseOperand() {
     }
 
     if (match(ASM_IDENT)) {
-        // can be a label for jump and branche
+        // can be a label for jump and branches
         const Token id = previous();
 
         AsmOperand op = {
@@ -182,7 +182,7 @@ AsmOperand AsmParser::parseOperand() {
 
 
     error(peek(), "Unexpected operand");
-    /*cerr << "Unexpected operand on line" << t.line << ", column " << t.col << " with lexeme: '" << t.lexeme <<"'" << "\n";
-    throw runtime_error("parsing errorg: operand");*/
+    /*cerr << "Unexpected operand online" << t.line << ", column " << t.col << " with lexeme: '" << t.lexeme <<"'" << "\n";
+    throw runtime_error("parsing error: operand");*/
     return {};
 }

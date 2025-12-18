@@ -9,36 +9,36 @@ protected:
     const std::vector<Token> &tokens;
     size_t pos = 0;
 
-    const Token &previous() const;
+    [[nodiscard]] const Token &previous() const;
 
-    const Token &previousTwo() const;
+    [[nodiscard]] const Token &previousTwo() const;
 
-    bool check(int kind);
+    [[nodiscard]] bool check(int kind) const;
 
     // match with more than one Token Kinds
     bool match(std::initializer_list<int> kinds);
 
-    const Token peekNext();
+    [[nodiscard]] Token peekNext() const;
 
     const Token &get();
 
 
     const Token &expect(int kind, const std::string &msg);
 
-    bool eof() const;
+    [[nodiscard]] bool eof() const;
 
     static void error(const Token &token, const std::string &msg);
 
 public:
     virtual ~Parser() = default;
 
-    explicit Parser(const std::vector<Token> &toks)
-        : tokens(toks) {
+    explicit Parser(const std::vector<Token> &tokens)
+        : tokens(tokens) {
     }
 
     bool match(int kind);
 
-    const Token &peek();
+    [[nodiscard]] const Token &peek() const;
 };
 
 

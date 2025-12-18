@@ -1,4 +1,6 @@
 #include <asm.h>
+#include <asm_registers.h>
+#include <asm_isa.h>
 
 using namespace std;
 
@@ -161,7 +163,7 @@ vector<uint32_t> asmGenerateCode(const vector<AsmLine> &prog, const unordered_ma
                     throw runtime_error(desc->name + ": third operand must be immediate");
                 }
 
-                const int16_t imm = static_cast<int16_t>(immOp.imm);
+                const auto imm = static_cast<int16_t>(immOp.imm);
 
                 w = asmEncodeI(opcode, rs, rt, imm);
             } else if (form == RtMem) {
@@ -178,7 +180,7 @@ vector<uint32_t> asmGenerateCode(const vector<AsmLine> &prog, const unordered_ma
                 }
 
                 const int rs = regNumber(mem.label); // base: "$gp", "$sp", etc.
-                const int16_t imm = static_cast<int16_t>(mem.imm);
+                const auto imm = static_cast<int16_t>(mem.imm);
 
                 w = asmEncodeI(opcode, rs, rt, imm);
             } else if (form == RsRtRel) {
@@ -202,7 +204,7 @@ vector<uint32_t> asmGenerateCode(const vector<AsmLine> &prog, const unordered_ma
 
                 const uint32_t target = itL->second;
                 const int32_t diff = static_cast<int32_t>(target) - static_cast<int32_t>(pc + 4);
-                const int16_t offset = static_cast<int16_t>(diff / 4);
+                const auto offset = static_cast<int16_t>(diff / 4);
 
                 w = asmEncodeI(opcode, rs, rt, offset);
             } else if (form == RtImm) {
@@ -251,7 +253,7 @@ vector<uint32_t> asmGenerateCode(const vector<AsmLine> &prog, const unordered_ma
 Assuming:
 
 Instructions starts with base_pc = 0x00400000;
-Each instruction ocupies 4 bytes;
+Each instruction occupies 4 bytes;
 Every line has hasInstr == true is instruction.
 */
 

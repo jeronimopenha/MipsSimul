@@ -9,7 +9,7 @@
 
 class AsmParser : public Parser {
 public:
-    AsmParser(const std::vector<Token> &tokens) : Parser(tokens) {
+    explicit AsmParser(const std::vector<Token> &tokens) : Parser(tokens) {
     }
 
     std::vector<AsmLine> parseProgram();
