@@ -14,37 +14,158 @@ using namespace std;
  *        | expr_stmt
  */
 
-unique_ptr<ExprNode> MiniCParser::parseStmt() {
-    if (match(TOK_WHILE)) {
-        throw runtime_error("Not implemented");
+unique_ptr<StmtNode> MiniCParser::parseStmt() {
+    if (match(TOK_SEMI)) {
+        return make_unique<ExprStmtNode>(nullptr);
     }
-    if (match(TOK_IF)) {
-        throw runtime_error("Not implemented");
+
+    //while_stmt ::= TOK_WHILE TOK_LPAREN expr TOK_RPAREN compound_stmt
+    if (check(TOK_WHILE)) {
+        return parseWhileStmt();
     }
-    if (match(TOK_LBRACE)) {
-        throw runtime_error("Not implemented");
+
+    //if_stmt ::= TOK_IF TOK_LPAREN expr TOK_RPAREN compound_stmt [ TOK_ELSE compound_stmt]
+    if (check(TOK_IF)) {
+        return parseIfStmt();
     }
-    if (match(TOK_RETURN)) {
+
+    //compound_stmt ::= TOK_LBRACE {stmt} TOK_RBRACE
+    if (check(TOK_LBRACE)) {
+        return parseCompoundStmt();
     }
-    if (match(TOK_BREAK)) {
-        throw runtime_error("Not implemented");
+
+    // return_stmt ::= TOK_RETURN expr? TOK_SEMI
+    if (check(TOK_RETURN)) {
+        return parseReturnStmt();
     }
-    if (match(TOK_CONTINUE)) {
-        throw runtime_error("Not implemented");
+
+    //break_stmt ::= TOK_BREAK TOK_SEMI
+    if (check(TOK_BREAK)) {
+        return parseBreakStmt();;
     }
-    if (match(TOK_FOR)) {
-        throw runtime_error("Not implemented");
+
+    //continue_stmt ::= TOK_CONTINUE TOK_SEMI
+    if (check(TOK_CONTINUE)) {
+        return parseContinueStmt();
+    }
+
+    //decl_stmt ::= type decl_list TOK_SEMI
+    if (check(TOK_INT) || check(TOK_FLOAT) || check(TOK_HEX_LIT)) {
+        return parseDeclStmt();
     }
     //TODO decl_stmt
 
     unique_ptr<ExprNode> expr = parseExpr();
-    match(TOK_SEMI);
-    return expr;
+    expect(TOK_SEMI, "expected semi");
+    unique_ptr<StmtNode> stmt = make_unique<ExprStmtNode>(std::move(expr));
+    return stmt;
 }
 
-/*
- *
- */
+//decl_stmt ::= type decl_list TOK_SEMI
+unique_ptr<StmtNode> MiniCParser::parseDeclStmt() {
+    if (match(TOK_INT) || match(TOK_FLOAT) || match(TOK_HEX_LIT)) {
+        Token t = previous();
+
+        expect(TOK_SEMI, "expected semi");
+        return;
+    }
+}
+
+//decl_list ::= decl_item { TOK_COMMA decl_item }
+unique_ptr<StmtNode> MiniCParser::parseDeclListStmt() {
+}
+
+//decl_item ::= TOK_IDENT decl_suffix
+unique_ptr<StmtNode> MiniCParser::parseDeclItemStmt() {
+}
+
+//decl_suffix ::= array_dims? init_opt?
+unique_ptr<StmtNode> MiniCParser::parseDeclSufixStmt() {
+}
+
+//array_dims ::= TOK_LBRACKET expr TOK_RBRACKET { TOK_LBRACKET expr TOK_RBRACKET }
+unique_ptr<StmtNode> MiniCParser::parseArrayDimsxStmt() {
+}
+
+//init_opt ::= TOK_ASSIGN assign_expr | ε
+unique_ptr<StmtNode> MiniCParser::parseInitOptStmt() {
+}
+
+//while_stmt ::= TOK_WHILE TOK_LPAREN expr TOK_RPAREN compound_stmt
+unique_ptr<StmtNode> MiniCParser::parseWhileStmt() {
+    expect(TOK_WHILE, "expected 'while'");
+    expect(TOK_LPAREN, "expected '('");
+    unique_ptr<ExprNode> cond = parseExpr();
+    expect(TOK_RPAREN, "expected ')'");
+
+    unique_ptr<StmtNode> body = parseCompoundStmt();
+
+    unique_ptr<StmtNode> elseBranch = nullptr;
+    if (match(TOK_ELSE)) {
+        elseBranch = parseCompoundStmt();
+    }
+    unique_ptr<StmtNode> stmt = make_unique<WhileStmtNode>(std::move(cond), std::move(body));
+    return stmt;
+}
+
+//if_stmt ::= TOK_IF TOK_LPAREN expr TOK_RPAREN compound_stmt [ TOK_ELSE compound_stmt]
+unique_ptr<StmtNode> MiniCParser::parseIfStmt() {
+    expect(TOK_IF, "expected 'if'");
+    expect(TOK_LPAREN, "expected '('");
+    unique_ptr<ExprNode> cond = parseExpr();
+    expect(TOK_RPAREN, "expected ')'");
+
+    unique_ptr<StmtNode> thenBranch = nullptr;
+    thenBranch = parseCompoundStmt();
+
+    unique_ptr<StmtNode> elseBranch = nullptr;
+    if (match(TOK_ELSE)) {
+        elseBranch = parseCompoundStmt();
+    }
+    unique_ptr<StmtNode> stmt = make_unique<IfStmtNode>(std::move(cond), std::move(thenBranch),
+                                                        std::move(elseBranch));
+    return stmt;
+}
+
+//compound_stmt ::= TOK_LBRACE {stmt} TOK_RBRACE
+unique_ptr<StmtNode> MiniCParser::parseCompoundStmt() {
+    expect(TOK_LBRACE, "expected '{'");
+    std::vector<std::unique_ptr<StmtNode> > items;
+    while (!check(TOK_RBRACE) && !eof()) {
+        items.push_back(parseStmt());
+    }
+    expect(TOK_RBRACE, "expected '}'");
+    unique_ptr<StmtNode> stmt = make_unique<BlockStmtNode>(std::move(items));
+    return stmt;
+}
+
+// return_stmt ::= TOK_RETURN expr? TOK_SEMI
+unique_ptr<StmtNode> MiniCParser::parseReturnStmt() {
+    expect(TOK_RETURN, "expected 'return'");
+    unique_ptr<ExprNode> expr = nullptr;
+    if (!check(TOK_SEMI)) {
+        expr = parseExpr();
+    }
+    expect(TOK_SEMI, "expected semi");
+    unique_ptr<StmtNode> stmt = make_unique<ReturnStmtNode>(std::move(expr));
+    return stmt;
+}
+
+//break_stmt ::= TOK_BREAK TOK_SEMI
+unique_ptr<StmtNode> MiniCParser::parseBreakStmt() {
+    expect(TOK_BREAK, "expected 'break'");
+    expect(TOK_SEMI, "expected semi");
+    unique_ptr<StmtNode> stmt = make_unique<BreakStmtNode>();
+    return stmt;
+}
+
+//continue_stmt ::= TOK_CONTINUE TOK_SEMI
+unique_ptr<StmtNode> MiniCParser::parseContinueStmt() {
+    expect(TOK_CONTINUE, "expected 'continue'");
+    expect(TOK_SEMI, "expected semi");
+    unique_ptr<StmtNode> stmt = make_unique<ContinueStmtNode>();
+    return stmt;
+}
 
 /*
  * expr_stmt ::= expr? TOK_SEMI
@@ -53,7 +174,7 @@ unique_ptr<StmtNode> MiniCParser::parseExprStmt() {
     unique_ptr<ExprNode> expr = parseExpr();
     match(TOK_SEMI);
     Token opTok = previous();
-    unique_ptr<StmtNode> stmt = make_unique<ExprStmtNode>(opTok.kind, std::move(expr));
+    unique_ptr<StmtNode> stmt = make_unique<ExprStmtNode>(std::move(expr));
     return stmt;
 }
 
@@ -283,10 +404,6 @@ unique_ptr<ExprNode> MiniCParser::parsePrimary() {
     return {};
 }
 
-
-void MiniCParser::skipNewLines() {
-    while (match(TOK_NEWLN));
-}
 
 /*
  * lvalue ::=  lvalue_base { TOK_LBRACKET expr TOK_RBRACKET }

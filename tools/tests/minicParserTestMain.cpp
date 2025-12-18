@@ -28,8 +28,9 @@ int main() {
         vector<Token> tokens;
         while (true) {
             Token t = lex.nextToken();
+            if (t.kind == TOK_NEWLN) continue;
             tokens.push_back(t);
-            if (t.kind == MiniCTokenKind::TOK_EOF) {
+            if (t.kind == TOK_EOF) {
                 break;
             }
         }
@@ -38,8 +39,7 @@ int main() {
         //FIXME fix this in future
         //auto prog = p.parseExpr();
         while (parser.peek().kind != TOK_EOF) {
-            if (parser.match(TOK_NEWLN))continue;
-            unique_ptr<ExprNode> prog = parser.parseStmt();
+            unique_ptr<StmtNode> prog = parser.parseStmt();
             prog->dump(0);
         }
         int a = 1;

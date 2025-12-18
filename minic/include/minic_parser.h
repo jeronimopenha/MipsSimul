@@ -14,7 +14,31 @@ public:
         : Parser(toks) {
     }
 
-    std::unique_ptr<ExprNode> parseStmt();
+    std::unique_ptr<StmtNode> parseStmt();
+
+    std::unique_ptr<StmtNode> parseDeclStmt();
+
+    std::unique_ptr<StmtNode> parseDeclListStmt();
+
+    std::unique_ptr<StmtNode> parseDeclItemStmt();
+
+    std::unique_ptr<StmtNode> parseDeclSufixStmt();
+
+    std::unique_ptr<StmtNode> parseArrayDimsxStmt();
+
+    std::unique_ptr<StmtNode> parseInitOptStmt();
+
+    std::unique_ptr<StmtNode> parseWhileStmt();
+
+    std::unique_ptr<StmtNode> parseIfStmt();
+
+    std::unique_ptr<StmtNode> parseCompoundStmt();
+
+    std::unique_ptr<StmtNode> parseBreakStmt();
+
+    std::unique_ptr<StmtNode> parseContinueStmt();
+
+    std::unique_ptr<StmtNode> parseReturnStmt();
 
     std::unique_ptr<StmtNode> parseExprStmt();
 
@@ -47,8 +71,6 @@ public:
 
     std::unique_ptr<ExprNode> parsePrimary();
 
-private:
-    void skipNewLines();
 };
 
 /*
@@ -91,9 +113,34 @@ for_stmt      ::= TOK_FOR TOK_LPAREN expr_stmt expr_stmt expr? TOK_RPAREN stmt
  *        | return_stmt
  *        | break_stmt
  *        | continue_stmt
- *        | for_stmt
  *        | decl_stmt
  *        | expr_stmt
+ *
+ * decl_stmt ::= type decl_list TOK_SEMI
+ *
+ * type ::= TOK_INT
+ *        | TOK_FLOAT
+ *
+ * decl_list ::= decl_item { TOK_COMMA decl_item }
+ *
+ * decl_item ::= TOK_IDENT decl_suffix
+ *
+ * decl_suffix ::= array_dims? init_opt?
+ *
+ * array_dims ::= TOK_LBRACKET expr TOK_RBRACKET { TOK_LBRACKET expr TOK_RBRACKET }
+ *
+ * init_opt ::= TOK_ASSIGN assign_expr
+ *            | ε
+ *
+ * while_stmt ::= TOK_WHILE TOK_LPAREN expr TOK_RPAREN compound_stmt
+ *
+ * if_stmt ::= TOK_IF TOK_LPAREN expr TOK_RPAREN compound_stmt [ TOK_ELSE compound_stmt]
+ *
+ * compound_stmt ::= TOK_LBRACE {stmt} TOK_RBRACE
+ *
+ * continue_stmt ::= TOK_CONTINUE TOK_SEMI
+ *
+ * break_stmt ::= TOK_BREAK TOK_SEMI
  *
  * return_stmt ::= TOK_RETURN expr? TOK_SEMI
  *

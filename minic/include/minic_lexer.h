@@ -66,6 +66,8 @@ private:
         {"if", TOK_IF},
         {"else", TOK_ELSE},
         {"while", TOK_WHILE},
+        {"break", TOK_BREAK},
+        {"continue", TOK_CONTINUE},
         {"return", TOK_RETURN}
     };
 

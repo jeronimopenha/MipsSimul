@@ -1,79 +1,147 @@
-//int g_int = 42;
-//int g_vec[3];
-//int *HW = 0x80000000;
+{
+    //;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    //;;; MiniC parser stress test (stmt + expr). Assumes control stmts need {} ;;;
+    //;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-//float g_f0 = 0.0;
-/* ... outras globais ... */
+    ;                       /* empty expr_stmt */
+    123;                    /* int literal */
+    0x2A;                   /* hex literal */
+    3.14159;                /* float literal */
+    (1 + 2) * (3 - 4) / 5 % 2;
 
-//int read_int();
-//void print_int(int x);
-/* ... */
+    a;
+    b;
+    c;
 
-//int soma_vetor(int *v, int n) { ... }
+    /* unary ops (+, -, !, *, &) + precedence */
+    +a;
+    -a;
+    !a;
+    *p;
+    &a;
+    *(&a);
 
-//float processa_float(float a, float b) { ... }
+    /* postfix indexing on primary_expr: ident[expr] and chaining */
+    arr[0];
+    arr[i + 1];
+    mat[i][j + 2];
 
-//int testa_logica(int a, int b) { ... }
+    /* lvalue variants: ident, *unary_expr, (lvalue), and with indexing */
+    a = 1;
+    a = b = c = 7;
+    arr[i] = 10;
+    mat[i][j] = mat[i][j] + 1;
+    (*p) = 99;
+    ((*p)) = 100;
+    (*p) = (*p) + 1;
+    (*p) = (a + b) * (c - 2);
 
-//int main() { ... }
+    /* assignment to indexed lvalue, plus nested expr inside index */
+    arr[i + (j * 2) - 1] = 123;
+    mat[(i + 1)][(j + 2) * 3] = 0x10;
 
-42;
-0xFF;
-3.14;
-x;
-(42);
-(a);
-(a + 1);   // aqui já usa add_expr também
+    /* relational + equality */
+    (a < b);
+    (a <= b);
+    (a > b);
+    (a >= b);
+    (a == b);
+    (a != b);
 
--42;
-+42;
-!flag;
-*p;
-&a;
--*p;
-*!a;
-&*p;
+    /* logical and/or chaining */
+    (a < b) && (b < c) && (c < d);
+    (a < b) || (b < c) || (c < d);
+    ((a < b) && (b < c)) || ((c < d) && (d < e));
 
-2 * 3 + 4;
-2 + 3 * 4;
-a * b / c % d;
-a + b - c + d;
-a + b * c - d / e;
+    /* NOT with grouped expr */
+    !(a == b);
+    !((a < b) || (b < c));
 
-a < b;
-a <= b;
-a > b;
-a >= b;
+    /* parentheses everywhere */
+    (((a)));
+    (a + (b * (c + (d - 1))));
 
-a == b;
-a != b;
+    /* IF (with mandatory compound blocks) */
+    if (a) {
+        x = 1;
+        y = 2;
+        ;
+        (x + y);
+    }
 
-a + 1 < b * 2;
-a < b == c < d;    // checar associatividade/eval
+    if ((a < b) && (b < c)) {
+        z = (a + b) * (c - 2);
+        mat[i][j] = z;
+    } else {
+        z = 0;
+        mat[i][j] = z;
+        ;
+    }
 
-a && b;
-a || b;
-a && b && c;
-a || b || c;
-a && b || c && d;
-a < b && b < c;
-a == b || c != d && e < f;
+    /* ELSE IF chain (else contains a compound which contains another if) */
+    if (a == 0) {
+        r = 0;
+    } else {
+        if (a == 1) {
+            r = 10;
+        } else {
+            if (a == 2) {
+                r = 20;
+            } else {
+                r = 30;
+            }
+        }
+    }
 
-x = 1;
-*p = 2;
-v[i] = 3;
-v[i + 1] = v[i] * 2;
-(*p) = 10;
-v[(a + b) * 2] = x;
-p = &v[0];           // lado direito não é lvalue, mas expr
-**pp = 3;            // se permitir, testa isso também
+    /* WHILE (body is compound) */
+    while (i < 10) {
+        i = i + 1;
+        sum = sum + i;
+        arr[i] = sum;
+    }
 
-return;
+    /* nested while + if */
+    while (i < n) {
+        j = 0;
+        while (j < m) {
+            if ((i + j) % 2 == 0) {
+                mat[i][j] = mat[i][j] + 1;
+            } else {
+                mat[i][j] = mat[i][j] - 1;
+            }
+            j = j + 1;
+        }
+        i = i + 1;
+    }
 
-//1 = x;
-//3.14 = y;
-//(a + b) = 10;
-//(x * y) = z;
-//(a < b) = 1;
-//&(a) = p;       // &a não é lvalue (no seu modelo simples)
-//v[1 + 2] + 3 = x;
+    /* break/continue (syntactic only; semantic check later) */
+    while (k < 100) {
+        k = k + 1;
+        if (k == 10) {
+            continue;
+        } else {
+            ;
+        }
+        if (k == 20) {
+            break;
+        } else {
+            ;
+        }
+        acc = acc + k;
+    }
+
+    /* return without expr */
+    return;
+
+    /* unreachable (still useful for parsing) */
+    return 0;
+}
+
+int a;
+int a, b, c;
+int a = 1;
+float x = 3.14;
+int v[10];
+int m[3][4];
+int v[10] = 0;
+float y = a + 2 * b;

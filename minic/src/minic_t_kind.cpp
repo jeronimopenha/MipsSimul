@@ -11,6 +11,8 @@ string minicTokenKindToString(const int k) {
         case TOK_IF: return "IF"; // reserved  - if
         case TOK_ELSE: return "ELSE"; // reserved  - else
         case TOK_WHILE: return "WHILE"; // reserved  - while
+        case TOK_BREAK: return "BREAK"; // reserved  - break
+        case TOK_CONTINUE: return "CONTINUE"; // reserved  - continue
         case TOK_RETURN: return "RETURN"; // reserved  - return
         //identificator
         case TOK_IDENT: return "IDENT"; // everything that is not a keyword and other tokens

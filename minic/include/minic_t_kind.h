@@ -14,7 +14,6 @@ enum MiniCTokenKind {
     TOK_BREAK, // reserved  - break
     TOK_CONTINUE, // reserved - continue
     TOK_RETURN, // reserved  - return
-    TOK_FOR, // reserved - for
 
     //identificator
     TOK_IDENT, // everything that is not a keyword and other tokens

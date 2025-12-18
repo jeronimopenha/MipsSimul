@@ -13,13 +13,6 @@ inline void printIndent(const int n) {
         std::cout << ' ';
 }
 
-// ----------------------------------------------
-/*primary_expr ::= TOK_INT_LIT
-               | TOK_HEX_LIT
-               | TOK_FLOAT_LIT
-               | TOK_IDENT
-               | TOK_LPAREN expr TOK_RPAREN
-*/
 
 struct ExprNode {
     virtual ~ExprNode() = default;
@@ -86,8 +79,18 @@ struct IndexNode : ExprNode {
     void dump(const int ident) override {
         printIndent(ident);
         std::cout << "INDEX\n";
-        base->dump(ident + 2);
-        index->dump(ident + 2);
+        if (base) {
+            base->dump(ident + 2);
+        } else {
+            printIndent(ident + 2);
+            std::cout << "NULL\n";
+        }
+        if (index) {
+            index->dump(ident + 2);
+        } else {
+            printIndent(ident + 2);
+            std::cout << "NULL\n";
+        }
     }
 };
 
@@ -105,7 +108,12 @@ struct UnaryOpNode : ExprNode {
     void dump(const int ident) override {
         printIndent(ident);
         std::cout << "(" << minicTokenKindToSimbol(op) << ")\n";
-        expr->dump(ident + 2);
+        if (expr) {
+            expr->dump(ident + 2);
+        } else {
+            printIndent(ident + 2);
+            std::cout << "NULL\n";
+        }
     }
 };
 
@@ -121,8 +129,18 @@ struct BinaryOpNode : ExprNode {
     void dump(const int ident) override {
         printIndent(ident);
         std::cout << "(" << minicTokenKindToSimbol(op) << ")\n";
-        left->dump(ident + 2);
-        right->dump(ident + 2);
+        if (left) {
+            left->dump(ident + 2);
+        } else {
+            printIndent(ident + 2);
+            std::cout << "NULL\n";
+        }
+        if (right) {
+            right->dump(ident + 2);
+        } else {
+            printIndent(ident + 2);
+            std::cout << "NULL\n";
+        }
     }
 };
 
@@ -138,8 +156,18 @@ struct AssignNode : ExprNode {
     void dump(const int ident) override {
         printIndent(ident);
         std::cout << "(" << minicTokenKindToSimbol(op) << ")\n";
-        left->dump(ident + 2);
-        right->dump(ident + 2);
+        if (left) {
+            left->dump(ident + 2);
+        } else {
+            printIndent(ident + 2);
+            std::cout << "NULL\n";
+        }
+        if (right) {
+            right->dump(ident + 2);
+        } else {
+            printIndent(ident + 2);
+            std::cout << "NULL\n";
+        }
     }
 };
 
@@ -150,41 +178,190 @@ struct StmtNode {
 };
 
 struct ExprStmtNode : StmtNode {
-    int op;
-    std::unique_ptr<ExprNode> expr; // pode ser null para ";"
-    ExprStmtNode(const int op, std::unique_ptr<ExprNode> _expr) : op(op), expr(std::move(_expr)) {
+    std::unique_ptr<ExprNode> expr;
+
+    ExprStmtNode(std::unique_ptr<ExprNode> expr) : expr(std::move(expr)) {
     }
 
     void dump(const int ident) override {
         printIndent(ident);
-        std::cout << minicTokenKindToSimbol(op) << "\n";
+        std::cout << "EXPR" << "\n";
+        if (expr) {
+            expr->dump(ident + 2);
+        } else {
+            printIndent(ident + 2);
+            std::cout << "NULL\n";
+        }
     }
 };
 
 struct ReturnStmtNode : StmtNode {
-    std::unique_ptr<ExprNode> expr; // pode ser null
+    std::unique_ptr<ExprNode> expr;
+
+    ReturnStmtNode(std::unique_ptr<ExprNode> expr) : expr(std::move(expr)) {
+    }
+
+    void dump(const int ident) override {
+        printIndent(ident);
+        std::cout << "RETURN" << "\n";
+        if (expr) {
+            expr->dump(ident + 2);
+        } else {
+            printIndent(ident + 2);
+            std::cout << "NULL\n";
+        }
+    }
 };
 
 struct WhileStmtNode : StmtNode {
     std::unique_ptr<ExprNode> cond;
     std::unique_ptr<StmtNode> body;
+
+    WhileStmtNode(
+        std::unique_ptr<ExprNode> cond,
+        std::unique_ptr<StmtNode> body
+    ) : cond(std::move(cond)),
+        body(std::move(body)) {
+    }
+
+    void dump(const int ident) override {
+        printIndent(ident);
+        std::cout << "WHILE" << "\n";
+        if (cond) {
+            cond->dump(ident + 2);
+        } else {
+            printIndent(ident + 2);
+            std::cout << "NULL\n";
+        }
+        std::cout << "DO" << "\n";
+        if (body) {
+            body->dump(ident + 2);
+        } else {
+            printIndent(ident + 2);
+            std::cout << "NULL\n";
+        }
+    }
 };
 
 struct IfStmtNode : StmtNode {
     std::unique_ptr<ExprNode> cond;
     std::unique_ptr<StmtNode> thenBranch;
-    std::unique_ptr<StmtNode> elseBranch; // pode ser null
+    std::unique_ptr<StmtNode> elseBranch;
+
+    IfStmtNode(std::unique_ptr<ExprNode> cond,
+               std::unique_ptr<StmtNode> thenBranch,
+               std::unique_ptr<StmtNode> elseBranch
+    ) : cond(std::move(cond)),
+        thenBranch(std::move(thenBranch)),
+        elseBranch(std::move(elseBranch)) {
+    }
+
+    void dump(const int ident) override {
+        printIndent(ident);
+        std::cout << "IF" << "\n";
+        if (cond) {
+            cond->dump(ident + 2);
+        } else {
+            printIndent(ident + 2);
+            std::cout << "NULL\n";
+        }
+        std::cout << "THEN" << "\n";
+        if (thenBranch) {
+            thenBranch->dump(ident + 2);
+        } else {
+            printIndent(ident + 2);
+            std::cout << "NULL\n";
+        }
+        std::cout << "ELSE" << "\n";
+        if (elseBranch) {
+            elseBranch->dump(ident + 2);
+        } else {
+            printIndent(ident + 2);
+            std::cout << "NULL\n";
+        }
+    }
 };
 
 struct BlockStmtNode : StmtNode {
     std::vector<std::unique_ptr<StmtNode> > items;
+
+    BlockStmtNode(std::vector<std::unique_ptr<StmtNode> > items) : items(std::move(items)) {
+    }
+
+    void dump(const int ident) override {
+        printIndent(ident);
+        std::cout << "BLOCK" << "\n";
+        for (const auto &item: items) {
+            if (item)
+                item->dump(ident + 2);
+        }
+    }
 };
 
 struct BreakStmtNode : StmtNode {
+    BreakStmtNode() = default;
+
+    void dump(const int ident) override {
+        printIndent(ident);
+        std::cout << "BREAK" << "\n";
+    }
 };
 
 struct ContinueStmtNode : StmtNode {
+    ContinueStmtNode() = default;
+
+    void dump(const int ident) override {
+        printIndent(ident);
+        std::cout << "CONTINUE" << "\n";
+    }
 };
+
+struct DeclItem : StmtNode {
+    std::string name;
+    std::vector<std::unique_ptr<ExprNode> > dims;
+    std::unique_ptr<ExprNode> init;
+
+    void dump(const int ident) override {
+        printIndent(ident);
+        std::cout << "ITEM " << name << "\n";
+        for (auto &dim: dims) {
+            if (dim) {
+                printIndent(ident + 2);
+                std::cout << "DIMS\n";
+                dim->dump(ident + 4);
+            }
+        }
+        if (init) {
+            printIndent(ident + 2);
+            std::cout << "INIT\n";
+            init->dump(ident + 4);
+        }
+    }
+};
+
+struct DeclStmtNode : StmtNode {
+    int type;
+    std::vector<std::unique_ptr<DeclItem> > items;
+
+    DeclStmtNode(
+        const int type,
+        std::vector<std::unique_ptr<DeclItem> > items
+    ) : type(type), items(std::move(items)) {
+    }
+
+    void dump(const int ident) override {
+        printIndent(ident);
+        std::cout << "DECL " << minicTokenKindToSimbol(type) << "\n";
+        for (auto &item: items) {
+            if (item) {
+                item->dump(ident + 2);
+            } else {
+                std::cout << "null\n";
+            }
+        }
+    }
+};
+
 
 // ----------------------------------------------
 
