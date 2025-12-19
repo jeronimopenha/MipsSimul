@@ -7,22 +7,32 @@
 #include <minic_ast.h>
 
 
-
 class MiniCParser : public Parser {
 public:
     explicit MiniCParser(const std::vector<Token> &tokens)
         : Parser(tokens) {
     }
 
+    std::vector<std::unique_ptr<AstNode>> parseProgram();
+
+private:
+    std::unique_ptr<AstNode> parseGlobalDecl();
+
+    std::unique_ptr<AstNode> parseFuncDef();
+
+    std::vector<std::unique_ptr<ParamNode> > parseParamList();
+
+    std::unique_ptr<ParamNode> parseParamItem();
+
     std::unique_ptr<StmtNode> parseStmt();
 
     std::unique_ptr<StmtNode> parseDeclStmt();
 
-    std::vector<std::unique_ptr<DeclItem> > parseDeclListStmt();
+    std::vector<std::unique_ptr<DeclStmtItem> > parseDeclListStmt();
 
-    std::unique_ptr<DeclItem> parseDeclItemStmt();
+    std::unique_ptr<DeclStmtItem> parseDeclItemStmt();
 
-    std::unique_ptr<DeclItem> parseDeclSufixStmt();
+    std::unique_ptr<DeclStmtItem> parseDeclSufixStmt();
 
     std::vector<std::unique_ptr<ExprNode> > parseArrayDimsStmt();
 
@@ -32,7 +42,7 @@ public:
 
     std::unique_ptr<StmtNode> parseIfStmt();
 
-    std::unique_ptr<StmtNode> parseCompoundStmt();
+    std::unique_ptr<StmtNode> parseBlockStmt();
 
     std::unique_ptr<StmtNode> parseBreakStmt();
 
@@ -68,7 +78,7 @@ public:
 
     std::unique_ptr<ExprNode> parsePostfix();
 
-    std::vector<std::unique_ptr<ExprNode>> parseArgList();
+    std::vector<std::unique_ptr<ExprNode> > parseArgList();
 
     std::unique_ptr<ExprNode> parsePrimary();
 };
@@ -89,7 +99,7 @@ public:
 /*
 * expr_stmt
 * return_stmt
-* compound_stmt
+* block_stmt
 * if_stmt
 * while_stmt
 * stmt (dispatcher)
@@ -107,17 +117,35 @@ for_stmt      ::= TOK_FOR TOK_LPAREN expr_stmt expr_stmt expr? TOK_RPAREN stmt
  *
  * program ::= { global_decl } EOF
  *
- * global_decl ::= func_decl | decl_stmt
+ * global_decl ::= func_def | global_var_decl
  *
- * func_decl ::= type TOK_IDENT TOK_LPAREN param_list? TOK_RPAREN compound_stmt
+ * global_var_decl ::= var_type decl_list TOK_SEMI
+ * var_type         ::= TOK_INT | TOK_FLOAT
+ * decl_list        ::= decl_item (TOK_COMMA decl_item)*
+ * decl_item        ::= declarator init_opt?
+ * declarator       ::= ptr_opt TOK_IDENT array_dims_opt
+ * array_dims_opt   ::= { TOK_LBRACKET (TOK_INT_LIT | TOK_HEX_LIT) TOK_RBRACKET }
+ * init_opt         ::= TOK_ASSIGN expr | ε
+ *
+ * func_def ::= func_ret_type TOK_IDENT TOK_LPAREN param_list? TOK_RPAREN block_stmt
+ *
+ * func_ret_type ::= base_type ptr_opt
+ *
+ * base_type ::= TOK_VOID | TOK_INT | TOK_FLOAT
  *
  * param_list ::= param { TOK_COMMA param }
  *
- * param ::= type TOK_IDENT
+ * param ::= param_type ptr_opt TOK_IDENT param_dims_opt
+ *
+ * param_type ::= TOK_INT | TOK_FLOAT
+ *
+ * ptr_opt     ::= { TOK_STAR }
+ *
+ * param_dims_opt ::= { TOK_LBRACKET TOK_RBRACKET }
  *
  * stmt ::= while_stmt
  *        | if_stmt
- *        | compound_stmt
+ *        | block_stmt
  *        | return_stmt
  *        | break_stmt
  *        | continue_stmt
@@ -126,12 +154,11 @@ for_stmt      ::= TOK_FOR TOK_LPAREN expr_stmt expr_stmt expr? TOK_RPAREN stmt
  *
  * decl_stmt ::= type decl_list TOK_SEMI
  *
- * type ::= TOK_INT
- *        | TOK_FLOAT
+ * type ::= TOK_INT | TOK_FLOAT
  *
  * decl_list ::= decl_item { TOK_COMMA decl_item }
  *
- * decl_item ::= TOK_IDENT decl_suffix
+ * decl_item ::= ptr_opt TOK_IDENT decl_suffix
  *
  * decl_suffix ::= array_dims? init_opt?
  *
@@ -139,11 +166,11 @@ for_stmt      ::= TOK_FOR TOK_LPAREN expr_stmt expr_stmt expr? TOK_RPAREN stmt
  *
  * init_opt ::= TOK_ASSIGN assign_expr | ε
  *
- * while_stmt ::= TOK_WHILE TOK_LPAREN expr TOK_RPAREN compound_stmt
+ * while_stmt ::= TOK_WHILE TOK_LPAREN expr TOK_RPAREN block_stmt
  *
- * if_stmt ::= TOK_IF TOK_LPAREN expr TOK_RPAREN compound_stmt [ TOK_ELSE compound_stmt]
+ * if_stmt ::= TOK_IF TOK_LPAREN expr TOK_RPAREN block_stmt [ TOK_ELSE block_stmt]
  *
- * compound_stmt ::= TOK_LBRACE {stmt} TOK_RBRACE
+ * block_stmt ::= TOK_LBRACE {stmt} TOK_RBRACE
  *
  * continue_stmt ::= TOK_CONTINUE TOK_SEMI
  *
@@ -223,7 +250,7 @@ init_opt       ::=
 
 function_decl ::= type_spec IDENT LPAREN param_list_opt RPAREN SEMICOLON ;
 
-function_def  ::= type_spec IDENT LPAREN param_list_opt RPAREN compound_stmt ;
+function_def  ::= type_spec IDENT LPAREN param_list_opt RPAREN block_stmt ;
 
 param_list_opt ::=
                  | param_list ;
@@ -232,14 +259,14 @@ param_list    ::= param_decl { COMMA param_decl } ;
 
 param_decl    ::= type_spec pointer_opt IDENT ;
 
-stmt          ::= compound_stmt
+stmt          ::= block_stmt
                  | if_stmt
                  | while_stmt
                  | return_stmt
                  | expr_stmt
                  | SEMICOLON ;     // empty line, optional
 
-compound_stmt ::= LBRACE { local_decl | stmt } RBRACE ;
+block_stmt ::= LBRACE { local_decl | stmt } RBRACE ;
 
 local_decl    ::= type_spec declarator_list SEMICOLON ;
                  // ex: int i;  int x, y;

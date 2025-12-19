@@ -4,17 +4,23 @@
 #include <definitions.h>
 #include <minic_t_kind.h>
 
+#include <utility>
+
 inline void printIndent(const int n) {
     for (int i = 0; i < n; ++i)
         std::cout << ' ';
 }
 
+//Basic AST Node
 struct AstNode {
     virtual ~AstNode() = default;
 
     virtual void dump(int ident) = 0;
 };
 
+//-----------------------------------------------
+
+//Expression Nodes
 struct ExprNode : AstNode {
 };
 
@@ -26,7 +32,7 @@ struct HexLiteralNode : ExprNode {
 
     void dump(const int ident) override {
         printIndent(ident);
-        std::cout << "INT_HEX(" << value << ")\n";
+        std::cout << "HEX(" << value << ")\n";
     }
 };
 
@@ -38,7 +44,7 @@ struct IntLiteralNode : ExprNode {
 
     void dump(const int ident) override {
         printIndent(ident);
-        std::cout << "INT_DEC(" << value << ")\n";
+        std::cout << "DEC(" << value << ")\n";
     }
 };
 
@@ -128,15 +134,9 @@ struct BinaryOpNode : ExprNode {
         std::cout << "(" << minicTokenKindToSimbol(op) << ")\n";
         if (left) {
             left->dump(ident + 2);
-        } else {
-            printIndent(ident + 2);
-            std::cout << "NULL\n";
         }
         if (right) {
             right->dump(ident + 2);
-        } else {
-            printIndent(ident + 2);
-            std::cout << "NULL\n";
         }
     }
 };
@@ -155,15 +155,9 @@ struct AssignNode : ExprNode {
         std::cout << "(" << minicTokenKindToSimbol(op) << ")\n";
         if (left) {
             left->dump(ident + 2);
-        } else {
-            printIndent(ident + 2);
-            std::cout << "NULL\n";
         }
         if (right) {
             right->dump(ident + 2);
-        } else {
-            printIndent(ident + 2);
-            std::cout << "NULL\n";
         }
     }
 };
@@ -187,6 +181,9 @@ struct CallNode : ExprNode {
     }
 };
 
+//-----------------------------------------------
+
+//Statements Nodes
 struct StmtNode : AstNode {
 };
 
@@ -198,12 +195,9 @@ struct ExprStmtNode : StmtNode {
 
     void dump(const int ident) override {
         printIndent(ident);
-        std::cout << "EXPR" << "\n";
         if (expr) {
+            std::cout << "EXPR" << "\n";
             expr->dump(ident + 2);
-        } else {
-            printIndent(ident + 2);
-            std::cout << "NULL\n";
         }
     }
 };
@@ -242,17 +236,11 @@ struct WhileStmtNode : StmtNode {
         std::cout << "WHILE" << "\n";
         if (cond) {
             cond->dump(ident + 2);
-        } else {
-            printIndent(ident + 2);
-            std::cout << "NULL\n";
         }
         printIndent(ident);
         std::cout << "DO" << "\n";
         if (body) {
             body->dump(ident + 2);
-        } else {
-            printIndent(ident + 2);
-            std::cout << "NULL\n";
         }
     }
 };
@@ -308,8 +296,9 @@ struct BlockStmtNode : StmtNode {
         printIndent(ident);
         std::cout << "BLOCK" << "\n";
         for (const auto &item: items) {
-            if (item)
+            if (item) {
                 item->dump(ident + 2);
+            }
         }
     }
 };
@@ -332,23 +321,29 @@ struct ContinueStmtNode : StmtNode {
     }
 };
 
-struct DeclItem : AstNode {
+struct DeclStmtItem : AstNode {
     std::string name;
+    int ptrLevel = 0;
     std::vector<std::unique_ptr<ExprNode> > dims;
     std::unique_ptr<ExprNode> init;
 
-    DeclItem(
+    DeclStmtItem(
         std::string name,
+        const int ptrLevel,
         std::vector<std::unique_ptr<ExprNode> > dims,
         std::unique_ptr<ExprNode> init
     ) : name(std::move(name)),
+        ptrLevel(ptrLevel),
         dims(std::move(dims)),
         init(std::move(init)) {
     }
 
     void dump(const int ident) override {
         printIndent(ident);
-        std::cout << "ITEM " << name << "\n";
+        std::cout << "ITEM ";
+        for (int i = 0; i < ptrLevel; i++)
+            std::cout << "*";
+        std::cout << " " << name << "\n";
         bool flag = false;
         for (auto &dim: dims) {
             if (dim) {
@@ -370,11 +365,11 @@ struct DeclItem : AstNode {
 
 struct DeclStmtNode : StmtNode {
     int type;
-    std::vector<std::unique_ptr<DeclItem> > items;
+    std::vector<std::unique_ptr<DeclStmtItem> > items;
 
     DeclStmtNode(
         const int type,
-        std::vector<std::unique_ptr<DeclItem> > items
+        std::vector<std::unique_ptr<DeclStmtItem> > items
     ) : type(type), items(std::move(items)) {
     }
 
@@ -384,16 +379,137 @@ struct DeclStmtNode : StmtNode {
         for (auto &item: items) {
             if (item) {
                 item->dump(ident + 2);
-            } else {
-                std::cout << "null\n";
             }
         }
     }
 };
 
+//-----------------------------------------------
+
+//Global Declaration Nodes
+struct DeclNode : AstNode {
+};
+
+struct ParamNode : AstNode {
+    int type;
+    std::string name;
+    int ptrLevel = 0;
+    std::vector<std::unique_ptr<ExprNode> > dims;
+
+    ParamNode(
+        const int type,
+        std::string name,
+        const int ptrLevel,
+        std::vector<std::unique_ptr<ExprNode> > dims
+    ) : type(type),
+        name(std::move(name)),
+        ptrLevel(ptrLevel),
+        dims(std::move(dims)) {
+    }
+
+    void dump(const int ident) override {
+        printIndent(ident);
+        std::cout << "PARAM " << minicTokenKindToSimbol(type);
+        for (int i = 0; i < ptrLevel; i++)
+            std::cout << "*";
+        std::cout << " " << name;
+        if (!dims.empty()) {
+            for (const auto &d: dims) {
+                if (d) {
+                    std::cout << "[";
+                    d->dump(2);
+                    std::cout << "]";
+                } else {
+                    std::cout << "[]";
+                }
+            }
+        }
+        std::cout << "\n";
+    }
+};
+
+struct TypeSpec {
+    int base;
+    int ptrLevel;
+
+    TypeSpec(
+        const int base,
+        const int ptrLevel
+    ) : base(base),
+        ptrLevel(ptrLevel) {
+    }
+};
+
+struct FuncDefNode : DeclNode {
+    std::unique_ptr<TypeSpec> returnType;
+    std::string name;
+    std::vector<std::unique_ptr<ParamNode> > params;
+    std::unique_ptr<StmtNode> bodyBlock;
+
+    FuncDefNode(
+        std::unique_ptr<TypeSpec> returnType,
+        std::string name,
+        std::vector<std::unique_ptr<ParamNode> > params,
+        std::unique_ptr<StmtNode> bodyBlock
+    ) : returnType(std::move(returnType)),
+        name(std::move(name)),
+        params(std::move(params)),
+        bodyBlock(std::move(bodyBlock)) {
+    }
+
+    void dump(const int ident) override {
+        printIndent(ident);
+        std::cout << "FUNC_DEF " << name << "\n";
+        std::cout << "RETURN_T " << minicTokenKindToSimbol(returnType->base);
+        for (int i = 0; i < returnType->ptrLevel; i++)
+            std::cout << "*";
+        std::cout << "\n";
+        for (auto &param: params) {
+            if (param) {
+                param->dump(ident + 2);
+            }
+        }
+        bodyBlock->dump(ident + 2);
+    }
+};
+
+struct VarDeclNode : DeclNode {
+    int type;
+    std::vector<std::unique_ptr<DeclStmtItem> > items;
+
+    VarDeclNode(
+        const int type,
+        std::vector<std::unique_ptr<DeclStmtItem> > items
+    ) : type(type),
+        items(std::move(items)) {
+    }
+
+    void dump(const int ident) override {
+        printIndent(ident);
+        std::cout << "GLOBAL_DECL " << minicTokenKindToSimbol(type) << "\n";
+        for (auto &item: items) {
+            if (item) item->dump(ident + 2);
+        }
+    }
+};
 
 // ----------------------------------------------
 
+//Program Node
+struct ProgramNode : AstNode {
+    std::vector<std::unique_ptr<DeclNode> > decls;
+
+    void dump(const int ident) override {
+        printIndent(ident);
+        std::cout << "PROGRAM\n";
+        for (auto &d: decls) {
+            if (d)
+                d->dump(ident + 2);
+        }
+    }
+};
+
+//-----------------------------------------------
 
 #endif
 

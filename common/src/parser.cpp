@@ -1,5 +1,7 @@
 #include <parser.h>
 
+#include "minic_t_kind.h"
+
 using namespace std;
 
 const Token &Parser::peek() const {
@@ -10,13 +12,17 @@ const Token &Parser::peek() const {
 
 
 Token Parser::peekNext() const {
-    if (pos >= tokens.size()) {
-        return tokens.back();
-    }
     if (pos + 1 >= tokens.size()) {
         return tokens.back();
     }
     return tokens[pos + 1];
+}
+
+Token Parser::peekN(const int n) const {
+    if (pos + n >= tokens.size()) {
+        return tokens.back();
+    }
+    return tokens[pos + n];
 }
 
 const Token &Parser::get() {
@@ -45,7 +51,7 @@ const Token &Parser::expect(const int kind, const string &msg) {
 }
 
 bool Parser::eof() const {
-    return pos >= tokens.size();
+    return pos >= tokens.size() || peek().kind == TOK_EOF;
 }
 
 const Token &Parser::previous() const {

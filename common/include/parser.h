@@ -20,6 +20,8 @@ protected:
 
     [[nodiscard]] Token peekNext() const;
 
+    Token peekN(int n) const;
+
     const Token &get();
 
 

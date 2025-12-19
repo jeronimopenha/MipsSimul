@@ -2,36 +2,139 @@
 
 using namespace std;
 
+//program ::= { global_decl } EOF
+vector<unique_ptr<AstNode> > MiniCParser::parseProgram() {
+    vector<unique_ptr<AstNode> > program;
+    while (!eof()) {
+        unique_ptr<AstNode> line = parseGlobalDecl();
+        program.push_back(std::move(line));
+    }
+    return program;
+}
+
+// global_decl ::= func_def | decl_stmt
+unique_ptr<AstNode> MiniCParser::parseGlobalDecl() {
+    if (!(check(TOK_VOID) || check(TOK_INT) || check(TOK_FLOAT))) {
+        return nullptr;
+    }
+
+    // VOID just func
+    if (check(TOK_VOID)) {
+        return parseFuncDef();
+    }
+
+    // Lookahead: type ('*')* IDENT '('  => func_def
+    int k = 1; // 0 é o tipo (peek), então começamos olhando 1 à frente
+    while (peekN(k).kind == TOK_STAR) k++;
+
+    if (peekN(k).kind != TOK_IDENT) {
+        error(peekN(k), "expected identifier after type");
+    }
+
+    if (peekN(k + 1).kind == TOK_LPAREN) {
+        return parseFuncDef();
+    }
+
+    return parseDeclStmt();
+}
+
+// func_def ::= base_type TOK_IDENT TOK_LPAREN param_list? TOK_RPAREN block_stmt
+// base_type ::= TOK_VOID | TOK_INT | TOK_FLOAT
+unique_ptr<AstNode> MiniCParser::parseFuncDef() {
+    unique_ptr<AstNode> funcNode;
+    if (!(match(TOK_VOID) || match(TOK_INT) || match(TOK_FLOAT))) {
+        error(peek(), "expected 'void', 'int' or 'float' as function return type");
+    }
+    const Token tType = previous();
+
+    int ptr = 0;
+    while (match(TOK_STAR))
+        ptr++;
+
+    expect(TOK_IDENT, "expected identifier");
+    const Token tIdent = previous();
+
+    unique_ptr<TypeSpec> returnType = make_unique<TypeSpec>(tType.kind, ptr);
+
+    expect(TOK_LPAREN, "expected '('");
+    vector<unique_ptr<ParamNode> > paramList;
+    if (!check(TOK_RPAREN)) {
+        paramList = parseParamList();
+    }
+    expect(TOK_RPAREN, "expected ')'");
+    unique_ptr<StmtNode> block = parseBlockStmt();
+
+    unique_ptr<DeclNode> funcDefNode = make_unique<FuncDefNode>(std::move(returnType), tIdent.lexeme,
+                                                                std::move(paramList), std::move(block));
+    return funcDefNode;
+}
+
+// param_list ::= param { TOK_COMMA param }
+vector<unique_ptr<ParamNode> > MiniCParser::parseParamList() {
+    vector<unique_ptr<ParamNode> > paramList;
+
+    paramList.push_back(parseParamItem());
+
+    while (match(TOK_COMMA)) {
+        paramList.push_back(parseParamItem());
+    }
+    return paramList;
+}
+
+// param ::= param_type ptr_opt TOK_IDENT param_dims_opt
+// param_type ::= TOK_INT | TOK_FLOAT
+// ptr_opt     ::= { TOK_STAR }
+// array_dims ::= { TOK_LBRACKET (TOK_INT_LIT | TOK_HEX_LIT) TOK_RBRACKET }
+unique_ptr<ParamNode> MiniCParser::parseParamItem() {
+    // param_type
+    if (!(match(TOK_INT) || match(TOK_FLOAT))) {
+        error(peek(), "expected int or float");
+    }
+    Token tType = previous();
+
+    // ptr_opt
+    int ptr = 0;
+    while (match(TOK_STAR))
+        ptr++;
+
+    // IDENT
+    expect(TOK_IDENT, "expected identifier");
+    Token tIdent = previous();
+
+    // arr_opt
+    std::vector<std::unique_ptr<ExprNode> > dims = parseArrayDimsStmt();
+
+    return make_unique<ParamNode>(tType.kind, tIdent.lexeme, ptr, std::move(dims));
+}
+
 /*
  * stmt ::= while_stmt
  *        | if_stmt
- *        | compound_stmt
+ *        | block_stmt
  *        | return_stmt
  *        | break_stmt
  *        | continue_stmt
  *        | decl_stmt
  *        | expr_stmt
  */
-
-
 unique_ptr<StmtNode> MiniCParser::parseStmt() {
     if (match(TOK_SEMI)) {
         return make_unique<ExprStmtNode>(nullptr);
     }
 
-    //while_stmt ::= TOK_WHILE TOK_LPAREN expr TOK_RPAREN compound_stmt
+    //while_stmt ::= TOK_WHILE TOK_LPAREN expr TOK_RPAREN block_stmt
     if (check(TOK_WHILE)) {
         return parseWhileStmt();
     }
 
-    //if_stmt ::= TOK_IF TOK_LPAREN expr TOK_RPAREN compound_stmt [ TOK_ELSE compound_stmt]
+    //if_stmt ::= TOK_IF TOK_LPAREN expr TOK_RPAREN block_stmt [ TOK_ELSE block_stmt]
     if (check(TOK_IF)) {
         return parseIfStmt();
     }
 
-    //compound_stmt ::= TOK_LBRACE {stmt} TOK_RBRACE
+    //block_stmt ::= TOK_LBRACE {stmt} TOK_RBRACE
     if (check(TOK_LBRACE)) {
-        return parseCompoundStmt();
+        return parseBlockStmt();
     }
 
     // return_stmt ::= TOK_RETURN expr? TOK_SEMI
@@ -65,7 +168,7 @@ unique_ptr<StmtNode> MiniCParser::parseStmt() {
 unique_ptr<StmtNode> MiniCParser::parseDeclStmt() {
     if (match(TOK_INT) || match(TOK_FLOAT)) {
         Token t = previous();
-        vector<unique_ptr<DeclItem> > declList = parseDeclListStmt();
+        vector<unique_ptr<DeclStmtItem> > declList = parseDeclListStmt();
         expect(TOK_SEMI, "expected semi");
 
         unique_ptr<DeclStmtNode> decl = make_unique<DeclStmtNode>(t.kind, std::move(declList));
@@ -75,8 +178,8 @@ unique_ptr<StmtNode> MiniCParser::parseDeclStmt() {
 }
 
 //decl_list ::= decl_item { TOK_COMMA decl_item }
-vector<unique_ptr<DeclItem> > MiniCParser::parseDeclListStmt() {
-    vector<unique_ptr<DeclItem> > declList;
+vector<unique_ptr<DeclStmtItem> > MiniCParser::parseDeclListStmt() {
+    vector<unique_ptr<DeclStmtItem> > declList;
     declList.push_back(parseDeclItemStmt());
     while (match(TOK_COMMA)) {
         declList.push_back(parseDeclItemStmt());
@@ -84,20 +187,26 @@ vector<unique_ptr<DeclItem> > MiniCParser::parseDeclListStmt() {
     return declList;
 }
 
-//decl_item ::= TOK_IDENT decl_suffix
-unique_ptr<DeclItem> MiniCParser::parseDeclItemStmt() {
+//decl_item ::= ptr_opt TOK_IDENT decl_suffix
+unique_ptr<DeclStmtItem> MiniCParser::parseDeclItemStmt() {
+    // ptr_opt
+    int ptr = 0;
+    while (match(TOK_STAR))
+        ptr++;
+
     expect(TOK_IDENT, "expected identifier");
     const Token &t = previous();
-    unique_ptr<DeclItem> item = parseDeclSufixStmt();
+    unique_ptr<DeclStmtItem> item = parseDeclSufixStmt();
     item->name = t.lexeme;
+    item->ptrLevel = ptr;
     return item;
 }
 
 //decl_suffix ::= array_dims? init_opt?
-unique_ptr<DeclItem> MiniCParser::parseDeclSufixStmt() {
+unique_ptr<DeclStmtItem> MiniCParser::parseDeclSufixStmt() {
     vector<unique_ptr<ExprNode> > dims = parseArrayDimsStmt();
     unique_ptr<ExprNode> init = parseInitOptStmt();
-    unique_ptr<DeclItem> item = make_unique<DeclItem>("", std::move(dims), std::move(init));
+    unique_ptr<DeclStmtItem> item = make_unique<DeclStmtItem>("", 0, std::move(dims), std::move(init));
     return item;
 }
 
@@ -112,8 +221,9 @@ vector<unique_ptr<ExprNode> > MiniCParser::parseArrayDimsStmt() {
             const Token &t = previous();
             dims.push_back(make_unique<HexLiteralNode>(t.intValue));
         } else {
-            const Token &t = peek();
-            error(t, "expected array dimension literal (int or hex)");
+            //const Token &t = peek();
+            //error(t, "expected array dimension literal (int or hex)");
+            dims.push_back(nullptr);
         }
         expect(TOK_RBRACKET, "expected ']'");
     }
@@ -128,20 +238,20 @@ unique_ptr<ExprNode> MiniCParser::parseInitOptStmt() {
     return nullptr;
 }
 
-//while_stmt ::= TOK_WHILE TOK_LPAREN expr TOK_RPAREN compound_stmt
+//while_stmt ::= TOK_WHILE TOK_LPAREN expr TOK_RPAREN block_stmt
 unique_ptr<StmtNode> MiniCParser::parseWhileStmt() {
     expect(TOK_WHILE, "expected 'while'");
     expect(TOK_LPAREN, "expected '('");
     unique_ptr<ExprNode> cond = parseExpr();
     expect(TOK_RPAREN, "expected ')'");
 
-    unique_ptr<StmtNode> body = parseCompoundStmt();
+    unique_ptr<StmtNode> body = parseBlockStmt();
 
     unique_ptr<StmtNode> stmt = make_unique<WhileStmtNode>(std::move(cond), std::move(body));
     return stmt;
 }
 
-//if_stmt ::= TOK_IF TOK_LPAREN expr TOK_RPAREN compound_stmt [ TOK_ELSE compound_stmt]
+//if_stmt ::= TOK_IF TOK_LPAREN expr TOK_RPAREN block_stmt [ TOK_ELSE block_stmt]
 unique_ptr<StmtNode> MiniCParser::parseIfStmt() {
     expect(TOK_IF, "expected 'if'");
     expect(TOK_LPAREN, "expected '('");
@@ -149,19 +259,19 @@ unique_ptr<StmtNode> MiniCParser::parseIfStmt() {
     expect(TOK_RPAREN, "expected ')'");
 
     unique_ptr<StmtNode> thenBranch = nullptr;
-    thenBranch = parseCompoundStmt();
+    thenBranch = parseBlockStmt();
 
     unique_ptr<StmtNode> elseBranch = nullptr;
     if (match(TOK_ELSE)) {
-        elseBranch = parseCompoundStmt();
+        elseBranch = parseBlockStmt();
     }
     unique_ptr<StmtNode> stmt = make_unique<IfStmtNode>(std::move(cond), std::move(thenBranch),
                                                         std::move(elseBranch));
     return stmt;
 }
 
-//compound_stmt ::= TOK_LBRACE {stmt} TOK_RBRACE
-unique_ptr<StmtNode> MiniCParser::parseCompoundStmt() {
+//block_stmt ::= TOK_LBRACE {stmt} TOK_RBRACE
+unique_ptr<StmtNode> MiniCParser::parseBlockStmt() {
     expect(TOK_LBRACE, "expected '{'");
     std::vector<std::unique_ptr<StmtNode> > items;
     while (!check(TOK_RBRACE) && !eof()) {

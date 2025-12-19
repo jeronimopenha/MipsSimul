@@ -38,34 +38,10 @@ int main() {
         MiniCParser parser(tokens);
         //FIXME fix this in future
         //auto prog = p.parseExpr();
-        while (parser.peek().kind != TOK_EOF) {
-            unique_ptr<StmtNode> prog = parser.parseStmt();
-            prog->dump(0);
+        vector<unique_ptr<AstNode> > prog = parser.parseProgram();
+        for (const auto &line: prog) {
+            line->dump(0);
         }
-
-        /*for (auto &line: prog) {
-            if (!line.label.empty()) {
-                cout << line.label << ":\n";
-            }
-            if (line.hasInstr) {
-                cout << "  " << line.instr.op;
-                for (auto &a: line.instr.args) {
-                    cout << "  [";
-                    switch (a.kind) {
-                        case AsmOperand::Kind::Reg: cout << "Reg " << a.label;
-                            break;
-                        case AsmOperand::Kind::Imm: cout << "Imm " << a.imm;
-                            break;
-                        case AsmOperand::Kind::Mem: cout << "Mem off=" << a.imm << " base=" << a.label;
-                            break;
-                        case AsmOperand::Kind::LabelRef: cout << "Label " << a.label;
-                            break;
-                    }
-                    cout << "]";
-                }
-                cout << "\n";
-            }
-        }*/
     }
 
 
