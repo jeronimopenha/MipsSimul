@@ -1,0 +1,55 @@
+assembly ───────►│ Lexer e Parser     │
+                 └─────────┬──────────┘
+                           │
+                           ▼
+                 ┌────────────────────┐
+                 │ Representação      │
+                 │ intermediária      │
+                 └─────────┬──────────┘
+                           │
+                           ▼
+                 ┌────────────────────┐
+                 │ Encoder/Assembler  │
+                 └─────────┬──────────┘
+                           │ palavras de 32 bits
+                           ▼
+┌──────────────┐    ┌────────────────────┐
+│ Memória de   │───►│ CPU Single-Cycle   │
+│ instruções   │    │                    │
+└──────────────┘    │ PC                 │
+                    │ Decoder            │
+┌──────────────┐    │ Unidade de controle│
+│ Memória de   │◄──►│ RegFile inteiro    │
+│ dados        │    │ RegFile FP         │
+└──────────────┘    │ ALU inteira        │
+                    │ Multiplicador       │
+                    │ Unidade FP          │
+                    └─────────┬──────────┘
+                              │
+                              ▼
+                    ┌────────────────────┐
+                    │ Trace e dumps      │
+                    │ sinais             │
+                    │ registradores      │
+                    │ memória            │
+                    └────────────────────┘
+Minha recomendação final
+
+Para manter o projeto rápido e viável:
+
+use instruções fixas de 32 bits;
+mantenha os três formatos R, I e J;
+use 32 GPRs e 32 FPRs;
+implemente somente float32;
+faça mul escrever diretamente em rd;
+considere todas as instruções como single-cycle;
+não implemente delay slot;
+não implemente exceções completas;
+use assembler em duas passagens;
+gere .hex, .map e .lst;
+execute sempre o binário codificado, não a instrução diretamente do parser;
+registre todos os sinais em uma estrutura CycleSnapshot;
+permita dump completo, periódico e apenas de alterações;
+prepare desde o início uma saída resumida que possa ser comparada ao Verilog.
+
+Esse escopo já é pequeno o bastante para fazer rapidamente, mas completo o bastante para virar um modelo de referência real para o processador dos alunos.
