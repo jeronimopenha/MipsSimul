@@ -52,7 +52,7 @@ main:
     nop
 
     beq  $s0, $t0, equal_case
-    addi $s1, $zero, -1
+    addi $s1, $0, -1
 
 equal_case:
     bne  $s0, $t1, different_case

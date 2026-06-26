@@ -5,16 +5,18 @@
 
 struct Token {
     int kind;
-    std::string lexeme;
-    int line;
-    int col;
+    std::string lexeme = "";
+    int line = 0;
+    int col = 0;
 
     int32_t intValue = 0;
     double floatValue = 0.0;
 
-    Token();
+    Token() {
 
-    Token(const int kind) : kind(kind) {
+    }
+
+    explicit Token(const int kind) : kind(kind) {
     }
 
     Token(

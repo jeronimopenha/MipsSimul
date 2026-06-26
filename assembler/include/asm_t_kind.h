@@ -8,9 +8,9 @@ enum AsmTokenKind {
     ASM_REG, // $t0, $zero, $s1
     ASM_FP_REG, // $f0, $f2, $f31
 
-    ASM_INT_LIT, // 10, -5, 0x1000
-    ASM_FLOAT_LIT, // 2.5, -3.14
-    ASM_STRING_LIT, // "texto"
+    ASM_INT_LIT, // 10, -5, 0x1000 //todo
+    ASM_FLOAT_LIT, // 2.5, -3.14 //todo
+    ASM_STRING_LIT, // "texto" //todo
 
     ASM_DIRECTIVE, // .text, .data, .word, .float, .space
 

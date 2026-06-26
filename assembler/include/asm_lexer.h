@@ -31,6 +31,18 @@ private:
 
     [[nodiscard]] bool eof() const;
 
+    Token readRegister();
+
+    Token readDirective();
+
+    Token readIdentifier();
+
+    Token readNumber();
+
+    char peekNext() const;
+
+    Token singleCharToken(AsmTokenKind kind);
+
 
     //void lexIdentifierOrDirectiveOrRegister();
     //void lexNumber();
