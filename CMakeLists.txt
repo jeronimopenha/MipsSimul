@@ -12,10 +12,9 @@ endif ()
 
 
 include_directories(
-        ${CMAKE_SOURCE_DIR}/minic/include
         ${CMAKE_SOURCE_DIR}/assembler/include
         ${CMAKE_SOURCE_DIR}/common/include
-        ${CMAKE_SOURCE_DIR}/tools/include
+        ${CMAKE_SOURCE_DIR}/simul/include
 )
 
 
@@ -42,67 +41,67 @@ add_executable(AsmLexerTestMain
 )
 
 # Asm Lexer Test
-file(GLOB_RECURSE ASM_PARSER_SRC
-        ${ASM_LEXER_SRC}
-        common/src/parser.cpp
-        assembler/src/asm_parser.cpp
-)
-add_executable(AsmParserTestMain
-        tools/tests/asmParserTestMain.cpp
-        ${ASM_PARSER_SRC}
-)
+#file(GLOB_RECURSE ASM_PARSER_SRC
+#        ${ASM_LEXER_SRC}
+#        common/src/parser.cpp
+#        assembler/src/asm_parser.cpp
+#)
+#add_executable(AsmParserTestMain
+#        tools/tests/asmParserTestMain.cpp
+#        ${ASM_PARSER_SRC}
+#)
 
 # Asm Test
-file(GLOB_RECURSE ASSEMBLER_SRC
-        ${ASM_PARSER_SRC}
-        assembler/src/asm_registers.cpp
-        assembler/src/asm_isa.cpp
-        assembler/src/asm.cpp
-)
-add_executable(AssemblerTestMain
-        tools/tests/asmTestMain.cpp
-        ${ASSEMBLER_SRC}
-)
+#file(GLOB_RECURSE ASSEMBLER_SRC
+#        ${ASM_PARSER_SRC}
+#        assembler/src/asm_registers.cpp
+#        assembler/src/asm_isa.cpp
+#        assembler/src/asm.cpp
+#)
+#add_executable(AssemblerTestMain
+#        tools/tests/asmTestMain.cpp
+#        ${ASSEMBLER_SRC}
+#)
 
 # Disasm Test
-file(GLOB_RECURSE DISASSEMBLER_SRC
-        ${ASSEMBLER_SRC}
-        assembler/src/disasm.cpp
-)
-add_executable(DisassemblerTestMain
-        tools/tests/disasmTestMain.cpp
-        ${DISASSEMBLER_SRC}
-)
+#file(GLOB_RECURSE DISASSEMBLER_SRC
+#        ${ASSEMBLER_SRC}
+#        assembler/src/disasm.cpp
+#)
+#add_executable(DisassemblerTestMain
+#        tools/tests/disasmTestMain.cpp
+#        ${DISASSEMBLER_SRC}
+#)
 
 # MiniC Lexer Test
-file(GLOB_RECURSE MINIC_LEXER_SRC
-        ${COMMON_SRC}
-        common/src/lexer.cpp
-        minic/src/minic_lexer.cpp
-        minic/src/minic_t_kind.cpp
-)
-add_executable(MinicLexerTestMain
-        tools/tests/minicLexerTestMain.cpp
-        ${MINIC_LEXER_SRC}
-)
+#file(GLOB_RECURSE MINIC_LEXER_SRC
+#        ${COMMON_SRC}
+#        common/src/lexer.cpp
+#        minic/src/minic_lexer.cpp
+#        minic/src/minic_t_kind.cpp
+#)
+#add_executable(MinicLexerTestMain
+#        tools/tests/minicLexerTestMain.cpp
+#        ${MINIC_LEXER_SRC}
+#)
 
 # MiniC Parser Test
-file(GLOB_RECURSE MINIC_PARSER_SRC
-        ${MINIC_LEXER_SRC}
-        common/src/parser.cpp
-        minic/src/minic_parser.cpp
-)
-add_executable(MinicParserTestMain
-        tools/tests/minicParserTestMain.cpp
-        ${MINIC_PARSER_SRC}
-)
+#file(GLOB_RECURSE MINIC_PARSER_SRC
+#        ${MINIC_LEXER_SRC}
+#        common/src/parser.cpp
+#        minic/src/minic_parser.cpp
+#)
+#add_executable(MinicParserTestMain
+#        tools/tests/minicParserTestMain.cpp
+#        ${MINIC_PARSER_SRC}
+#)
 
 # assembler tool
-file(GLOB_RECURSE ASSEMBLER_TOOLS_SRC
-        ${DISASSEMBLER_SRC}
-        tools/src/assembler_cli.cpp
-)
-add_executable(assembler
-        tools/src/assembler_tools.cpp
-        ${ASSEMBLER_TOOLS_SRC}
-)
+#file(GLOB_RECURSE ASSEMBLER_TOOLS_SRC
+#        ${DISASSEMBLER_SRC}
+#        tools/src/assembler_cli.cpp
+#)
+#add_executable(assembler
+#        tools/src/assembler_tools.cpp
+#        ${ASSEMBLER_TOOLS_SRC}
+#)

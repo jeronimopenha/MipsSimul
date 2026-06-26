@@ -2,79 +2,61 @@
 
 using namespace std;
 
-void AsmLexer::skipComments() {
+Token AsmLexer::nextToken() {
+    Token token = Token(ASM_UNKNOWN);
+
+    //skip white spaces
+    skipWhitespaces();
+    //skip comments
+    skipComments();
+
+    //verifying tokens.
+    //first
+}
+
+void AsmLexer::skipWhitespaces() {
     while (!eof()) {
         const char c = peek();
-        if (c == '#') {
-            while (!eof() && peek() != '\n') {
-                nextChar();
-            }
+        if (c == ' ' || c == '\t' || c == '\r' || c == '\f' || c == '\v') {
+            nextChar();
+            continue;
         }
-        break; // if c is not a comment, so return
+        break;
     }
 }
 
-int AsmLexer::getEofKind() const {
-    return ASM_EOF;
-}
-
-bool AsmLexer::isIdentStart(const char c) const {
-    return Lexer::isIdentStart(c) || c == '$' || c == '.';
-}
-
-bool AsmLexer::isIdentChar(const char c) const {
-    return Lexer::isIdentChar(c) || c == '$' || c == '.';
-}
-
-Token AsmLexer::makeIdentifierOrKeyword(const string &lexeme, const int startLine, const int startCol) {
-    Token t(ASM_IDENT, lexeme, startLine, startCol);
-
-    if (!lexeme.empty() && lexeme[0] == '$') {
-        t = Token(ASM_REG, lexeme, startLine, startCol);
-    } else {
-        auto it = keywordMap.find(lexeme);
-        if (it != keywordMap.end()) {
-            t = Token(it->second, lexeme, startLine, startCol);
-        }
+void AsmLexer::skipComments() {
+    char c = peek();
+    if (c != '#') {
+        return;
     }
-
-    return t;
+    c = nextChar();
+    while (!eof() && c != '\n') {
+        c = nextChar();
+    }
 }
 
-Token AsmLexer::makeNumberToken(const string &lexeme, const int startLine, const int startCol) {
-    Token t(ASM_UNKNOWN, lexeme, startLine, startCol);
 
-    if (lexeme.find('.') == string::npos) {
-        for (const auto c: lexeme) {
-            if (isdigit(static_cast<unsigned char>(c))) {
-                string lex(1, c);
-                if (c == '0' && !eof() && (peek() == 'x' || peek() == 'X')) {
-                    lex.push_back(nextChar()); // x or X - hex
-                    while (!eof() && isIntXNumber(peek())) {
-                        lex.push_back(nextChar());
-                    }
-                } else {
-                    // decimal
-                    while (!eof() && isIntDNumber(peek())) {
-                        lex.push_back(nextChar());
-                    }
-                }
-                t = Token{ASM_INT_LIT, lexeme, startLine, startCol};
-                return t;
-            }
-        }
+char AsmLexer::peek() const {
+    if (eof()) {
+        return '\0';
     }
-    return t;
+    return source[pos];
 }
 
-Token AsmLexer::makeOperatorOrPunctToken(const string first, int startLine, int startCol) {
-    Token t(ASM_UNKNOWN, first, startLine, startCol);
-
-
-    auto it = punctMap.find(first);
-    if (it != punctMap.end()) {
-        t = Token(it->second, (first == "\n" ? "\\n" : first), startLine, startCol);
+char AsmLexer::nextChar() {
+    if (eof()) {
+        return '\0';
     }
+    const char c = source[pos++];
+    col++;
+    if (c == '\n') {
+        col = 0;
+        line++;
+    }
+    return c;
+}
 
-    return t;
+bool AsmLexer::eof() const {
+    return pos >= source.size();
 }

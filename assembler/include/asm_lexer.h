@@ -2,43 +2,82 @@
 #define ASSEMBLER_LEXER_H
 
 #include <definitions.h>
-#include <lexer.h>
 #include <token.h>
 #include <asm_t_kind.h>
+#include <utility>
 
-class AsmLexer final : public Lexer {
+class AsmLexer {
 public:
-    explicit AsmLexer(const std::string &s) : Lexer(s) {
+    explicit AsmLexer(std::string src) : source(std::move(src)) {
     }
 
+    virtual ~AsmLexer() = default;
+
+    Token nextToken();
+
 private:
-    const std::unordered_map<std::string, AsmTokenKind> punctMap = {
-        {",", ASM_COMMA},
-        {":", ASM_COLON},
-        {"(", ASM_L_PAREN},
-        {")", ASM_R_PAREN},
-        {"-",ASM_MINUS},
-        {"\n", ASM_NEWLINE}
-    };
+    std::string source;
+    size_t pos = 0;
+    int line = 1;
+    int col = 1;
+
+    void skipWhitespaces();
+
+    void skipComments();
+
+    [[nodiscard]] char peek() const;
+
+    char nextChar();
+
+    [[nodiscard]] bool eof() const;
+
+
+    //void lexIdentifierOrDirectiveOrRegister();
+    //void lexNumber();
+    //void lexString();        // opcional agora
+    //void lexPunctuation();
+
+    //void tokenize();
+
+
+    /*
+    [[nodiscard]] char peek() const;
+
+    [[nodiscard]] char peekNext() const;
+
+    char nextChar();
+
+    [[nodiscard]] bool eof() const;
+
+
+
+    // hooks for languages
+    [[nodiscard]] virtual bool isIdentStart(char c) const;
+
+    [[nodiscard]] virtual bool isIdentChar(char c) const;
+
+    [[nodiscard]] virtual bool isNumberStart(char c) const;
+
+    [[nodiscard]] virtual bool isIntDNumber(char c) const;
+
+    [[nodiscard]] virtual bool isIntXNumber(char c) const;
+
+    static void error(const Token &token, const std::string &msg);
+
+    virtual void skipComments() = 0;
+
+    [[nodiscard]] virtual int getEofKind() const = 0;
+
+    Token makeIdentifierOrKeyword(const std::string &lexeme, int startLine, int startCol);
+
+    Token makeNumberToken(const std::string &lexeme, int startLine, int startCol);
+
+    Token makeOperatorOrPunctToken(std::string first, int startLine, int startCol);
 
     const std::unordered_map<std::string, AsmTokenKind> keywordMap = {
-        {".data", ASM_DIRECT_DATA},
-        {".text", ASM_DIRECT_TEXT},
-    };
-
-    void skipComments() override;
-
-    [[nodiscard]] int getEofKind() const override;
-
-    [[nodiscard]] bool isIdentStart(char c) const override;
-
-    [[nodiscard]] bool isIdentChar(char c) const override;
-
-    Token makeIdentifierOrKeyword(const std::string &lexeme, int startLine, int startCol) override;
-
-    Token makeNumberToken(const std::string &lexeme, int startLine, int startCol) override;
-
-    Token makeOperatorOrPunctToken(std::string first, int startLine, int startCol) override;
+        {".data", ASM_DIRECTIVE},
+        {".text", ASM_DIRECTIVE},
+    };*/
 };
 
 #endif
