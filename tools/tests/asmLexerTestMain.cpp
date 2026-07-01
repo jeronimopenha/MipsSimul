@@ -28,18 +28,11 @@ int main() {
         AsmLexer lex(src);
 
 
+        Token t;
+        while (t.kind != ASM_EOF) {
+            t = lex.nextToken();
 
-        while (true) {
-            Token t = lex.nextToken();
-            if (t.kind == ASM_EOF) {
-                break;
-            }
-
-            cout << t.line << ":\t";
-            cout << t.col << ":\t";
-
-            cout << asmTokenKindToString(static_cast<AsmTokenKind>(t.kind)) << "\t";
-            cout << t.lexeme << "\n";
+            cout << t.tokenToString();
         }
     }
 

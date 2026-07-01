@@ -2,6 +2,7 @@
 #define MIPSSIMUL_COMMON_TOKEN_H
 
 #include <definitions.h>
+#include <asm_t_kind.h>
 
 struct Token {
     int kind;
@@ -27,6 +28,15 @@ struct Token {
                          lexeme(std::move(lexeme)),
                          line(line),
                          col(col) {
+    }
+    [[nodiscard]] std::string tokenToString() const {
+        std::string strReturn = std::to_string(line) + ":\t";
+        strReturn += std::to_string(col) + ":\t";
+
+        strReturn += asmTokenKindToString(kind) + "\t";
+        strReturn += lexeme + "\n";
+
+        return strReturn;
     }
 };
 

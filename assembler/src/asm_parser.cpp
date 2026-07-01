@@ -1,26 +1,61 @@
 #include <asm_parser.h>
 
-#include "disasm.h"
+//#include "disasm.h"
 
 using namespace std;
 
-//program    ::= { line }
-vector<AsmLine> AsmParser::parseProgram() {
-    vector<AsmLine> prog;
-    while (true) {
-        if (peek().kind == ASM_EOF) {
-            break;
-        }
-        // multiple Newlines
-        if (peek().kind == ASM_NEWLINE) {
-            get();
+//program        ::= { line } EOF
+vector<AsmProgram> AsmParser::parseProgram() {
+    vector<AsmProgram> program;
+    while (!check(ASM_EOF)) {
+        if (match(ASM_NEWLINE)) {
             continue;
         }
-        prog.push_back(parseLine());
+
+        //auto line = parseLine();
+
+        //if (line) {
+        //    program.lines.push_back(std::move(line));
+        //}
     }
-    return prog;
+
+    return program;
 }
 
+bool AsmParser::check(const int kind) const {
+    if (eof()) {
+        return false;
+    }
+    return peek().kind == kind;
+}
+
+bool AsmParser::eof() const {
+    return pos >= tokens.size() || peek().kind == ASM_EOF;
+}
+
+bool AsmParser::match(const int kind) {
+    if (peek().kind == kind) {
+        get();
+        return true;
+    }
+    return false;
+}
+
+const Token &AsmParser::peek() const {
+    if (pos >= tokens.size())
+        return tokens.back();
+    return tokens[pos];
+}
+
+const Token &AsmParser::get() {
+    const Token &t = peek();
+    if (pos < tokens.size()) {
+        ++pos;
+    }
+    return t;
+}
+
+/*
 //line ::= [ label ":" ] [ instruction ] NEWLINE
 AsmLine AsmParser::parseLine() {
     AsmLine line;
@@ -87,7 +122,7 @@ vector<AsmOperand> AsmParser::parseOperandList() {
           | NUMBER
           | memaddr
           | IDENT
-*/
+#1#
 AsmOperand AsmParser::parseOperand() {
     if (match(ASM_REG)) {
         const Token r = previous();
@@ -183,6 +218,7 @@ AsmOperand AsmParser::parseOperand() {
 
     error(peek(), "Unexpected operand");
     /*cerr << "Unexpected operand online" << t.line << ", column " << t.col << " with lexeme: '" << t.lexeme <<"'" << "\n";
-    throw runtime_error("parsing error: operand");*/
+    throw runtime_error("parsing error: operand");#1#
     return {};
 }
+*/

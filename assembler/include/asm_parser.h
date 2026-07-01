@@ -3,46 +3,87 @@
 
 #include <definitions.h>
 #include <asm_lexer.h>
-#include <parser.h>
 #include <asm_ast.h>
 
 
-class AsmParser : public Parser {
+class AsmParser {
 public:
-    explicit AsmParser(const std::vector<Token> &tokens) : Parser(tokens) {
+    explicit AsmParser(const std::vector<Token> &tokens) : tokens(tokens) {
     }
 
-    std::vector<AsmLine> parseProgram();
+    std::vector<AsmProgram> parseProgram();
+
+
 
 private:
-    AsmLine parseLine();
+    const std::vector<Token> &tokens;
+    size_t pos = 0;
 
-    MiniCInstruction parseInstruction();
+    bool check(const int kind) const ;
 
-    std::vector<AsmOperand> parseOperandList();
+    bool eof() const;
 
-    AsmOperand parseOperand();
+    bool match(int kind);
+
+    [[nodiscard]] const Token &peek() const;
+
+    const Token &get();
+
+    //AsmLine parseLine();
+
+    //MiniCInstruction parseInstruction();
+
+    //std::vector<AsmOperand> parseOperandList();
+
+    //AsmOperand parseOperand();
 };
 
 /* - Grammar
 
-program    ::= { line }
+program        ::= { line }
 
-line       ::= [ label ":" ] [ instruction ] NEWLINE
+line           ::= empty_line
+| section_directive
+| labeled_statement
+| statement
 
-label      ::= IDENT
+empty_line     ::= NEWLINE
 
-instruction ::= IDENT operand_list
+section_directive ::= ".text" NEWLINE
+| ".data" NEWLINE
 
-operand_list ::= operand { "," operand }
+labeled_statement ::= label ":" [ statement ]
 
-operand ::= REGISTER
-          | NUMBER
-          | memaddr
-          | IDENT        (* used as label for branch/jump *)
+label          ::= IDENT
 
-memaddr ::= NUMBER "(" REGISTER ")"
-          | "(" REGISTER ")"
+statement      ::= instruction NEWLINE
+| data_directive NEWLINE
+
+instruction    ::= IDENT [ operand_list ]
+
+operand_list   ::= operand { "," operand }
+
+operand         ::= register
+| fp_register
+| integer
+| float
+| string
+| memory_operand
+| label_ref
+
+memory_operand ::= integer "(" register ")"
+| "(" register ")"
+
+data_directive ::= ".word" data_list
+| ".float" data_list
+| ".space" integer
+
+data_list      ::= data_value { "," data_value }
+
+data_value     ::= integer
+| float
+| string
+| label_ref
 */
 
 #endif

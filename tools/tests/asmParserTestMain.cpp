@@ -38,7 +38,7 @@ int main() {
 
         // Só pra testar: imprimir o que o parser entendeu
         for (auto &line: prog) {
-            if (!line.label.empty()) {
+            /*if (!line.label.empty()) {
                 cout << line.label << ":\n";
             }
             if (line.hasInstr) {
@@ -58,7 +58,7 @@ int main() {
                     cout << "]";
                 }
                 cout << "\n";
-            }
+            }*/
         }
     }
 

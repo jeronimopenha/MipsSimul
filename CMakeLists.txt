@@ -41,15 +41,15 @@ add_executable(AsmLexerTestMain
 )
 
 # Asm Lexer Test
-#file(GLOB_RECURSE ASM_PARSER_SRC
-#        ${ASM_LEXER_SRC}
-#        common/src/parser.cpp
-#        assembler/src/asm_parser.cpp
-#)
-#add_executable(AsmParserTestMain
-#        tools/tests/asmParserTestMain.cpp
-#        ${ASM_PARSER_SRC}
-#)
+file(GLOB_RECURSE ASM_PARSER_SRC
+        ${ASM_LEXER_SRC}
+        #common/src/parser.cpp
+        assembler/src/asm_parser.cpp
+)
+add_executable(AsmParserTestMain
+        tools/tests/asmParserTestMain.cpp
+        ${ASM_PARSER_SRC}
+)
 
 # Asm Test
 #file(GLOB_RECURSE ASSEMBLER_SRC
